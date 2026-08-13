@@ -1,0 +1,42 @@
+name: Challenge a Claim
+description: Evidence or reasoning that contradicts something the model currently asserts.
+labels: ["claim", "challenge"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Contradicted beliefs are as valuable as supported ones. A claim that
+        turns out to be wrong should be marked `contradicted`, not deleted —
+        the record of what we believed and why we stopped believing it is
+        part of the artifact.
+
+  - type: input
+    id: claim
+    attributes:
+      label: Claim ID
+      placeholder: claim-first-caseload-retention
+    validations:
+      required: true
+
+  - type: textarea
+    id: challenge
+    attributes:
+      label: What contradicts it
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or reasoning
+      description: Public research, interview, observation, data, or experiment.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: proposed_status
+    attributes:
+      label: Proposed new status
+      options: [contradicted, retired, keep active but lower confidence]
+    validations:
+      required: true

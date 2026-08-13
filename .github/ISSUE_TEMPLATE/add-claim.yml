@@ -1,0 +1,49 @@
+name: Add a Claim
+description: Something we currently believe about how the system works.
+labels: ["claim"]
+body:
+  - type: textarea
+    id: statement
+    attributes:
+      label: Statement
+      description: One sentence. What do we believe?
+      placeholder: >
+        Clinicians who reach a viable initial caseload quickly are more likely
+        to remain active on the platform.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      description: What sort of belief is this?
+      options: [reported, observed, inference, assumption, hypothesis]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Confidence
+      options: [low, medium, high]
+    validations:
+      required: true
+
+  - type: input
+    id: targets
+    attributes:
+      label: Target Stage or Step IDs
+      placeholder: clinician-onboarding, matching
+    validations:
+      required: true
+
+  - type: textarea
+    id: provenance
+    attributes:
+      label: Where this came from
+      description: >
+        Author reasoning, public research, interview, observation, data, or
+        experiment. This is why we believe it — not who edited the file.
+    validations:
+      required: true

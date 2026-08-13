@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How to author model content
+    url: https://github.com/dmeehan45/Parent-Behavioral-Health-OS/blob/main/docs/authoring.md
+    about: Adding a Stage, Step, Entity, Claim, Metric, or Bet without touching application code.

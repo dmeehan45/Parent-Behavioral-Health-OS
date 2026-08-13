@@ -1,0 +1,58 @@
+name: Propose a Bet
+description: An intervention we believe may improve part of the operating machinery.
+labels: ["bet"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A Bet is the bridge between systems thinking and working software.
+        It can exist long before a prototype does.
+
+  - type: input
+    id: title
+    attributes:
+      label: Bet
+      description: Short name for the intervention.
+      placeholder: Guided First Caseload
+    validations:
+      required: true
+
+  - type: input
+    id: targets
+    attributes:
+      label: Target Stage or Step IDs
+      description: Existing IDs from `content/stages/` or `content/steps/`.
+      placeholder: clinician-onboarding, matching
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What appears to be going wrong in this part of the machine?
+    validations:
+      required: true
+
+  - type: textarea
+    id: bet
+    attributes:
+      label: The bet
+      description: What intervention do we think may improve it?
+    validations:
+      required: true
+
+  - type: input
+    id: metrics
+    attributes:
+      label: Metrics that would tell us it worked
+      description: Existing metric IDs, or describe metrics we would need to create.
+      placeholder: time-to-first-match, time-to-first-session
+
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Confidence
+      options: [low, medium, high]
+    validations:
+      required: true
