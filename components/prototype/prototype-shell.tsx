@@ -36,10 +36,14 @@ export function PrototypeShell({ route, children }: { route: string; children: R
     );
   }
 
-  const targets = bet.blocks.find((block) => block.type === "links" && block.label === "Against");
+  // The problem comes first: the software only means something next to what it
+  // was built against. Both come from the Bet's projected blocks, so retargeting
+  // or rewording the model updates this page without touching it.
+  const problem = bet.blocks.find((block) => block.type === "links" && block.label === "The problem this answers");
+  const targets = bet.blocks.find((block) => block.type === "links" && block.label === "Where it lands");
   const context = bet.blocks.filter(
     (block) =>
-      (block.type === "prose" && (block.label === "Problem" || block.label === "Intervention")) ||
+      (block.type === "prose" && block.label === "Intervention") ||
       (block.type === "links" && (block.label === "Success would affect" || block.label === "Supporting claims")) ||
       (block.type === "markdown" && block.label.toLowerCase().includes("question")),
   );
@@ -86,7 +90,7 @@ export function PrototypeShell({ route, children }: { route: string; children: R
 
       <section className="prototype-context">
         <h2>What this prototype is testing</h2>
-        <DetailBlocks blocks={[...(targets ? [targets] : []), ...context]} />
+        <DetailBlocks blocks={[...(problem ? [problem] : []), ...(targets ? [targets] : []), ...context]} />
       </section>
     </main>
   );

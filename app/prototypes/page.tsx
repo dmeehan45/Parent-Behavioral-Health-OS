@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge, Breadcrumb, ConfidenceBadge, CoverageMeter } from "@/components/model/badges";
+import { Badge, Breadcrumb, ConfidenceBadge } from "@/components/model/badges";
 import { projectModel } from "@/lib/model/graph";
 
 export const dynamic = "force-dynamic";
@@ -13,14 +13,26 @@ export const metadata = {
  * Every prototype in the model, derived from Bets that declare one. Bets that
  * intend a prototype but have not built it are listed too, because the gap
  * between intent and working software is part of what the model records.
+ *
+ * Each card leads with the problem rather than the bet's own name: a list of
+ * prototype titles says what was built and nothing about why.
  */
 export default function PrototypesPage() {
   const graph = projectModel();
+  const problemFor = (betId: string) => {
+    const bet = graph.nodes.find((node) => node.kind === "bet" && node.contentId === betId);
+    const block = bet?.blocks.find(
+      (candidate) => candidate.type === "links" && candidate.label === "The problem this answers",
+    );
+    return block?.type === "links" ? block.items[0] : undefined;
+  };
+
   const prototypes = graph.nodes
     .filter((node) => node.kind === "prototype")
     .map((prototype) => ({
       prototype,
       bet: graph.nodes.find((node) => node.kind === "bet" && node.contentId === prototype.contentId),
+      problem: problemFor(prototype.contentId),
     }));
 
   return (
@@ -43,7 +55,7 @@ export default function PrototypesPage() {
         </p>
       ) : (
         <ul className="card-grid">
-          {prototypes.map(({ prototype, bet }) => {
+          {prototypes.map(({ prototype, bet, problem }) => {
             const launchable = prototype.href.startsWith("/prototypes/");
             return (
               <li key={prototype.id}>
@@ -52,9 +64,13 @@ export default function PrototypesPage() {
                     <Badge tone={launchable ? "accent" : "quiet"}>{prototype.status ?? "unknown"}</Badge>
                     <ConfidenceBadge confidence={bet?.confidence} />
                   </div>
+                  {problem ? (
+                    <Link className="card-problem" href={problem.href}>
+                      {problem.title}
+                    </Link>
+                  ) : null}
                   <h2>{bet?.title ?? prototype.title}</h2>
                   {bet?.summary ? <p className="muted">{bet.summary}</p> : null}
-                  {bet ? <CoverageMeter coverage={bet.coverage} /> : null}
                   <div className="card-actions">
                     {launchable ? (
                       <Link className="button" href={prototype.href}>

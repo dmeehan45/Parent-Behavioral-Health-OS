@@ -11,11 +11,11 @@ before changing anything.
 
 **`content/` is canonical. The application is a projection of it.**
 
-Stages, steps, entities, claims, metrics, and bets live in `content/` as Markdown
-with YAML frontmatter. The React Flow graphs render that content; they are not a
-second source of truth.
+Stages, steps, entities, claims, metrics, problems, and bets live in `content/`
+as Markdown with YAML frontmatter. The React Flow graphs render that content;
+they are not a second source of truth.
 
-- Never hardcode a stage, step, claim, metric, or bet into a React component.
+- Never hardcode a stage, step, claim, metric, problem, or bet into a React component.
 - Never encode counts, positions, or relationships in application code that could
   be derived from `content/`.
 - Adding new system thinking must not require editing `app/` or `components/`.
@@ -31,10 +31,10 @@ typed nodes for every primitive, typed edges for every relationship, plus derive
 signals, detail blocks, coverage, and a per-node content hash. Components read
 that shape and nothing else.
 
-The practical consequence: **adding a stage, step, entity, claim, metric, or bet
-requires no code change at all.** It appears on the map, in search, in the detail
-panel, on its own page, and in the relevant lens because the projection already
-describes it.
+The practical consequence: **adding a stage, step, entity, claim, metric, problem,
+or bet requires no code change at all.** It appears on the map, in search, in the
+detail panel, on its own page, and in the relevant lens because the projection
+already describes it.
 
 Two rules keep this working:
 
@@ -62,6 +62,22 @@ that changed are highlighted.
 Model-driven routes are therefore `dynamic = "force-dynamic"`. Do not prerender
 them: a statically built page would show a stale model until the next deploy,
 which defeats the point.
+
+## Problems are named separately from their answers
+
+The model does not let a Bet attach straight to a Stage. A Bet names the one
+Problem it answers, and the Problem names the Stages and Steps it bites. Where
+the Bet lands follows from the Problem.
+
+This is deliberate, and it is the rule most likely to feel like an extra step:
+
+- Naming a problem is a complete contribution. Do not invent a Bet to justify
+  writing one down.
+- Do not restate a problem inside a Bet. Bets render `# Bet` and `# Questions`;
+  a `# Problem` heading in a Bet is rejected by validation, because two copies
+  of the same trouble drift apart.
+- Do not give a Bet its own targets. If a Bet seems to land somewhere its
+  Problem does not, the Problem's `targets` are wrong, or it is a second problem.
 
 ## Incompleteness is valid
 

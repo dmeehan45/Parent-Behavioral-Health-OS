@@ -1,0 +1,56 @@
+name: Name a Problem
+description: Somewhere the machine appears to break.
+labels: ["problem"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Naming a problem is a complete contribution. It does not need a proposed
+        answer, and a problem nobody has answered yet is one of the more useful
+        things this model can hold.
+
+        Write the title as the trouble, not the fix.
+
+  - type: input
+    id: title
+    attributes:
+      label: The problem
+      description: What goes wrong, stated as what goes wrong.
+      placeholder: A clinician can finish onboarding and still have no work
+    validations:
+      required: true
+
+  - type: input
+    id: targets
+    attributes:
+      label: Where it bites
+      description: Existing Stage or Step IDs from `content/stages/` or `content/steps/`.
+      placeholder: clinician-onboarding, become-match-ready
+    validations:
+      required: true
+
+  - type: textarea
+    id: today
+    attributes:
+      label: What happens today
+      description: The observable behaviour, as far as it is understood.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why_it_matters
+    attributes:
+      label: Why it matters
+      description: What it costs a family, a clinician, or the practice when this happens.
+
+  - type: textarea
+    id: questions
+    attributes:
+      label: Open questions
+      description: What we would need to find out to understand this properly.
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Where this came from
+      description: Author reasoning, public research, interview, observation, or data.

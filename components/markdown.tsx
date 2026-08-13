@@ -86,7 +86,14 @@ function parse(source: string): Block[] {
       continue;
     }
 
-    flushList();
+    // A line directly under a list item continues it. Content files wrap long
+    // lines, and without this the tail of a wrapped question would break out of
+    // the list and render as a stray paragraph.
+    if (list && list.items.length > 0) {
+      list.items[list.items.length - 1] += ` ${line}`;
+      continue;
+    }
+
     paragraph.push(line);
   }
 

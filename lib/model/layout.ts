@@ -40,6 +40,7 @@ export type LayoutResult = {
 export const NODE_SIZE: Record<NodeKind, { width: number; height: number }> = {
   stage: { width: 256, height: 150 },
   step: { width: 212, height: 104 },
+  problem: { width: 252, height: 130 },
   bet: { width: 244, height: 124 },
   prototype: { width: 212, height: 88 },
   claim: { width: 252, height: 124 },

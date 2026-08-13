@@ -17,7 +17,8 @@ export const OVERVIEW = "Overview";
 export const SECTION = {
   currentModel: "Current model",
   openQuestions: "Open questions",
-  problem: "Problem",
+  whatHappensToday: "What happens today",
+  whyItMatters: "Why it matters",
   bet: "Bet",
   questions: "Questions",
 } as const;
@@ -25,7 +26,10 @@ export const SECTION = {
 export const RENDERED_SECTIONS: Record<string, readonly string[]> = {
   stages: [SECTION.currentModel, SECTION.openQuestions],
   steps: [SECTION.currentModel, SECTION.openQuestions],
-  bets: [SECTION.problem, SECTION.bet, SECTION.questions],
+  problems: [SECTION.whatHappensToday, SECTION.whyItMatters, SECTION.openQuestions],
+  // A Bet no longer states its own problem: it names one, and the Problem file
+  // is where that is written. Two statements of the same trouble would drift.
+  bets: [SECTION.bet, SECTION.questions],
   // Entities, claims, and metrics render their body as a single block of prose.
   // Any heading in them would be invisible, so none are permitted.
   entities: [],

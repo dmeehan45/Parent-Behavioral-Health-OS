@@ -1,7 +1,7 @@
 ---
 id: guided-first-caseload
 title: Guided First Caseload
-targets: [clinician-onboarding, matching, become-match-ready]
+problem: activation-without-productivity
 status: concept
 confidence: medium
 claims: [claim-first-caseload-retention]
@@ -12,10 +12,6 @@ prototype:
 authority: proposed
 provenance: { source: author, references: [] }
 ---
-
-# Problem
-
-A clinician may become technically activated without becoming a productive practitioner.
 
 # Bet
 

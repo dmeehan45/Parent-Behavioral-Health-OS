@@ -7,11 +7,8 @@ import {
   AuthorityBadge,
   Badge,
   ConfidenceBadge,
-  CoverageGaps,
-  CoverageMeter,
-  Freshness,
   KindBadge,
-  SourceLink,
+  Provenance,
 } from "@/components/model/badges";
 import { KIND_LABELS } from "@/lib/model/kinds";
 import type { ModelGraph, ModelNode } from "@/lib/model/types";
@@ -158,27 +155,9 @@ export function DetailSheet({
 
       {node ? (
         <div className="sheet-body">
-          <div className="sheet-meta">
-            <CoverageMeter coverage={node.coverage} />
-            <Freshness lastReviewed={node.lastReviewed} provenance={node.provenance} />
-          </div>
-
-          {node.signals.some((signal) => signal.value > 0) ? (
-            <div className="sheet-signals">
-              {node.signals
-                .filter((signal) => signal.value > 0)
-                .map((signal) => (
-                  <span key={signal.label} className={`sheet-signal tone-${signal.tone}`}>
-                    <b>{signal.value}</b>
-                    {signal.label}
-                  </span>
-                ))}
-            </div>
-          ) : null}
-
+          {/* Substance first. The panel is narrow, and a reader who opened a
+              primitive wants to read it, not audit how completely it is filled in. */}
           <DetailBlocks blocks={node.blocks} onNavigate={onNavigate} />
-
-          <CoverageGaps coverage={node.coverage} />
 
           <footer className="sheet-foot">
             <Link className="button" href={node.href}>
@@ -190,8 +169,15 @@ export function DetailSheet({
                 Centre on map
               </button>
             ) : null}
-            <SourceLink file={node.file} sourceUrl={graph.sourceUrl} />
           </footer>
+
+          <Provenance
+            provenance={node.provenance}
+            lastReviewed={node.lastReviewed}
+            coverage={node.coverage}
+            file={node.file}
+            sourceUrl={graph.sourceUrl}
+          />
         </div>
       ) : null}
     </aside>
