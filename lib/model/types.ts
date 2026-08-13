@@ -141,6 +141,29 @@ export type VocabTerm = {
 };
 
 /**
+ * A way into the model for someone who has never seen it.
+ *
+ * Reading a graph is a skill; using a piece of software is not. An entry point
+ * pairs the problem in the words the model already uses with the working
+ * software built against it, so a first-time reader can start with the thing
+ * that needs no explanation and follow it back into the model afterwards.
+ */
+export type EntryPoint = {
+  id: string;
+  /** The bet's title. */
+  title: string;
+  /** The problem the bet was written against, in the model's own words. */
+  problem?: string;
+  /** What the bet proposes doing about it. */
+  intervention?: string;
+  /** Route of the working software. */
+  href: string;
+  betHref: string;
+  status?: string;
+  confidence?: string;
+};
+
+/**
  * The complete projection handed to the client. Small enough to ship whole,
  * which is what lets lens switching and search stay instant.
  */
@@ -151,11 +174,16 @@ export type ModelGraph = {
   nodes: ModelNode[];
   edges: ModelEdge[];
   lenses: LensDescriptor[];
+  /** Size of the model in plain words. Labels are already pluralised. */
   stats: Array<{ label: string; value: number }>;
+  /** Working software a newcomer can try, derived from Bets that declare it. */
+  entryPoints: EntryPoint[];
   vocab: {
     authority: VocabTerm[];
     edges: Array<{ kind: EdgeKind; label: string; description: string }>;
   };
   /** Base URL for "view source" links, when configured. */
   sourceUrl?: string;
+  /** Repository root, derived from `sourceUrl`, for clone instructions. */
+  repoUrl?: string;
 };
