@@ -11,6 +11,7 @@ import type { LensId, NodeKind } from "@/lib/model/types";
 export const KIND_LABELS: Record<NodeKind, string> = {
   stage: "Stage",
   step: "Step",
+  problem: "Problem",
   bet: "Bet",
   prototype: "Prototype",
   claim: "Claim",
@@ -28,18 +29,20 @@ export const KIND_LABELS: Record<NodeKind, string> = {
 export const KIND_MEANING: Record<NodeKind, string> = {
   stage: "One part of the machine. Getting a clinician ready to see families is a stage. Matching a family to a clinician is another.",
   step: "Something that has to happen inside a stage, with what it needs before it starts and what it leaves behind.",
-  bet: "A change we think is worth making, written down with the reason we believe it and what would show us we were wrong.",
-  prototype: "Working software for a single bet, built to find out whether the idea holds up. It runs on made-up data.",
+  problem: "A place we think the machine breaks, and what it costs when it does. Naming one is a contribution on its own — it does not need an answer yet.",
+  bet: "A proposed answer to one named problem, written down with the reason we believe it and what would show us we were wrong.",
+  prototype: "Working software for a single bet, built to find out whether the answer holds up. It runs on made-up data.",
   claim: "Something we believe, marked with how sure we are and where the belief came from.",
   metric: "A number that would tell us whether this part of the machine is working, whether or not anyone measures it today.",
   entity: "Something the machine handles and changes as work moves through it, such as a family, a clinician, or a match.",
 };
 
 /**
- * The few words a reader needs before the rest of the model makes sense.
- * Everything else is explained where it appears.
+ * The few words a reader needs before the rest of the model makes sense, in the
+ * order the model itself runs: a part of the machine, where it breaks, what we
+ * would do about it, and the software that tests the answer.
  */
-export const ORIENTATION_KINDS: NodeKind[] = ["stage", "bet", "prototype"];
+export const ORIENTATION_KINDS: NodeKind[] = ["stage", "problem", "bet", "prototype"];
 
 /**
  * How each satellite lens stacks its node kinds, outermost band first. The
@@ -47,7 +50,10 @@ export const ORIENTATION_KINDS: NodeKind[] = ["stage", "bet", "prototype"];
  * operating-flow lens is laid out as a directed graph instead.
  */
 export const LENS_BANDS: Partial<Record<LensId, NodeKind[][]>> = {
-  bets: [["stage"], ["step"], ["bet"], ["prototype"]],
+  // Reads downward as the argument runs: the machine, where it breaks, what we
+  // propose, what got built. The step band is empty unless a problem is pinned
+  // to a step rather than a whole stage, and an empty band takes no space.
+  bets: [["stage"], ["step"], ["problem"], ["bet"], ["prototype"]],
   evidence: [["stage"], ["step"], ["claim"], ["metric"]],
   entities: [["entity"], ["step"]],
 };
@@ -56,6 +62,7 @@ export const LENS_BANDS: Partial<Record<LensId, NodeKind[][]>> = {
 export const ROUTES: Record<NodeKind, (contentId: string) => string> = {
   stage: (id) => `/stages/${id}`,
   step: (id) => `/steps/${id}`,
+  problem: (id) => `/problems/${id}`,
   bet: (id) => `/bets/${id}`,
   prototype: (id) => `/bets/${id}`,
   claim: (id) => `/claims/${id}`,

@@ -13,7 +13,7 @@
  */
 
 import { SECTION } from "@/lib/content/body";
-import type { Bet, Claim, Entity, Metric, Stage, Step } from "@/lib/schemas";
+import type { Bet, Claim, Entity, Metric, Problem, Stage, Step } from "@/lib/schemas";
 import type { Coverage } from "@/lib/model/types";
 
 type Described = { body?: string; sections?: Record<string, string> };
@@ -74,9 +74,23 @@ export function stepCoverage(step: Step): Coverage {
   ]);
 }
 
+export function problemCoverage(problem: Problem): Coverage {
+  return score([
+    ["Summary", problem.summary],
+    ["What happens today", problem.sections[SECTION.whatHappensToday]],
+    ["Why it matters", problem.sections[SECTION.whyItMatters]],
+    ["Open questions", problem.sections[SECTION.openQuestions]],
+    ["Where it bites", problem.targets],
+    ["Supporting claims", problem.claims],
+    ["Metrics", problem.metrics],
+    ["Authority", problem.authority],
+    ["Provenance", problem.provenance?.source],
+    ["Last reviewed", problem.lastReviewed],
+  ]);
+}
+
 export function betCoverage(bet: Bet): Coverage {
   return score([
-    ["Problem", bet.sections[SECTION.problem]],
     ["Intervention", bet.sections[SECTION.bet]],
     ["Open questions", bet.sections[SECTION.questions]],
     ["Confidence", bet.confidence],

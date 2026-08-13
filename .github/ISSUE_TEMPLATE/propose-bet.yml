@@ -8,6 +8,10 @@ body:
         A Bet is the bridge between systems thinking and working software.
         It can exist long before a prototype does.
 
+        Every Bet answers one Problem. If the problem is not written down yet,
+        open a **Name a Problem** issue first — that is a contribution in its
+        own right, and this bet will have something to attach to.
+
   - type: input
     id: title
     attributes:
@@ -18,19 +22,11 @@ body:
       required: true
 
   - type: input
-    id: targets
-    attributes:
-      label: Target Stage or Step IDs
-      description: Existing IDs from `content/stages/` or `content/steps/`.
-      placeholder: clinician-onboarding, matching
-    validations:
-      required: true
-
-  - type: textarea
     id: problem
     attributes:
-      label: Problem
-      description: What appears to be going wrong in this part of the machine?
+      label: Problem ID
+      description: The existing Problem this answers, from `content/problems/`.
+      placeholder: activation-without-productivity
     validations:
       required: true
 

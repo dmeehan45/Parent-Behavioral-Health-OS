@@ -9,12 +9,42 @@ The model separates human navigation from semantic depth. A human sees a compact
 - **Entity:** a stable reference to something transformed by the system.
 - **Claim:** a reported belief, observation, inference, assumption, or hypothesis.
 - **Metric:** a measure that matters, independently of whether data exists today.
-- **Bet:** a proposed intervention linking a problem, claim, metric, and optional prototype.
+- **Problem:** somewhere the machine is thought to break, and what that costs.
+- **Bet:** a proposed answer to one Problem, with an optional prototype.
 - **Prototype:** working software that makes a Bet concrete without becoming production infrastructure.
 
 Authority (`reference`, `proposed`, `validated`, or `policy`) keeps tentative ideas distinct from approved rules. The seed model is proposed and generalized.
 
 `content/map.yaml` owns top-level topology. `next` references in Step files own the internal process sequence. Both are directed relationships rather than assumptions about a universal funnel.
+
+## Problem space is modelled, not implied
+
+A map of stages says how the machine is meant to run. It does not say where the
+machine is failing, and a Bet attached straight to a Stage does not say it
+either — it only records that somebody wanted to build something there.
+
+So the chain is explicit:
+
+```text
+Stage or Step → Problem → Bet → Prototype
+```
+
+A **Problem** declares `targets`: the Stages and Steps where it bites. That link
+is required, because a problem that bites nowhere is not a problem with this
+system. A **Bet** declares `problem`: the one Problem it proposes to answer.
+That link is also required, and it is the only one — where a Bet lands in the
+machine is derived from its Problem rather than restated, so the two can never
+disagree.
+
+Three things follow from this that the old shape could not express:
+
+- A Stage can show what it has to answer for, including problems nobody has
+  proposed anything about yet. A Problem with no Bet under it is the most useful
+  thing on the map.
+- A Problem can hold several competing Bets, and they can be compared as answers
+  to the same question rather than as unrelated proposals.
+- Naming a problem is a complete contribution. It needs `id`, `title`, and
+  `targets`, and nothing else — no proposed solution, no evidence.
 
 ## How the model is projected
 
@@ -29,7 +59,7 @@ Every primitive has a page, and every reference between primitives is traversabl
 in both directions:
 
 ```text
-/map → /stages/[id] → /steps/[id] → /bets/[id] → /prototypes/[id]
+/map → /stages/[id] → /steps/[id] → /problems/[id] → /bets/[id] → /prototypes/[id]
                           ↓
         /entities/[id]  /claims/[id]  /metrics/[id]
 ```
@@ -49,7 +79,7 @@ The same graph is shown four ways, so the map can hold more context than a singl
 diagram could without becoming unreadable:
 
 - **Operating flow** — stages ranked by topology, each expandable in place to reveal its steps in `next` order.
-- **Bets & prototypes** — the stage spine with bets and prototypes hanging beneath what they target.
+- **Problems & solutions** — the stage spine, then the problems pinned to it, then the bets proposed against those problems, then whatever has been built. It reads downward as the argument runs.
 - **Evidence** — the stage spine with claims and metrics beneath what they describe.
 - **Entities** — entities as the nouns of the system, with the steps that transform them.
 

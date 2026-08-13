@@ -26,8 +26,6 @@ roles:
   supporting: [platform-operations]
 rules: []
 exceptions: []
-bets:
-  - guided-first-caseload
 claims:
   - claim-first-caseload-retention
 metrics:
