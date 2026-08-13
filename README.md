@@ -7,11 +7,16 @@ An open, executable model of the operational machinery behind a best-in-class, A
 Many product artifacts separate the business model, process model, product strategy, and prototype. This project intentionally links them so we can understand:
 
 ```text
-how the machine works
-→ where it breaks
-→ what we believe might improve it
-→ what that improvement looks like as software
+how the machine works        Stage, Step
+→ where it breaks            Problem
+→ what we would do about it  Bet
+→ what that looks like       Prototype
 ```
+
+Each arrow is a link the model actually holds, not a narrative. A Problem names
+the Stages and Steps it bites; a Bet names the one Problem it answers. Where a
+Bet lands in the machine follows from its Problem, so nothing states the same
+trouble twice, and a Problem with no Bet under it stays visible as exactly that.
 
 Repository content is canonical. The React Flow graphs are projections of that content—not a second source of truth.
 
@@ -20,7 +25,7 @@ The map is live. Open it in a browser and leave it there: it polls a fingerprint
 ## Core loop
 
 ```text
-Map → Question → Bet → Prototype → Learn → Update Map
+Map → Problem → Bet → Prototype → Learn → Update Map
 ```
 
 ## Run locally
@@ -42,7 +47,7 @@ Optionally set `NEXT_PUBLIC_CONTENT_SOURCE_URL` to the repository's blob root �
 | Lens | The question it answers |
 | --- | --- |
 | Operating flow | How does work move through the system, stage by stage? |
-| Bets & prototypes | What do we propose to change, and what has been built? |
+| Problems & solutions | Where does the machine break, what have we proposed about it, and what has been built? |
 | Evidence | What do we believe, and what would we measure? |
 | Entities | What does the system transform, and where? |
 
@@ -52,7 +57,7 @@ Press <kbd>⌘K</kbd> to search every primitive, including ones the current lens
 
 ## Repository model
 
-- `content/` contains the canonical map, stages, steps, entities, claims, metrics, and bets.
+- `content/` contains the canonical map, stages, steps, entities, claims, metrics, problems, and bets.
 - `lib/schemas/` contains permissive Zod contracts for progressive enrichment.
 - `lib/content/` loads content and validates IDs and cross-references.
 - `lib/model/` projects that content into the single typed graph the interface renders, and derives node positions from topology.

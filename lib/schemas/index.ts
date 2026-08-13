@@ -19,7 +19,9 @@ export const stepSchema = z.object({
   purpose: z.string().optional(), entryConditions: z.array(z.string()).optional(), inputs: z.array(stateRefSchema).optional(),
   roles: z.object({ primary: z.array(z.string()).optional(), supporting: z.array(z.string()).optional() }).optional(), activity: z.string().optional(),
   rules: z.array(ruleSchema).optional(), outputs: z.array(stateRefSchema).optional(), exitConditions: z.array(z.string()).optional(),
-  exceptions: z.array(exceptionSchema).optional(), metrics: z.array(idSchema).optional(), claims: z.array(idSchema).optional(), bets: z.array(idSchema).optional(),
+  // No `bets`: a Step is reached by the Problems that name it as a target, so a
+  // back-reference here would be a second, driftable statement of the same link.
+  exceptions: z.array(exceptionSchema).optional(), metrics: z.array(idSchema).optional(), claims: z.array(idSchema).optional(),
   authority: authoritySchema.optional(), ...common
 });
 // `states` is optional. Declaring it opts the entity into state validation: every
@@ -35,8 +37,20 @@ export const metricSchema = z.object({
   id: idSchema, title: z.string().min(1), unit: z.string().optional(), direction: z.enum(["lower", "higher", "target"]).optional(),
   targets: z.array(idSchema).optional(), dataStatus: z.enum(["unknown", "available", "partially-available", "not-measured"]).optional(), ...common
 });
+// A Problem is where the machine is thought to break. `targets` is required
+// because a problem that bites nowhere is not a problem with this system, and
+// the Stage-to-Problem link is what lets a stage show what it has to answer for.
+export const problemSchema = z.object({
+  id: idSchema, title: z.string().min(1), targets: z.array(idSchema).min(1), summary: z.string().optional(),
+  status: z.enum(["open", "exploring", "addressed", "parked"]).default("open"),
+  claims: z.array(idSchema).optional(), metrics: z.array(idSchema).optional(),
+  authority: authoritySchema.optional(), ...common
+});
+// A Bet is a proposed solution, so it names the Problem it answers rather than
+// attaching straight to a Stage. Where it lands in the machine follows from the
+// Problem, which keeps one statement of where the trouble is.
 export const betSchema = z.object({
-  id: idSchema, title: z.string().min(1), targets: z.array(idSchema).min(1), status: z.string().optional(), confidence: confidenceSchema.optional(),
+  id: idSchema, title: z.string().min(1), problem: idSchema, status: z.string().optional(), confidence: confidenceSchema.optional(),
   claims: z.array(idSchema).optional(), metrics: z.array(idSchema).optional(), prototype: z.object({ status: z.enum(["not-started", "concept", "working", "tested", "retired"]), route: z.string().startsWith("/").optional() }).optional(),
   authority: authoritySchema.optional(), ...common
 });
@@ -48,6 +62,7 @@ export type Step = z.infer<typeof stepSchema> & { body: string; sections: Record
 export type Entity = z.infer<typeof entitySchema> & { body: string; sections: Record<string, string>; file: string };
 export type Claim = z.infer<typeof claimSchema> & { body: string; sections: Record<string, string>; file: string };
 export type Metric = z.infer<typeof metricSchema> & { body: string; sections: Record<string, string>; file: string };
+export type Problem = z.infer<typeof problemSchema> & { body: string; sections: Record<string, string>; file: string };
 export type Bet = z.infer<typeof betSchema> & { body: string; sections: Record<string, string>; file: string };
 export type SystemMap = z.infer<typeof mapSchema>;
 export type Provenance = z.infer<typeof provenanceSchema>;

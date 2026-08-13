@@ -11,6 +11,7 @@
 export type NodeKind =
   | "stage"
   | "step"
+  | "problem"
   | "bet"
   | "prototype"
   | "claim"
@@ -28,7 +29,8 @@ export type EdgeKind =
   | "flow" // stage to stage, from content/map.yaml
   | "feedback" // stage to stage, where the relationship loops backwards
   | "process" // step to step, from `next`
-  | "bet" // bet to the stage or step it targets
+  | "problem" // stage or step to a problem said to bite there
+  | "bet" // problem to a bet proposed against it
   | "prototype" // bet to its prototype
   | "evidence" // claim or metric to what it targets
   | "state"; // step to entity, via inputs and outputs
@@ -152,6 +154,9 @@ export type EntryPoint = {
   id: string;
   /** The bet's title. */
   title: string;
+  /** Title of the Problem the bet answers. */
+  problemTitle?: string;
+  problemHref?: string;
   /** The problem the bet was written against, in the model's own words. */
   problem?: string;
   /** What the bet proposes doing about it. */

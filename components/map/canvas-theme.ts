@@ -10,6 +10,7 @@ import type { EdgeKind, NodeKind } from "@/lib/model/types";
 export const KIND_COLOR: Record<NodeKind, string> = {
   stage: "#1d5b45",
   step: "#3f6b7d",
+  problem: "#a4453a",
   bet: "#8a5f27",
   prototype: "#6b4a86",
   claim: "#8a4a58",
@@ -21,6 +22,7 @@ export const EDGE_COLOR: Record<EdgeKind, string> = {
   flow: "#6e8a7d",
   feedback: "#b08a52",
   process: "#7f9aa8",
+  problem: "#b3695f",
   bet: "#b08a52",
   prototype: "#8f74a8",
   evidence: "#7f9aa8",

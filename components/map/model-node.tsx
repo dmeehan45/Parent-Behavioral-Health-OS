@@ -37,7 +37,9 @@ export function ModelNodeCard({ data }: NodeProps<CanvasNode>) {
   // fit; the detail sheet is where the full set is always shown.
   const visibleSignals =
     tier === "detailed" ? node.signals : node.signals.filter((signal) => signal.value > 0).slice(0, 4);
-  const nothingRecorded = node.signals.every((signal) => signal.value === 0);
+  // A primitive with nothing counted yet says so. One with nothing countable —
+  // a prototype — has no signals at all, and should stay quiet instead.
+  const nothingRecorded = node.signals.length > 0 && node.signals.every((signal) => signal.value === 0);
 
   return (
     <div

@@ -26,6 +26,7 @@
 
   --kind-stage: #1d5b45;
   --kind-step: #3f6b7d;
+  --kind-problem: #a4453a;
   --kind-bet: #8a5f27;
   --kind-prototype: #6b4a86;
   --kind-claim: #8a4a58;
@@ -67,6 +68,7 @@
 
     --kind-stage: #5fbf99;
     --kind-step: #7fb2c8;
+    --kind-problem: #e2897c;
     --kind-bet: #d3a469;
     --kind-prototype: #b193d0;
     --kind-claim: #d3919e;
@@ -362,6 +364,9 @@ p:last-child {
 .kind-step {
   background: var(--kind-step);
 }
+.kind-problem {
+  background: var(--kind-problem);
+}
 .kind-bet {
   background: var(--kind-bet);
 }
@@ -383,6 +388,9 @@ p:last-child {
 }
 .kind-badge.subtle.kind-step {
   color: var(--kind-step);
+}
+.kind-badge.subtle.kind-problem {
+  color: var(--kind-problem);
 }
 .kind-badge.subtle.kind-bet {
   color: var(--kind-bet);
@@ -844,6 +852,9 @@ p:last-child {
 }
 .node-step {
   --kind: var(--kind-step);
+}
+.node-problem {
+  --kind: var(--kind-problem);
 }
 .node-bet {
   --kind: var(--kind-bet);
