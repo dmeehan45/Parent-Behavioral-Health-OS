@@ -82,6 +82,69 @@ function requireRef(value: string, allowed: Set<string>, file: string, field: st
   if (!allowed.has(value)) throw new Error(`Invalid reference in ${file}: ${field} '${value}' does not exist`);
 }
 
+/**
+ * Check that a Bet's declared prototype route is actually implemented.
+ *
+ * The Bet page renders a prominent "Launch prototype" control from this field,
+ * so a stale or mistyped route sends a reader to a 404. A Bet with no prototype
+ * simply omits `route`.
+ */
+function requirePrototypeRoute(route: string, file: string) {
+  const base = path.join(ROOT, "app", route);
+  const exists = ["page.tsx", "page.ts", "page.jsx", "page.js"].some((page) => fs.existsSync(path.join(base, page)));
+  if (!exists) {
+    throw new Error(
+      `Missing prototype in ${file}: route '${route}' has no implementation at app${route}/page.tsx. ` +
+        `Build the route, or remove 'route' until the prototype exists.`,
+    );
+  }
+}
+
+/**
+ * A Stage that `content/map.yaml` does not list is unreachable: it never appears
+ * on the system map, and nothing links to its detail page. `map.yaml` owns
+ * top-level topology, so membership there is what makes a Stage part of the model.
+ */
+function requireMapMembership(stages: Stage[], listed: string[]) {
+  const onMap = new Set(listed);
+  for (const stage of stages) {
+    if (!onMap.has(stage.id)) {
+      throw new Error(
+        `Orphan stage in ${stage.file}: '${stage.id}' is not listed in ${MAP_FILE}, so it would never appear on the map. ` +
+          `Add it to 'stages' in ${MAP_FILE}.`,
+      );
+    }
+  }
+}
+
+/**
+ * Check `{ entity, state }` references against the states an Entity declares.
+ *
+ * Entities that declare no `states` are skipped, so an entity whose state model
+ * is not yet understood stays unconstrained. Once states are declared, this is
+ * what stops a Step from claiming a clinician is `open` — a caseload state —
+ * rather than `match-ready`.
+ */
+function checkEntityStates(steps: Step[], entities: Entity[]) {
+  const declared = new Map(entities.filter((e) => e.states?.length).map((e) => [e.id, e.states!]));
+  for (const step of steps) {
+    for (const [field, refs] of [
+      ["inputs", step.inputs],
+      ["outputs", step.outputs],
+    ] as const) {
+      for (const ref of refs ?? []) {
+        const states = declared.get(ref.entity);
+        if (!states || states.includes(ref.state)) continue;
+        throw new Error(
+          `Unknown state in ${step.file}: ${field} references '${ref.entity}' in state '${ref.state}', ` +
+            `but '${ref.entity}' declares ${states.map((s) => `'${s}'`).join(", ")}. ` +
+            `Correct the state, or add it to content/entities/${ref.entity}.md.`,
+        );
+      }
+    }
+  }
+}
+
 export function getRepository() {
   const stages = loadMarkdown("stages", stageSchema) as Stage[];
   const steps = loadMarkdown("steps", stepSchema) as Step[];
@@ -137,7 +200,11 @@ export function getRepository() {
     bet.targets.forEach((id) => requireRef(id, targetIds, bet.file, "targets"));
     bet.claims?.forEach((id) => requireRef(id, claimIds, bet.file, "claims"));
     bet.metrics?.forEach((id) => requireRef(id, metricIds, bet.file, "metrics"));
+    if (bet.prototype?.route) requirePrototypeRoute(bet.prototype.route, bet.file);
   });
+
+  requireMapMembership(stages, map.stages);
+  checkEntityStates(steps, entities);
 
   return { map, stages, steps, entities, claims, metrics, bets };
 }

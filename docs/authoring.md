@@ -41,7 +41,9 @@ a Markdown list (`-`, `*`, `+`, or numbered).
 ## Add a Stage
 
 1. Create `content/stages/<id>.md` with `id` and `title` frontmatter.
-2. Add the ID to `stages` in `content/map.yaml`.
+2. Add the ID to `stages` in `content/map.yaml`. This is required — `map.yaml`
+   owns top-level topology, and a Stage missing from it would never appear on
+   the map, so validation rejects it.
 3. Add constrained directed edges if known.
 
 ## Add a Step
@@ -51,6 +53,21 @@ Create `content/steps/<id>.md` with `id`, `title`, and an existing `stage`. Add 
 ## Add an Entity
 
 Create `content/entities/<id>.md` with `id` and `title`. Use it from Step inputs and outputs as `{ entity, state }`; do not create detailed clinical-record schemas.
+
+Optionally declare the states the entity can occupy:
+
+```yaml
+states:
+  - selected
+  - match-ready
+  - active
+```
+
+Declaring `states` opts the entity into validation: every `{ entity, state }`
+reference in a Step must then name a declared state. An entity that omits
+`states` stays unconstrained, so a state model that is not yet understood does
+not have to be invented. Adding a new state is a deliberate edit to the entity
+file rather than a new string typed into a Step.
 
 ## Add a Claim
 
@@ -71,3 +88,8 @@ Create `content/metrics/<id>.md` with `id` and `title`. `dataStatus` explicitly 
 ## Link a prototype
 
 Add a route implementation under `app/prototypes/<id>/page.tsx`, then add `prototype: { status: working, route: /prototypes/<id> }` to the Bet. Use synthetic data only and keep the prototype intentionally small.
+
+`route` is validated against the filesystem: the Bet page renders a prominent
+launch control from it, so a route with no implementation would send a reader to
+a 404. A Bet without a prototype omits `route` entirely — a Bet is allowed to
+exist long before any software does.

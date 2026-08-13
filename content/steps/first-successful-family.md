@@ -9,6 +9,8 @@ entryConditions:
   - clinician is match-ready
 inputs:
   - entity: clinician
+    state: match-ready
+  - entity: caseload
     state: open
 activity: >
   Translate activation into an initial accepted care relationship.
