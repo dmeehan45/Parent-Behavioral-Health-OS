@@ -11,6 +11,33 @@ npm run typecheck
 
 Errors name the content file and invalid field. IDs use lowercase kebab case and must be unique.
 
+## Frontmatter and body
+
+Every content file has two parts: YAML frontmatter carrying the structured model,
+and a Markdown body carrying prose.
+
+Body prose is split into sections on top-level (`#`) headings, and the application
+renders a fixed set of section names per primitive:
+
+| Primitive | Headings the application renders |
+| --- | --- |
+| Stage | `# Current model`, `# Open questions` |
+| Step | `# Current model`, `# Open questions` |
+| Bet | `# Problem`, `# Bet`, `# Questions` |
+| Entity, Claim, Metric | none — the body renders as a single block of prose |
+
+**Section names are a contract, not a convention.** A heading outside this table
+is prose that would never be displayed, so `validate:content` rejects it by name
+rather than dropping it silently. `## Subheadings` are free-form and stay inside
+their parent section.
+
+All sections are optional. A Stage with no body at all is valid; a Stage whose
+prose sits under `# How this works today` is not, because that writing would
+disappear.
+
+Items in `# Open questions` are counted and surfaced on the map, so write them as
+a Markdown list (`-`, `*`, `+`, or numbered).
+
 ## Add a Stage
 
 1. Create `content/stages/<id>.md` with `id` and `title` frontmatter.
