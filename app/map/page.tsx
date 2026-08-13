@@ -1,28 +1,46 @@
-import { getRepository } from "@/lib/content/repository";
-import { SECTION, countListItems } from "@/lib/content/body";
-import { SystemMap } from "@/components/system-map/system-map";
+import { projectModel } from "@/lib/model/graph";
+import { MapWorkspace, type MapView } from "@/components/map/map-workspace";
+import type { LensId } from "@/lib/model/types";
 
-export default function MapPage() {
-  const repository = getRepository();
-  const stages = repository.map.stages.map((id) => repository.stages.find((stage) => stage.id === id)!).map((stage) => {
-    const steps = repository.steps.filter((step) => step.stage === stage.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const claims = repository.claims.filter((claim) => claim.targets.includes(stage.id));
-    const bets = repository.bets.filter((bet) => bet.targets.includes(stage.id));
-    return {
-      id: stage.id,
-      title: stage.title,
-      order: stage.order,
-      status: stage.status,
-      summary: stage.summary,
-      steps: steps.length,
-      claims: claims.length,
-      questions: countListItems(stage.sections[SECTION.openQuestions]),
-      bets: bets.length,
-      prototypes: bets.filter((bet) => bet.prototype?.status === "working").length,
-      stepsList: steps.map((step) => ({ id: step.id, title: step.title })),
-      betsList: bets.map((bet) => ({ id: bet.id, title: bet.title, confidence: bet.confidence, prototype: bet.prototype })),
-    };
-  });
+/**
+ * Rendered per request so a deep link opens on the current model, then the
+ * workspace keeps itself in step with `content/` from the client.
+ */
+export const dynamic = "force-dynamic";
 
-  return <main className="shell main map-page"><header className="map-intro"><div><span className="eyebrow">Reference operating model · Interactive</span><h1>The system, in view.</h1><p className="lede">Trace how demand, clinical supply, care delivery, and learning connect. Start broad, then move into the process detail, evidence, bets, and working prototypes behind each stage.</p></div><div className="map-summary"><span><strong>{stages.length}</strong> operating stages</span><span><strong>{repository.steps.length}</strong> modeled steps</span><span><strong>{repository.bets.length}</strong> active bet</span></div></header><SystemMap stages={stages} edges={repository.map.edges} /></main>;
+export const metadata = {
+  title: "System map · Parent Behavioral Health OS",
+  description: "An interactive projection of how the operating model works, what we believe, and what we are betting on.",
+};
+
+type Search = Promise<Record<string, string | string[] | undefined>>;
+
+/** View state arrives in the URL, so a shared link opens the same picture. */
+function readView(params: Record<string, string | string[] | undefined>, lensIds: LensId[], nodeIds: Set<string>): MapView {
+  const single = (key: string) => (typeof params[key] === "string" ? (params[key] as string) : undefined);
+
+  const lensParam = single("lens") as LensId | undefined;
+  const lens = lensParam && lensIds.includes(lensParam) ? lensParam : "flow";
+
+  const openParam = single("open");
+  const open = openParam && nodeIds.has(openParam) ? openParam : undefined;
+
+  const expand = (single("expand") ?? "")
+    .split(",")
+    .map((id) => `stage:${id.trim()}`)
+    .filter((id) => nodeIds.has(id));
+
+  return { lens, open, expand };
+}
+
+export default async function MapPage({ searchParams }: { searchParams: Search }) {
+  const graph = projectModel();
+  const params = await searchParams;
+  const view = readView(
+    params,
+    graph.lenses.map((lens) => lens.id),
+    new Set(graph.nodes.map((node) => node.id)),
+  );
+
+  return <MapWorkspace initialGraph={graph} initialView={view} />;
 }

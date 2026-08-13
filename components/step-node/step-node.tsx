@@ -1,4 +1,0 @@
-"use client";
-import Link from "next/link"; import { Handle, Position, type NodeProps } from "@xyflow/react";
-export type StepNodeData={id:string;title:string;order?:number;metrics:number;bets:number;rules:number;selected?:boolean};
-export function StepNode({data}:{data:StepNodeData}&NodeProps){return <div className={`flow-node step-flow-node ${data.selected?"selected":""}`}><Handle type="target" position={Position.Left}/><span className="node-index">{String(data.order??"").padStart(2,"0")}</span><strong className="node-title">{data.title}</strong><div className="counts"><span><b>{data.rules}</b> rules</span><span><b>{data.metrics}</b> metrics</span>{data.bets>0&&<span className="count-accent"><b>{data.bets}</b> bets</span>}</div><Link className="node-link" href={`/steps/${data.id}`} onClick={event=>event.stopPropagation()}>Inspect <span>→</span></Link><Handle type="source" position={Position.Right}/></div>}

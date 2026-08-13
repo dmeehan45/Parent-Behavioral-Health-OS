@@ -93,9 +93,36 @@ Create `content/metrics/<id>.md` with `id` and `title`. `dataStatus` explicitly 
 
 ## Link a prototype
 
-Add a route implementation under `app/prototypes/<id>/page.tsx`, then add `prototype: { status: working, route: /prototypes/<id> }` to the Bet. Use synthetic data only and keep the prototype intentionally small.
+Add a route under `app/prototypes/<id>/page.tsx` that renders only the interaction, wrapped in `PrototypeShell`:
 
-`route` is validated against the filesystem: the Bet page renders a prominent
-launch control from it, so a route with no implementation would send a reader to
-a 404. A Bet without a prototype omits `route` entirely — a Bet is allowed to
-exist long before any software does.
+```tsx
+export default function Page() {
+  return (
+    <PrototypeShell route="/prototypes/<id>">
+      <YourInteraction />
+    </PrototypeShell>
+  );
+}
+```
+
+Then add `prototype: { status: working, route: /prototypes/<id> }` to the Bet. The
+shell finds the Bet that points at the route and derives the title, problem,
+targets, metrics, and both return paths from it, so the prototype page never
+restates anything the model already knows. Use synthetic data only and keep the
+prototype intentionally small.
+
+`route` is validated against the filesystem: the Bet page and the map both render
+a prominent launch control from it, so a route with no implementation would send
+a reader to a 404. A Bet without a prototype omits `route` entirely — a Bet is
+allowed to exist long before any software does.
+
+## What you never have to edit
+
+Adding any primitive is a content-only change. A new stage, step, entity, claim,
+metric, or bet appears on the map, in search, in its lens, in the detail panel,
+and on its own page without a single line of React. If something you added does
+not show up, the projection in `lib/model/graph.ts` is missing a relationship —
+fix it there, not in a component.
+
+Anyone with the map open sees your change within seconds of it landing, without
+reloading.

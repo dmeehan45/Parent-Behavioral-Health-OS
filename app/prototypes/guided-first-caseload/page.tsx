@@ -1,3 +1,19 @@
-import Link from "next/link";import {GuidedCaseload} from "@/components/guided-caseload";import {PrototypeContext} from "@/components/prototype-context/prototype-context";
-const ROUTE="/prototypes/guided-first-caseload";
-export default function PrototypePage(){return <main className="prototype-shell"><div className="shell"><div className="breadcrumb"><Link href="/map">System map</Link><span>→</span><Link href="/stages/clinician-onboarding">Clinician Onboarding</Link><span>→</span><Link href="/steps/become-match-ready">Become Match-Ready</Link><span>→</span><Link href="/bets/guided-first-caseload">Guided First Caseload</Link></div><header className="detail-head"><div><span className="eyebrow">Working prototype · synthetic data only</span><h1 style={{fontSize:48}}>Guide the first caseload</h1><p className="lede">Make early marketplace participation active, inspectable, and clinician-controlled.</p></div><Link className="button secondary" href="/bets/guided-first-caseload">← Return to bet</Link></header><GuidedCaseload/><PrototypeContext route={ROUTE}/></div></main>}
+import { GuidedCaseload } from "@/components/guided-caseload";
+import { PrototypeShell } from "@/components/prototype/prototype-shell";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * The prototype interaction only. Every piece of surrounding context — which
+ * bet this tests, what it is aimed at, which metrics would move — is resolved
+ * by the shell from the Bet that points at this route.
+ */
+const ROUTE = "/prototypes/guided-first-caseload";
+
+export default function GuidedFirstCaseloadPrototype() {
+  return (
+    <PrototypeShell route={ROUTE}>
+      <GuidedCaseload />
+    </PrototypeShell>
+  );
+}
