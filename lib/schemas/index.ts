@@ -54,3 +54,4 @@ export type Claim = z.infer<typeof claimSchema> & { body: string; sections: Reco
 export type Metric = z.infer<typeof metricSchema> & { body: string; sections: Record<string, string>; file: string };
 export type Bet = z.infer<typeof betSchema> & { body: string; sections: Record<string, string>; file: string };
 export type SystemMap = z.infer<typeof mapSchema>;
+export type Provenance = z.infer<typeof provenanceSchema>;

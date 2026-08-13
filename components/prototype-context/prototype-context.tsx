@@ -52,7 +52,7 @@ export function PrototypeContext({ route }: { route: string }) {
           <span className="eyebrow">Success would affect</span>
           <div className="chips" style={{ marginTop: 10 }}>
             {metrics.map((m) => (
-              <MetricChip key={m.id} title={m.title} status={m.dataStatus} />
+              <MetricChip key={m.id} id={m.id} title={m.title} status={m.dataStatus} />
             ))}
           </div>
         </div>
