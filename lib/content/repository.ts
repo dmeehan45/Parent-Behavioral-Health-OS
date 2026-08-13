@@ -181,6 +181,7 @@ export function getRepository() {
     requireRef(edge.from, stageIds, MAP_FILE, `edges.${i}.from`);
     requireRef(edge.to, stageIds, MAP_FILE, `edges.${i}.to`);
   });
+  Object.keys(map.layout ?? {}).forEach((id) => requireRef(id, stageIds, MAP_FILE, "layout"));
 
   steps.forEach((step) => {
     requireRef(step.stage, stageIds, step.file, "stage");

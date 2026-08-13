@@ -46,6 +46,23 @@ a Markdown list (`-`, `*`, `+`, or numbered).
    the map, so validation rejects it.
 3. Add constrained directed edges if known.
 
+The new Stage appears on the map immediately. Its position is derived from the
+edges you declare: stages are laid out left to right by how deep they sit in the
+flow, and `feedback_to` edges are excluded from that calculation so feedback
+loops do not distort the ordering. Nothing in `app/` or `components/` needs to
+change.
+
+If the derived arrangement is not the one you want, override any stage in
+`content/map.yaml`:
+
+```yaml
+layout:
+  quality-outcomes: { x: 890, y: 450 }
+```
+
+Overrides are optional presentation data and apply per stage; every stage
+without one stays derived.
+
 ## Add a Step
 
 Create `content/steps/<id>.md` with `id`, `title`, and an existing `stage`. Add `next` references only when the sequence is known. Purpose, state references, roles, rules, exceptions, claims, metrics, and bets are optional.

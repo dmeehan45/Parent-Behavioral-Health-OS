@@ -41,7 +41,11 @@ export const betSchema = z.object({
   authority: authoritySchema.optional(), ...common
 });
 export const relationshipSchema = z.enum(["flows_to", "supplies", "enables", "depends_on", "constrains", "informs", "influences", "feedback_to"]);
-export const mapSchema = z.object({ id: idSchema, title: z.string(), stages: z.array(idSchema), edges: z.array(z.object({ from: idSchema, to: idSchema, relationship: relationshipSchema })) });
+export const pointSchema = z.object({ x: z.number(), y: z.number() });
+// `layout` is optional presentation data, not system knowledge: positions are
+// derived from topology when absent. It exists so an author can arrange the map
+// without editing React, not so the map becomes a second source of truth.
+export const mapSchema = z.object({ id: idSchema, title: z.string(), stages: z.array(idSchema), edges: z.array(z.object({ from: idSchema, to: idSchema, relationship: relationshipSchema })), layout: z.record(idSchema, pointSchema).optional() });
 
 export type Stage = z.infer<typeof stageSchema> & { body: string; sections: Record<string, string>; file: string };
 export type Step = z.infer<typeof stepSchema> & { body: string; sections: Record<string, string>; file: string };
