@@ -24,6 +24,7 @@ import { contentRevision, fingerprint } from "@/lib/model/revision";
 import { AUTHORITY_TERMS, EDGE_LEGEND, isFeedbackRelationship } from "@/lib/model/vocabulary";
 import type {
   DetailBlock,
+  EntryPoint,
   LensId,
   ModelEdge,
   ModelGraph,
@@ -547,6 +548,30 @@ export function projectModel(): ModelGraph {
   const countByKind = (kind: NodeKind) => nodes.filter((node) => node.kind === kind).length;
   const lensCount = (lens: LensId) => nodes.filter((node) => node.lenses.includes(lens)).length;
 
+  const openQuestions = [...stages, ...steps, ...bets].reduce(
+    (total, record) => total + openQuestionCount(record.sections),
+    0,
+  );
+
+  // A Bet with a route has software behind it; the loader has already checked
+  // the route resolves, so anything listed here is genuinely runnable.
+  const entryPoints: EntryPoint[] = bets.flatMap((bet) =>
+    bet.prototype?.route
+      ? [
+          {
+            id: bet.id,
+            title: bet.title,
+            problem: bet.sections[SECTION.problem]?.trim() || undefined,
+            intervention: bet.sections[SECTION.bet]?.trim() || undefined,
+            href: bet.prototype.route,
+            betHref: ROUTES.bet(bet.id),
+            status: bet.prototype.status,
+            confidence: bet.confidence,
+          },
+        ]
+      : [],
+  );
+
   return {
     revision: contentRevision(),
     title: map.title,
@@ -578,22 +603,42 @@ export function projectModel(): ModelGraph {
         nodeCount: lensCount("entities"),
       },
     ],
+    // Four numbers that answer "how much of this is real yet?" without
+    // requiring the reader to already know the vocabulary.
     stats: [
-      { label: "stages", value: countByKind("stage") },
-      { label: "steps", value: countByKind("step") },
-      { label: "bets", value: countByKind("bet") },
-      { label: "claims", value: countByKind("claim") },
-      { label: "metrics", value: countByKind("metric") },
-      { label: "entities", value: countByKind("entity") },
+      stat(countByKind("stage"), "stage of the machine", "stages of the machine"),
+      stat(openQuestions, "open question", "open questions"),
+      stat(countByKind("bet"), "bet on the table", "bets on the table"),
+      stat(entryPoints.length, "prototype you can try", "prototypes you can try"),
     ],
+    entryPoints,
     vocab: { authority: AUTHORITY_TERMS, edges: EDGE_LEGEND },
     sourceUrl: process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL,
+    repoUrl: repositoryUrl(process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL),
   };
 }
 
 /* -------------------------------------------------------------------------- */
 /* Small helpers                                                               */
 /* -------------------------------------------------------------------------- */
+
+/** A count with its label already agreeing with it. */
+function stat(value: number, singular: string, plural: string) {
+  return { value, label: value === 1 ? singular : plural };
+}
+
+/**
+ * The repository root, from the blob root used for "view source" links.
+ *
+ * `NEXT_PUBLIC_CONTENT_SOURCE_URL` points at a branch — `.../blob/main` — so
+ * the clone instructions on the home page derive from the same setting rather
+ * than naming a repository in application code.
+ */
+function repositoryUrl(sourceUrl?: string): string | undefined {
+  if (!sourceUrl) return undefined;
+  const trimmed = sourceUrl.replace(/\/+$/, "");
+  return /\/(?:blob|tree)\/[^/]+$/.exec(trimmed) ? trimmed.replace(/\/(?:blob|tree)\/[^/]+$/, "") : trimmed;
+}
 
 /**
  * Appends the references that justify a primitive, then fingerprints it.
