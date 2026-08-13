@@ -1,5 +1,11 @@
 # Parent Behavioral Health OS V0 execution plan
 
+> **Historical record.** This is the plan the V0 build was executed against.
+> It is kept because it documents the contracts the initial implementation was
+> aiming at. For the current model see [`system-model.md`](system-model.md); for
+> how to contribute see [`authoring.md`](authoring.md). This document is not
+> maintained.
+
 ## Executive overview
 
 Build a Git-native, open-source system-map explorer for product and care-operations thinkers. Repository Markdown and YAML files will remain canonical; the Next.js application will validate and project that content into a restrained React Flow map, drill-down pages, linked bets, and one synthetic guided-caseload prototype.

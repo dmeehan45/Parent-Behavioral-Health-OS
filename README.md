@@ -48,4 +48,8 @@ This is not a production EHR, a replica of a specific healthcare company, or a c
 
 The reference model represents generalized, provisional thinking about how a parent-focused behavioral-health operating system might work. Do not represent private knowledge from any company as public factual documentation. Company research, if added later, should remain separate from this canonical generalized model.
 
-See [the authoring guide](docs/authoring.md) to add system thinking without editing React code.
+## Contributing
+
+See [the authoring guide](docs/authoring.md) to add system thinking without editing React code, and [CONTRIBUTING.md](CONTRIBUTING.md) for the process around model and software changes. [AGENTS.md](AGENTS.md) states the rules that keep the model canonical and the projection derived — it applies to human and AI contributors alike.
+
+Every pull request runs content validation, lint, typecheck, and build.

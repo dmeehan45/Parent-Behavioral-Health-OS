@@ -1,0 +1,38 @@
+name: Validate
+
+# The canonical model lives in `content/`. This workflow is the gate that keeps
+# invalid or unreferenced system thinking from entering the repository, since
+# the intended trust model is: propose a change -> human reviews -> Git accepts.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Content first: a schema or cross-reference error is the most likely
+      # failure for a model-only change, and it produces the clearest message.
+      - name: Validate content
+        run: npm run validate:content
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build

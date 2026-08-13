@@ -1,0 +1,31 @@
+name: Model gap or open question
+description: Part of the operating machinery we do not yet understand well enough.
+labels: ["model"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Incomplete understanding is valid system state. Recording a gap is a
+        contribution — it does not need a proposed answer.
+
+  - type: input
+    id: where
+    attributes:
+      label: Where in the model
+      description: Stage or Step ID, or "unmapped" if this does not fit anywhere yet.
+      placeholder: matching
+    validations:
+      required: true
+
+  - type: textarea
+    id: gap
+    attributes:
+      label: What we do not understand
+    validations:
+      required: true
+
+  - type: textarea
+    id: why_it_matters
+    attributes:
+      label: Why it matters
+      description: What decision or bet would this unblock?
