@@ -1,10 +1,15 @@
 # Parent Behavioral Health OS V0 execution plan
 
-> **Historical record.** This is the plan the V0 build was executed against.
-> It is kept because it documents the contracts the initial implementation was
-> aiming at. For the current model see [`system-model.md`](system-model.md); for
-> how to contribute see [`authoring.md`](authoring.md). This document is not
-> maintained.
+> **Historical record, closed out.** This is the plan the V0 build was executed
+> against, kept because it documents the contracts the initial implementation
+> was aiming at. It is not a description of the system as it stands — see
+> [`system-model.md`](system-model.md) for that, and
+> [`authoring.md`](authoring.md) for how to contribute.
+>
+> Its status lines are settled below, and **[What changed after
+> V0](#what-changed-after-v0)** records where the shipped system has since moved
+> away from this plan. Nothing else here is maintained: read the contracts as
+> what was aimed at in the first build, not as current fact.
 
 ## Executive overview
 
@@ -182,8 +187,10 @@ We will prove the V0 by installing dependencies, validating all content referenc
 - [x] No database, auth, PHI, EHR, agent, CMS, graph database, or external service is introduced.
 - [x] Lint, typecheck, content validation, and production build pass.
 - [x] Browser route smoke test confirms the main UI surfaces.
-- [ ] Screenshot capture remains unavailable because the environment has no browser executable or screenshot-capable web tool.
-- [ ] Changes are committed and a pull request is created without merging.
+- [x] Changes are committed and a pull request is created without merging.
+- [x] Screenshot capture: unavailable to the V0 build, which had no browser in
+      its environment. Later work runs Chromium through Playwright and verifies
+      surfaces visually, so this constraint no longer applies.
 
 ## Risks and mitigations
 
@@ -194,11 +201,45 @@ We will prove the V0 by installing dependencies, validating all content referenc
 - **Healthcare misinterpretation:** label the content provisional, use synthetic examples, and state explicitly that this is not production care infrastructure.
 - **Dependency churn:** use the smallest set required by the specified stack and commit the lockfile once.
 
-## Current status
+## Final status
 
 - [x] Inspected repository contents, Git branch, and scoped instructions.
 - [x] Defined contracts, workstreams, integration, acceptance checks, and risks.
 - [x] Build-tooling/configuration changes were explicitly approved by the reviewer.
 - [x] Implementation, content validation, lint, typecheck, production build, and route smoke testing are complete.
-- [ ] Commit, push, and pull request delivery are in progress after the reviewer explicitly requested a push to `dmeehan45/Parent-Behavioral-Health-OS`.
-- [ ] Next step: commit, push the feature branch, and create the pull request without merging.
+- [x] Committed, pushed, and delivered as a pull request. V0 is merged; this plan is closed.
+
+## What changed after V0
+
+The shipped system has moved past this plan in four ways. They are recorded here
+so nothing above is mistaken for current fact.
+
+**Problem became a primitive.** V0 let a Bet attach straight to a Stage, with the
+problem written as prose inside the Bet. The chain is now
+`Stage or Step → Problem → Bet → Prototype`. A Problem declares the stages and
+steps it bites; a Bet declares the one Problem it answers and nothing else.
+Required fields changed accordingly — Bet is now (`id`, `title`, `problem`), and
+Problem (`id`, `title`, `targets`) joined the list. `bets` was removed from Step,
+and `# Problem` from the Bet body, both being second statements of a link that
+already exists in one direction.
+
+**One projection replaced per-surface data plumbing.** The "UI contracts" above
+describe components receiving validated content directly. Everything now goes
+through `projectModel()` in `lib/model/graph.ts`, which turns `content/` into a
+single typed graph — nodes, edges, derived signals, detail blocks, coverage, and
+a per-node content hash. Components read that shape and never reach back into
+content. The stub file map is obsolete: the component tree is
+`components/map/*`, `components/model/*`, and `components/prototype/*`, and node
+positions are derived from topology in `lib/model/layout.ts` rather than stored.
+
+**Filters became lenses, and the map went live.** V0 planned four filters over one
+static graph. There are four *lenses*, each re-projecting the same model, with
+view state in the URL so any view is a link. The map polls a fingerprint of
+`content/` and redraws within seconds of a change landing, so model-driven routes
+are `force-dynamic` rather than prerendered.
+
+**Reading order was inverted.** Records used to open with coverage, freshness, and
+counts. Every surface now reads: what this is, what it says, where it came from.
+
+Everything V0 ruled out — database, auth, CMS, graph database, agent framework,
+PHI — is still ruled out.
