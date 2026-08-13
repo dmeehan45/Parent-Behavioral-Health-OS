@@ -23,6 +23,46 @@ second source of truth.
 If you find yourself adding a literal ID or a literal count to a component, the
 model is missing a field. Add the field instead.
 
+## How the projection works
+
+`lib/model/` is the single boundary between canonical content and the interface.
+`projectModel()` in `lib/model/graph.ts` turns `content/` into one `ModelGraph`:
+typed nodes for every primitive, typed edges for every relationship, plus derived
+signals, detail blocks, coverage, and a per-node content hash. Components read
+that shape and nothing else.
+
+The practical consequence: **adding a stage, step, entity, claim, metric, or bet
+requires no code change at all.** It appears on the map, in search, in the detail
+panel, on its own page, and in the relevant lens because the projection already
+describes it.
+
+Two rules keep this working:
+
+- **Relationships belong in the projection, not the canvas.** If the map needs to
+  know that two things are connected, derive the edge in `graph.ts`. Never infer
+  a relationship inside a React component.
+- **Respect the server boundary.** `lib/model/graph.ts` reads the filesystem and
+  is server-only. Anything a client component needs — kind labels, routes, lens
+  bands — lives in `lib/model/kinds.ts`. Importing `graph.ts` from a `"use client"`
+  component fails the build with a `node:fs` chunking error.
+
+Node positions are derived too. `lib/model/layout.ts` computes them from topology,
+so the same revision always draws the same picture and a shared URL shows the same
+view. A reader dragging a node is overriding a derived position locally; it is not
+an edit to the model.
+
+## The map follows the repository
+
+`/map` is rendered on the server and then keeps itself current: the browser polls
+`/api/model/revision` (a hash of everything under `content/`) and pulls
+`/api/model` when it moves. A push, a merge, or a local edit made through any tool
+wired to this repository shows up on every open map within seconds, and the nodes
+that changed are highlighted.
+
+Model-driven routes are therefore `dynamic = "force-dynamic"`. Do not prerender
+them: a statically built page would show a stale model until the next deploy,
+which defeats the point.
+
 ## Incompleteness is valid
 
 The schemas are deliberately permissive. Only `id` and `title` are required on
@@ -33,6 +73,11 @@ is not, and this artifact is meant to be reasoned against later.
 
 Equally: do not restate `purpose` verbatim as `activity`. If the distinction
 isn't known yet, leave `activity` out.
+
+The interface makes this visible rather than hiding it. Every primitive shows how
+many of its modelable fields are populated and names the ones that are not, so a
+thin file reads as a thin file instead of looking the same as a rich one. That is
+a navigation aid, not a score to maximise — do not fill fields to move the bar.
 
 ## Authority and provenance are load-bearing
 

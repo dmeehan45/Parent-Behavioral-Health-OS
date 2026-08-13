@@ -15,6 +15,8 @@ how the machine works
 
 Repository content is canonical. The React Flow graphs are projections of that content—not a second source of truth.
 
+The map is live. Open it in a browser and leave it there: it polls a fingerprint of `content/`, so a push, a merge, or a local edit made through Claude Code, Codex, or any other tool wired to this repository appears on every open map within seconds, with the changed primitives highlighted. Nobody has to reload, and everybody is looking at the same picture.
+
 ## Core loop
 
 ```text
@@ -31,12 +33,30 @@ npm run dev
 
 Open [http://localhost:3000/map](http://localhost:3000/map). Other checks are `npm run lint`, `npm run typecheck`, and `npm run build`.
 
+Optionally set `NEXT_PUBLIC_CONTENT_SOURCE_URL` to the repository's blob root — for example `https://github.com/<owner>/<repo>/blob/main` — and every primitive links to the canonical file it was projected from.
+
+## Reading the map
+
+`/map` is one canvas with four lenses over the same model:
+
+| Lens | The question it answers |
+| --- | --- |
+| Operating flow | How does work move through the system, stage by stage? |
+| Bets & prototypes | What do we propose to change, and what has been built? |
+| Evidence | What do we believe, and what would we measure? |
+| Entities | What does the system transform, and where? |
+
+Progressive disclosure runs top to bottom. Zooming controls how much of each node is drawn. A stage expands **in place** to reveal its steps, so drilling into a process never costs you the surrounding system. Selecting anything opens a detail panel beside the canvas — a bottom sheet on a phone — and links inside that panel move within it, so you can follow a bet to its claim to the step it describes without leaving the graph.
+
+Press <kbd>⌘K</kbd> to search every primitive, including ones the current lens is not showing. The view state — lens, expanded stages, open primitive — lives in the URL, so any view is a link.
+
 ## Repository model
 
 - `content/` contains the canonical map, stages, steps, entities, claims, metrics, and bets.
 - `lib/schemas/` contains permissive Zod contracts for progressive enrichment.
 - `lib/content/` loads content and validates IDs and cross-references.
-- `app/` and `components/` project the model into maps and detail pages.
+- `lib/model/` projects that content into the single typed graph the interface renders, and derives node positions from topology.
+- `app/` and `components/` render that projection. They contain no model IDs, counts, or relationships.
 - `app/prototypes/` contains small executable artifacts linked to Bets.
 - `docs/` explains the model, authoring loop, and future semantic boundaries.
 

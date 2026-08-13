@@ -1,0 +1,657 @@
+/**
+ * Projects `content/` into the single graph the interface renders.
+ *
+ * This is the only place that knows how canonical primitives relate to each
+ * other. Components consume `ModelGraph` and never reach back into content, so
+ * new stages, steps, claims, metrics, and bets appear on the map — with detail,
+ * links, signals, and coverage — without any change under `app/` or
+ * `components/`.
+ */
+
+import { getRepository } from "@/lib/content/repository";
+import { OVERVIEW, SECTION, countListItems } from "@/lib/content/body";
+import { ROUTES, nodeId } from "@/lib/model/kinds";
+import type { Entity, Stage, Step } from "@/lib/schemas";
+import {
+  betCoverage,
+  claimCoverage,
+  entityCoverage,
+  metricCoverage,
+  stageCoverage,
+  stepCoverage,
+} from "@/lib/model/coverage";
+import { contentRevision, fingerprint } from "@/lib/model/revision";
+import { AUTHORITY_TERMS, EDGE_LEGEND, isFeedbackRelationship } from "@/lib/model/vocabulary";
+import type {
+  DetailBlock,
+  LensId,
+  ModelEdge,
+  ModelGraph,
+  ModelNode,
+  NodeKind,
+  Signal,
+} from "@/lib/model/types";
+
+/* -------------------------------------------------------------------------- */
+/* Markdown section helpers                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Section names are a content contract enforced by the loader, so the counts and
+ * blocks below name them directly rather than pattern-matching headings.
+ */
+function openQuestionCount(sections: Record<string, string>): number {
+  return countListItems(sections[SECTION.openQuestions] ?? sections[SECTION.questions]);
+}
+
+function markdownBlocks(sections: Record<string, string>, skip: string[] = []): DetailBlock[] {
+  const skipped = new Set([...skip, OVERVIEW].map((name) => name.toLowerCase()));
+  return Object.entries(sections)
+    .filter(([label, value]) => !skipped.has(label.toLowerCase()) && value.trim().length > 0)
+    .map(([label, value]) => ({ type: "markdown", label, value }) as DetailBlock);
+}
+
+/**
+ * Entities, claims, and metrics permit no headings, so their whole body arrives
+ * as leading prose. Rendering it under an "Overview" label would invent a
+ * section the author never wrote.
+ */
+function bodyBlock(sections: Record<string, string>, label: string): DetailBlock[] {
+  const prose = sections[OVERVIEW];
+  return prose && prose.trim().length > 0 ? [{ type: "markdown", label, value: prose }] : [];
+}
+
+function isoDate(value?: Date): string | undefined {
+  return value ? value.toISOString().slice(0, 10) : undefined;
+}
+
+function firstSentence(value?: string): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim().replace(/\s+/g, " ");
+  const stop = trimmed.indexOf(". ");
+  return stop > 0 ? `${trimmed.slice(0, stop)}.` : trimmed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Projection                                                                  */
+/* -------------------------------------------------------------------------- */
+
+type LinkItem = { id: string; title: string; href: string; kind: NodeKind; meta?: string };
+
+function link(kind: NodeKind, contentId: string, title: string, meta?: string): LinkItem {
+  return { id: nodeId(kind, contentId), title, href: ROUTES[kind](contentId), kind, meta };
+}
+
+function linksBlock(label: string, items: LinkItem[]): DetailBlock[] {
+  return items.length > 0 ? [{ type: "links", label, items }] : [];
+}
+
+function listBlock(label: string, items?: string[]): DetailBlock[] {
+  return items && items.length > 0 ? [{ type: "list", label, items }] : [];
+}
+
+function proseBlock(label: string, value?: string): DetailBlock[] {
+  return value && value.trim().length > 0 ? [{ type: "prose", label, value: value.trim() }] : [];
+}
+
+export function projectModel(): ModelGraph {
+  const repository = getRepository();
+  const { map, stages, steps, entities, claims, metrics, bets } = repository;
+
+  const stageById = new Map(stages.map((stage) => [stage.id, stage]));
+  const stepById = new Map(steps.map((step) => [step.id, step]));
+  const entityById = new Map(entities.map((entity) => [entity.id, entity]));
+
+  const orderedStages = map.stages
+    .map((id) => stageById.get(id))
+    .filter((stage): stage is Stage => Boolean(stage));
+
+  const stepsByStage = new Map<string, Step[]>();
+  for (const step of steps) {
+    const bucket = stepsByStage.get(step.stage) ?? [];
+    bucket.push(step);
+    stepsByStage.set(step.stage, bucket);
+  }
+  for (const bucket of stepsByStage.values()) {
+    bucket.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.title.localeCompare(b.title));
+  }
+
+  /** Everything that points at a given stage or step id. */
+  const betsFor = (targetId: string) => bets.filter((bet) => bet.targets.includes(targetId));
+  const claimsFor = (targetId: string) => claims.filter((claim) => claim.targets.includes(targetId));
+  const metricsFor = (targetId: string, declared?: string[]) =>
+    metrics.filter((metric) => metric.targets?.includes(targetId) || declared?.includes(metric.id));
+
+  const nodes: ModelNode[] = [];
+  const edges: ModelEdge[] = [];
+
+  /* ---- Stages ---------------------------------------------------------- */
+
+  for (const stage of orderedStages) {
+    const stageSteps = stepsByStage.get(stage.id) ?? [];
+    const stageBets = betsFor(stage.id);
+    const stageClaims = claimsFor(stage.id);
+    const stageMetrics = metricsFor(stage.id, stage.metrics);
+    const questions = openQuestionCount(stage.sections);
+    const workingPrototypes = stageBets.filter((bet) => bet.prototype?.status === "working").length;
+
+    const signals: Signal[] = [
+      { label: "steps", value: stageSteps.length, tone: "neutral" },
+      { label: "bets", value: stageBets.length, tone: "accent" },
+      { label: "questions", value: questions, tone: "warn" },
+      { label: "evidence", value: stageClaims.length + stageMetrics.length, tone: "evidence" },
+    ];
+    if (workingPrototypes > 0) {
+      signals.push({ label: "prototypes", value: workingPrototypes, tone: "accent" });
+    }
+
+    const blocks: DetailBlock[] = [
+      ...listBlock("Entry conditions", stage.entryConditions),
+      ...listBlock("Exit conditions", stage.exitConditions),
+      ...markdownBlocks(stage.sections),
+      ...linksBlock(
+        "Process steps",
+        stageSteps.map((step) => link("step", step.id, step.title, step.purpose ? undefined : "not described")),
+      ),
+      ...linksBlock("Bets", stageBets.map((bet) => link("bet", bet.id, bet.title, bet.confidence))),
+      ...linksBlock("Claims", stageClaims.map((claim) => link("claim", claim.id, claim.statement, claim.kind))),
+      ...linksBlock("Metrics", stageMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
+    ];
+
+    nodes.push(
+      finalise({
+        id: nodeId("stage", stage.id),
+        kind: "stage",
+        contentId: stage.id,
+        title: stage.title,
+        summary: stage.summary,
+        order: stage.order,
+        status: stage.status,
+        authority: stage.authority,
+        lastReviewed: isoDate(stage.lastReviewed),
+        provenance: stage.provenance?.source,
+        href: ROUTES.stage(stage.id),
+        file: stage.file,
+        signals,
+        coverage: stageCoverage(stage),
+        blocks,
+        lenses: ["flow", "bets", "evidence"],
+        searchText: [stage.title, stage.summary, stage.id, stage.status].join(" "),
+      }, stage.provenance?.references),
+    );
+  }
+
+  /* ---- Steps ----------------------------------------------------------- */
+
+  for (const step of steps) {
+    const stepBets = bets.filter((bet) => bet.targets.includes(step.id) || step.bets?.includes(bet.id));
+    const stepClaims = claims.filter((claim) => claim.targets.includes(step.id) || step.claims?.includes(claim.id));
+    const stepMetrics = metricsFor(step.id, step.metrics);
+    const stage = stageById.get(step.stage);
+
+    const states = [
+      ...(step.inputs ?? []).map((io) => ({ ...io, direction: "in" as const })),
+      ...(step.outputs ?? []).map((io) => ({ ...io, direction: "out" as const })),
+    ];
+
+    const lenses: LensId[] = ["flow"];
+    if (stepBets.length > 0) lenses.push("bets");
+    if (stepClaims.length > 0 || stepMetrics.length > 0) lenses.push("evidence");
+    if (states.length > 0) lenses.push("entities");
+
+    const blocks: DetailBlock[] = [
+      ...proseBlock("Activity", step.activity === step.purpose ? undefined : step.activity),
+      ...listBlock("Entry conditions", step.entryConditions),
+      ...stateBlock("Inputs", step.inputs, entityById),
+      ...stateBlock("Outputs", step.outputs, entityById),
+      ...listBlock("Exit conditions", step.exitConditions),
+      ...(step.rules && step.rules.length > 0
+        ? [{ type: "rules" as const, label: "Rules", items: step.rules }]
+        : []),
+      ...listBlock("Exceptions", step.exceptions?.map(describeException)),
+      ...listBlock(
+        "Roles",
+        [
+          ...(step.roles?.primary ?? []).map((role) => `${role} (primary)`),
+          ...(step.roles?.supporting ?? []).map((role) => `${role} (supporting)`),
+        ],
+      ),
+      ...markdownBlocks(step.sections, ["Overview"]),
+      ...proseBlock("Notes", step.sections.Overview),
+      ...linksBlock(
+        "Next steps",
+        (step.next ?? []).flatMap((id) => {
+          const target = stepById.get(id);
+          return target ? [link("step", target.id, target.title)] : [];
+        }),
+      ),
+      ...linksBlock("Bets", stepBets.map((bet) => link("bet", bet.id, bet.title, bet.confidence))),
+      ...linksBlock("Claims", stepClaims.map((claim) => link("claim", claim.id, claim.statement, claim.kind))),
+      ...linksBlock("Metrics", stepMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
+    ];
+
+    nodes.push(
+      finalise({
+        id: nodeId("step", step.id),
+        kind: "step",
+        contentId: step.id,
+        title: step.title,
+        subtitle: stage?.title,
+        summary: step.purpose,
+        order: step.order,
+        authority: step.authority,
+        lastReviewed: isoDate(step.lastReviewed),
+        provenance: step.provenance?.source,
+        parentId: nodeId("stage", step.stage),
+        href: ROUTES.step(step.id),
+        file: step.file,
+        signals: [
+          { label: "rules", value: step.rules?.length ?? 0, tone: "neutral" },
+          { label: "states", value: states.length, tone: "quiet" },
+          { label: "bets", value: stepBets.length, tone: "accent" },
+          { label: "evidence", value: stepClaims.length + stepMetrics.length, tone: "evidence" },
+        ],
+        coverage: stepCoverage(step),
+        blocks,
+        lenses,
+        searchText: [step.title, step.purpose, step.id, stage?.title].join(" "),
+      }, step.provenance?.references),
+    );
+
+    for (const next of step.next ?? []) {
+      edges.push({
+        id: `process:${step.id}->${next}`,
+        source: nodeId("step", step.id),
+        target: nodeId("step", next),
+        kind: "process",
+        lenses: ["flow"],
+      });
+    }
+
+    for (const io of step.inputs ?? []) {
+      edges.push({
+        id: `state:${io.entity}->${step.id}`,
+        source: nodeId("entity", io.entity),
+        target: nodeId("step", step.id),
+        kind: "state",
+        label: io.state,
+        lenses: ["entities"],
+      });
+    }
+    for (const io of step.outputs ?? []) {
+      edges.push({
+        id: `state:${step.id}->${io.entity}`,
+        source: nodeId("step", step.id),
+        target: nodeId("entity", io.entity),
+        kind: "state",
+        label: io.state,
+        lenses: ["entities"],
+      });
+    }
+  }
+
+  /* ---- Bets and prototypes --------------------------------------------- */
+
+  for (const bet of bets) {
+    const betClaims = claims.filter((claim) => bet.claims?.includes(claim.id));
+    const betMetrics = metrics.filter((metric) => bet.metrics?.includes(metric.id));
+    const targets = bet.targets.flatMap((id) => {
+      const stage = stageById.get(id);
+      if (stage) return [link("stage", stage.id, stage.title)];
+      const step = stepById.get(id);
+      return step ? [link("step", step.id, step.title, stageById.get(step.stage)?.title)] : [];
+    });
+
+    nodes.push(
+      finalise({
+        id: nodeId("bet", bet.id),
+        kind: "bet",
+        contentId: bet.id,
+        title: bet.title,
+        summary: firstSentence(bet.sections[SECTION.bet]),
+        status: bet.status,
+        confidence: bet.confidence,
+        authority: bet.authority,
+        lastReviewed: isoDate(bet.lastReviewed),
+        provenance: bet.provenance?.source,
+        href: ROUTES.bet(bet.id),
+        file: bet.file,
+        signals: [
+          { label: "targets", value: bet.targets.length, tone: "neutral" },
+          { label: "claims", value: betClaims.length, tone: "evidence" },
+          { label: "metrics", value: betMetrics.length, tone: "evidence" },
+          { label: "questions", value: openQuestionCount(bet.sections), tone: "warn" },
+        ],
+        coverage: betCoverage(bet),
+        blocks: [
+          ...proseBlock("Problem", bet.sections[SECTION.problem]),
+          ...proseBlock("Intervention", bet.sections[SECTION.bet]),
+          ...markdownBlocks(bet.sections, [SECTION.problem, SECTION.bet]),
+          ...linksBlock("Against", targets),
+          ...linksBlock("Supporting claims", betClaims.map((claim) => link("claim", claim.id, claim.statement, claim.confidence))),
+          ...linksBlock("Success would affect", betMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
+        ],
+        lenses: ["bets"],
+        searchText: [bet.title, bet.sections[SECTION.problem], bet.sections[SECTION.bet], bet.id].join(" "),
+      }, bet.provenance?.references),
+    );
+
+    for (const target of bet.targets) {
+      const targetKind: NodeKind | undefined = stageById.has(target)
+        ? "stage"
+        : stepById.has(target)
+          ? "step"
+          : undefined;
+      if (!targetKind) continue;
+      edges.push({
+        id: `bet:${bet.id}->${target}`,
+        source: nodeId(targetKind, target),
+        target: nodeId("bet", bet.id),
+        kind: "bet",
+        lenses: ["bets"],
+      });
+    }
+
+    if (!bet.prototype) continue;
+
+    const launchable = Boolean(bet.prototype.route);
+    nodes.push(
+      finalise({
+        id: nodeId("prototype", bet.id),
+        kind: "prototype",
+        contentId: bet.id,
+        title: bet.title,
+        subtitle: "Prototype",
+        summary: launchable
+          ? "Working software that makes this bet concrete. Synthetic data only."
+          : "No prototype has been built for this bet yet.",
+        status: bet.prototype.status,
+        href: bet.prototype.route ?? ROUTES.bet(bet.id),
+        file: bet.file,
+        signals: [{ label: "status", value: launchable ? 1 : 0, tone: "accent" }],
+        coverage: { filled: launchable ? 2 : 1, total: 2, missing: launchable ? [] : ["Route"] },
+        blocks: [
+          ...linksBlock("Tests the bet", [link("bet", bet.id, bet.title, bet.confidence)]),
+          ...linksBlock("Against", targets),
+          ...linksBlock("Success would affect", betMetrics.map((metric) => link("metric", metric.id, metric.title))),
+        ],
+        lenses: ["bets"],
+        searchText: [bet.title, "prototype", bet.prototype.status, bet.id].join(" "),
+      }),
+    );
+
+    edges.push({
+      id: `prototype:${bet.id}`,
+      source: nodeId("bet", bet.id),
+      target: nodeId("prototype", bet.id),
+      kind: "prototype",
+      lenses: ["bets"],
+    });
+  }
+
+  /* ---- Claims and metrics ---------------------------------------------- */
+
+  for (const claim of claims) {
+    const targets = resolveTargets(claim.targets, stageById, stepById);
+    nodes.push(
+      finalise({
+        id: nodeId("claim", claim.id),
+        kind: "claim",
+        contentId: claim.id,
+        title: claim.statement.trim(),
+        subtitle: `${claim.kind} · ${claim.status}`,
+        confidence: claim.confidence,
+        status: claim.status,
+        authority: claim.authority,
+        lastReviewed: isoDate(claim.lastReviewed),
+        provenance: claim.provenance?.source,
+        href: ROUTES.claim(claim.id),
+        file: claim.file,
+        signals: [
+          { label: "targets", value: claim.targets.length, tone: "neutral" },
+          { label: "references", value: claim.provenance?.references?.length ?? 0, tone: "evidence" },
+        ],
+        coverage: claimCoverage(claim),
+        blocks: [
+          ...bodyBlock(claim.sections, "Reasoning"),
+          ...linksBlock("Describes", targets),
+          ...linksBlock(
+            "Used by bets",
+            bets.filter((bet) => bet.claims?.includes(claim.id)).map((bet) => link("bet", bet.id, bet.title)),
+          ),
+        ],
+        lenses: ["evidence"],
+        searchText: [claim.statement, claim.kind, claim.id].join(" "),
+      }, claim.provenance?.references),
+    );
+
+    for (const target of targets) {
+      edges.push({
+        id: `evidence:${claim.id}->${target.id}`,
+        source: target.id,
+        target: nodeId("claim", claim.id),
+        kind: "evidence",
+        lenses: ["evidence"],
+      });
+    }
+  }
+
+  for (const metric of metrics) {
+    const declaredBy = [
+      ...stages.filter((stage) => stage.metrics?.includes(metric.id)).map((stage) => stage.id),
+      ...steps.filter((step) => step.metrics?.includes(metric.id)).map((step) => step.id),
+    ];
+    const targets = resolveTargets([...(metric.targets ?? []), ...declaredBy], stageById, stepById);
+
+    nodes.push(
+      finalise({
+        id: nodeId("metric", metric.id),
+        kind: "metric",
+        contentId: metric.id,
+        title: metric.title,
+        subtitle: [metric.unit, metric.direction && `${metric.direction} is better`].filter(Boolean).join(" · ") || undefined,
+        dataStatus: metric.dataStatus,
+        provenance: metric.provenance?.source,
+        href: ROUTES.metric(metric.id),
+        file: metric.file,
+        signals: [{ label: "measures", value: targets.length, tone: "neutral" }],
+        coverage: metricCoverage(metric),
+        blocks: [
+          ...bodyBlock(metric.sections, "Definition"),
+          ...linksBlock("Measures", targets),
+          ...linksBlock(
+            "Bets aimed at this",
+            bets.filter((bet) => bet.metrics?.includes(metric.id)).map((bet) => link("bet", bet.id, bet.title)),
+          ),
+        ],
+        lenses: ["evidence"],
+        searchText: [metric.title, metric.unit, metric.id].join(" "),
+      }, metric.provenance?.references),
+    );
+
+    for (const target of targets) {
+      edges.push({
+        id: `evidence:${metric.id}->${target.id}`,
+        source: target.id,
+        target: nodeId("metric", metric.id),
+        kind: "evidence",
+        lenses: ["evidence"],
+      });
+    }
+  }
+
+  /* ---- Entities -------------------------------------------------------- */
+
+  for (const entity of entities) {
+    const producedBy = steps.filter((step) => step.outputs?.some((io) => io.entity === entity.id));
+    const consumedBy = steps.filter((step) => step.inputs?.some((io) => io.entity === entity.id));
+    const statesIn = (step: Step, field: "inputs" | "outputs") =>
+      (step[field] ?? []).filter((io) => io.entity === entity.id).map((io) => io.state);
+
+    const observed = new Set(steps.flatMap((step) => [...statesIn(step, "inputs"), ...statesIn(step, "outputs")]));
+    const declared = entity.states ?? [];
+
+    nodes.push(
+      finalise({
+        id: nodeId("entity", entity.id),
+        kind: "entity",
+        contentId: entity.id,
+        title: entity.title,
+        summary: firstSentence(entity.body),
+        provenance: entity.provenance?.source,
+        lastReviewed: isoDate(entity.lastReviewed),
+        href: ROUTES.entity(entity.id),
+        file: entity.file,
+        signals: [
+          { label: "states", value: declared.length || observed.size, tone: "quiet" },
+          { label: "touched by", value: new Set([...producedBy, ...consumedBy].map((s) => s.id)).size, tone: "neutral" },
+        ],
+        coverage: entityCoverage(entity),
+        blocks: [
+          ...bodyBlock(entity.sections, "Definition"),
+          ...listBlock("Declared states", declared),
+          // Only worth showing separately when nothing is declared; otherwise the
+          // loader has already guaranteed the two agree.
+          ...(declared.length === 0 ? listBlock("States referenced by steps", [...observed].sort()) : []),
+          ...linksBlock(
+            "Produced by",
+            producedBy.map((step) => link("step", step.id, step.title, statesIn(step, "outputs").join(", "))),
+          ),
+          ...linksBlock(
+            "Read by",
+            consumedBy.map((step) => link("step", step.id, step.title, statesIn(step, "inputs").join(", "))),
+          ),
+        ],
+        lenses: ["entities"],
+        searchText: [entity.title, entity.body, entity.id, ...declared].join(" "),
+      }, entity.provenance?.references),
+    );
+  }
+
+  /* ---- Stage topology --------------------------------------------------- */
+
+  for (const [index, edge] of map.edges.entries()) {
+    const feedback = isFeedbackRelationship(edge.relationship);
+    edges.push({
+      id: `flow:${index}:${edge.from}->${edge.to}`,
+      source: nodeId("stage", edge.from),
+      target: nodeId("stage", edge.to),
+      kind: feedback ? "feedback" : "flow",
+      label: edge.relationship.replaceAll("_", " "),
+      lenses: ["flow", "bets", "evidence"],
+    });
+  }
+
+  /* ---- Summary ---------------------------------------------------------- */
+
+  const countByKind = (kind: NodeKind) => nodes.filter((node) => node.kind === kind).length;
+  const lensCount = (lens: LensId) => nodes.filter((node) => node.lenses.includes(lens)).length;
+
+  return {
+    revision: contentRevision(),
+    title: map.title,
+    nodes,
+    edges,
+    lenses: [
+      {
+        id: "flow",
+        label: "Operating flow",
+        description: "How work moves through the system, stage by stage.",
+        nodeCount: lensCount("flow"),
+      },
+      {
+        id: "bets",
+        label: "Bets & prototypes",
+        description: "What we propose to change, and what has been built.",
+        nodeCount: lensCount("bets"),
+      },
+      {
+        id: "evidence",
+        label: "Evidence",
+        description: "What we believe and what we would measure.",
+        nodeCount: lensCount("evidence"),
+      },
+      {
+        id: "entities",
+        label: "Entities",
+        description: "The things the system transforms, and where.",
+        nodeCount: lensCount("entities"),
+      },
+    ],
+    stats: [
+      { label: "stages", value: countByKind("stage") },
+      { label: "steps", value: countByKind("step") },
+      { label: "bets", value: countByKind("bet") },
+      { label: "claims", value: countByKind("claim") },
+      { label: "metrics", value: countByKind("metric") },
+      { label: "entities", value: countByKind("entity") },
+    ],
+    vocab: { authority: AUTHORITY_TERMS, edges: EDGE_LEGEND },
+    sourceUrl: process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Small helpers                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Appends the references that justify a primitive, then fingerprints it.
+ *
+ * `provenance.references` is where the evidence behind a belief is recorded, so
+ * it is shown on every primitive that has any rather than only on claims.
+ */
+function finalise(node: Omit<ModelNode, "hash">, references?: string[]): ModelNode {
+  const blocks = references && references.length > 0
+    ? [...node.blocks, { type: "list" as const, label: "References", items: references }]
+    : node.blocks;
+  const settled = { ...node, blocks };
+  return { ...settled, hash: fingerprint(settled), searchText: node.searchText.toLowerCase() };
+}
+
+function describeException(exception: Step["exceptions"] extends Array<infer T> | undefined ? T : never): string {
+  if (typeof exception === "string") return exception;
+  return [exception.condition, exception.outcome].filter(Boolean).join(" → ");
+}
+
+function stateBlock(
+  label: string,
+  states: Step["inputs"],
+  entityById: Map<string, Entity>,
+): DetailBlock[] {
+  if (!states || states.length === 0) return [];
+  return [
+    {
+      type: "states",
+      label,
+      items: states.map((io) => ({
+        entityId: io.entity,
+        entityTitle: entityById.get(io.entity)?.title ?? io.entity,
+        state: io.state,
+        href: ROUTES.entity(io.entity),
+      })),
+    },
+  ];
+}
+
+function resolveTargets(
+  targetIds: string[],
+  stageById: Map<string, Stage>,
+  stepById: Map<string, Step>,
+): LinkItem[] {
+  const seen = new Set<string>();
+  const resolved: LinkItem[] = [];
+  for (const id of targetIds) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const stage = stageById.get(id);
+    if (stage) {
+      resolved.push(link("stage", stage.id, stage.title));
+      continue;
+    }
+    const step = stepById.get(id);
+    if (step) resolved.push(link("step", step.id, step.title, stageById.get(step.stage)?.title));
+  }
+  return resolved;
+}
+
