@@ -1,0 +1,92 @@
+name: Pull request shape
+
+# A pull request based on another feature branch rather than on the default
+# branch will strand its own content if the branch beneath it merges first.
+# Merging the bottom of a stack does not move the branches above it: those
+# pull requests stay open, still pointed at a branch that is no longer being
+# developed, and merging them then pushes work *down* into that dead branch
+# instead of up onto the default branch.
+#
+# This has happened twice here — PRs #3-#7, recovered by #9, and PRs #12-#14,
+# recovered by #15. Both times every check was green and every pull request
+# reported itself merged. Nothing in CI noticed, because nothing was looking
+# at the shape of the pull request rather than the contents of the diff.
+#
+# So this job looks at the shape. Stacking stays possible, because sometimes a
+# change genuinely depends on an unmerged one, but it becomes a deliberate and
+# labelled choice that arrives with its own merge instructions rather than a
+# default that quietly costs a recovery operation.
+
+on:
+  pull_request:
+    # `edited` catches a base branch changed after opening; the label events
+    # catch the opt-out being added or removed on an existing pull request.
+    types: [opened, reopened, edited, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  base-branch:
+    name: Base branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check what this pull request is based on
+        env:
+          BASE: ${{ github.event.pull_request.base.ref }}
+          HEAD: ${{ github.event.pull_request.head.ref }}
+          DEFAULT: ${{ github.event.repository.default_branch }}
+          STACKED: ${{ contains(github.event.pull_request.labels.*.name, 'stacked') }}
+        run: |
+          set -euo pipefail
+
+          if [ "$BASE" = "$DEFAULT" ]; then
+            echo "Based on '$DEFAULT'. Nothing to check."
+            echo "Based on \`$DEFAULT\`. This pull request can merge in any order." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "$STACKED" = "true" ]; then
+            {
+              echo "## Stacked pull request"
+              echo
+              echo "\`$HEAD\` is based on \`$BASE\`, not on \`$DEFAULT\`. The \`stacked\`"
+              echo "label says that is deliberate, so this check passes."
+              echo
+              echo "**Merge the stack top down.** Start with the pull request furthest"
+              echo "from \`$DEFAULT\` and finish with the one based on it. Merging bottom"
+              echo "up lands only the first one and strands the rest in their parent"
+              echo "branches, which is what happened to #3-#7 and again to #12-#14."
+              echo
+              echo "Deleting each head branch on merge also fixes this: GitHub"
+              echo "re-targets an orphaned pull request at its base's base, so a"
+              echo "bottom-up merge corrects itself."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "Stacked pull request, labelled as intended. Merge the stack top down."
+            exit 0
+          fi
+
+          {
+            echo "## This pull request is not based on \`$DEFAULT\`"
+            echo
+            echo "\`$HEAD\` is based on \`$BASE\`."
+            echo
+            echo "If \`$BASE\` merges first, this pull request does not follow it onto"
+            echo "\`$DEFAULT\`. Merging it then pushes its commits into \`$BASE\` — a"
+            echo "branch nobody is developing any more — and the work has to be"
+            echo "recovered by hand. That has happened twice in this repository."
+            echo
+            echo "### Pick one"
+            echo
+            echo "**Re-target this pull request at \`$DEFAULT\`.** Use *Edit* next to the"
+            echo "title to change the base. Right for almost everything here, including"
+            echo "a change that merely builds on another — an overlapping diff is a much"
+            echo "smaller cost than a stranded merge."
+            echo
+            echo "**Or keep the stack and label it \`stacked\`.** Right when this change"
+            echo "genuinely cannot be reviewed without an unmerged one. The label makes"
+            echo "the dependency visible and prints the merge order on every run."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "::error title=Pull request is based on '$BASE', not '$DEFAULT'::Re-target it at $DEFAULT, or add the 'stacked' label if the dependency is deliberate. See the job summary."
+          exit 1

@@ -34,6 +34,7 @@
 
 ## Checks
 
+- [ ] Based on `main` — or stacked deliberately, labelled `stacked`, and the merge order stated above
 - [ ] `npm run validate:content` passes
 - [ ] `npm run lint` and `npm run typecheck` pass
 - [ ] No PHI, real patient data, real clinician data, or company-confidential material

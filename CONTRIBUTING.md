@@ -41,6 +41,29 @@ npm run build
 
 CI runs all four on every pull request.
 
+## Branch from `main`, and target `main`
+
+One rule, and it is enforced: **a pull request is based on `main`**.
+
+A pull request based on another feature branch does not follow that branch onto
+`main` when it merges. It stays open, still pointed at a branch nobody is
+developing any more, and merging it then pushes the work *down* into that dead
+branch. Every check stays green and GitHub reports the pull request as merged,
+while `main` never receives a line of it.
+
+This has happened twice here, to PRs #3–#7 and again to #12–#14, and both times
+it took a hand-written recovery pull request to undo. The `Pull request shape`
+check now fails a pull request based on anything other than `main`.
+
+If a change genuinely cannot be reviewed without an unmerged one, stack it and
+add the **`stacked`** label. The check then passes and prints the rule that
+makes stacking safe: **merge a stack top down**, starting with the pull request
+furthest from `main`. Merging bottom up lands only the first one.
+
+Splitting work into several pull requests does not require stacking. Branch each
+one from `main` and accept that the diffs overlap — an overlapping diff is a far
+smaller cost than a stranded merge.
+
 ## What belongs in a model change
 
 The pull request template asks what we now believe that we did not before, and
