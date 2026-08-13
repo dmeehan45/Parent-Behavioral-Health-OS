@@ -22,10 +22,13 @@ export const stepSchema = z.object({
   exceptions: z.array(exceptionSchema).optional(), metrics: z.array(idSchema).optional(), claims: z.array(idSchema).optional(), bets: z.array(idSchema).optional(),
   authority: authoritySchema.optional(), ...common
 });
-export const entitySchema = z.object({ id: idSchema, title: z.string().min(1), ...common });
+// `states` is optional. Declaring it opts the entity into state validation: every
+// `{ entity, state }` reference in a Step must then name a declared state. Leave
+// it out while the state model for an entity is still unknown.
+export const entitySchema = z.object({ id: idSchema, title: z.string().min(1), states: z.array(z.string().min(1)).optional(), ...common });
 export const claimSchema = z.object({
   id: idSchema, statement: z.string().min(1), kind: z.enum(["reported", "observed", "inference", "assumption", "hypothesis"]),
-  confidence: confidenceSchema, targets: z.array(idSchema).min(1), status: z.enum(["active", "supported", "contradicted", "retired"]),
+  confidence: confidenceSchema, targets: z.array(idSchema).min(1), status: z.enum(["active", "supported", "contradicted", "retired"]).default("active"),
   authority: authoritySchema.optional(), ...common
 });
 export const metricSchema = z.object({
@@ -47,3 +50,4 @@ export type Claim = z.infer<typeof claimSchema> & { body: string; sections: Reco
 export type Metric = z.infer<typeof metricSchema> & { body: string; sections: Record<string, string>; file: string };
 export type Bet = z.infer<typeof betSchema> & { body: string; sections: Record<string, string>; file: string };
 export type SystemMap = z.infer<typeof mapSchema>;
+export type Provenance = z.infer<typeof provenanceSchema>;
