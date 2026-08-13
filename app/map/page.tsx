@@ -1,4 +1,5 @@
 import { getRepository } from "@/lib/content/repository";
+import { SECTION, countListItems } from "@/lib/content/body";
 import { SystemMap } from "@/components/system-map/system-map";
 
 export default function MapPage() {
@@ -15,7 +16,7 @@ export default function MapPage() {
       summary: stage.summary,
       steps: steps.length,
       claims: claims.length,
-      questions: (stage.sections["Open questions"]?.match(/^- /gm) ?? []).length,
+      questions: countListItems(stage.sections[SECTION.openQuestions]),
       bets: bets.length,
       prototypes: bets.filter((bet) => bet.prototype?.status === "working").length,
       stepsList: steps.map((step) => ({ id: step.id, title: step.title })),
