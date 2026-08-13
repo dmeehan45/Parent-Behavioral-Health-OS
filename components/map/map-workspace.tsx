@@ -7,7 +7,7 @@ import { CommandPalette } from "@/components/map/command-palette";
 import { DetailSheet } from "@/components/map/detail-sheet";
 import { useLiveModel } from "@/components/map/use-live-model";
 import { EDGE_COLOR, KIND_COLOR } from "@/components/map/canvas-theme";
-import { KIND_LABELS } from "@/lib/model/kinds";
+import { KIND_LABELS, KIND_MEANING } from "@/lib/model/kinds";
 import type { LensId, ModelGraph, ModelNode } from "@/lib/model/types";
 
 export type MapView = {
@@ -37,7 +37,6 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
 
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const openNode = openId ? nodeById.get(openId) : undefined;
-  const activeLens = graph.lenses.find((entry) => entry.id === lens) ?? graph.lenses[0];
 
   /* ---- Shareable view state -------------------------------------------- */
 
@@ -143,6 +142,9 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
   return (
     <div className={`workspace${openNode || openId ? " sheet-open" : ""}`}>
       <div className="workspace-bar">
+        {/* The tab labels name the four views; their node counts were four more
+            numbers on the busiest control on the page, answering a question
+            nobody asks before switching. The description stays as the tooltip. */}
         <div className="lens-tabs" role="tablist" aria-label="Map lens">
           {graph.lenses.map((entry) => (
             <button
@@ -154,7 +156,6 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
               title={entry.description}
             >
               {entry.label}
-              <span className="lens-count">{entry.nodeCount}</span>
             </button>
           ))}
         </div>
@@ -194,11 +195,6 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
       </div>
 
       <div className="workspace-canvas">
-        <div className="canvas-orientation">
-          <strong>{activeLens?.label}</strong>
-          <span>{activeLens?.description}</span>
-        </div>
-
         {lastChange && changed.size > 0 ? (
           <div className="update-toast" role="status">
             <span className="live-dot" aria-hidden="true" />
@@ -252,13 +248,17 @@ function Legend({ graph, onClose }: { graph: ModelGraph; onClose: () => void }) 
         </button>
       </div>
 
+      {/* The legend is where someone learns the vocabulary, so it says what each
+          word means rather than only pairing it with a colour. */}
       <section>
-        <h3 className="field-label">Primitives</h3>
-        <ul className="legend-list">
+        <h3 className="field-label">What the words mean</h3>
+        <ul className="legend-list legend-terms">
           {(Object.keys(KIND_LABELS) as Array<keyof typeof KIND_LABELS>).map((kind) => (
             <li key={kind}>
               <span className="legend-swatch" style={{ background: KIND_COLOR[kind] }} aria-hidden="true" />
-              {KIND_LABELS[kind]}
+              <span>
+                <strong>{KIND_LABELS[kind]}</strong> {KIND_MEANING[kind]}
+              </span>
             </li>
           ))}
         </ul>

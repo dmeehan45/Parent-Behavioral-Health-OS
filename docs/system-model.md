@@ -98,8 +98,15 @@ filling fields with filler to raise it defeats its purpose.
 ### Authority and provenance, in view
 
 Authority is not buried in a detail page. Because it is the guardrail that
-separates a proposal from an approved rule, it is shown wherever a primitive is
-shown, alongside `provenance.source`, `provenance.references`, and
-`lastReviewed`, and explained in the map legend. Git records who changed a file;
-provenance records why we believe the content, which is what determines how much
-weight a reader should give it.
+separates a proposal from an approved rule, it is shown on the face of every
+primitive, alongside confidence and status, and explained in the map legend.
+
+Everything else about how we came to believe something — `provenance.source`,
+`provenance.references`, `lastReviewed`, coverage, and the file it was projected
+from — is gathered into a single block *after* the content, on both the page and
+the panel. It all matters, and none of it is what the reader came for. Reading
+order is the same everywhere: what this is, what it says, then where it came
+from.
+
+Git records who changed a file; provenance records why we believe the content,
+which is what determines how much weight a reader should give it.

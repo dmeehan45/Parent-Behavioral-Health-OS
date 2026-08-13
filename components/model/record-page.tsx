@@ -5,22 +5,22 @@ import {
   Badge,
   Breadcrumb,
   ConfidenceBadge,
-  CoverageGaps,
-  CoverageMeter,
-  Freshness,
   KindBadge,
-  SourceLink,
+  Provenance,
 } from "@/components/model/badges";
-import { KIND_LABELS } from "@/lib/model/kinds";
 import type { ModelGraph, ModelNode } from "@/lib/model/types";
 
 /**
  * The full-page read of any primitive.
  *
- * Stages, steps, bets, claims, metrics, entities, and prototypes all render
- * through here, from the same projection the map uses. That is what keeps the
- * two surfaces honest with each other and means a new kind of content cannot
+ * Stages, steps, problems, bets, claims, metrics, entities, and prototypes all
+ * render through here, from the same projection the map uses. That is what keeps
+ * the two surfaces honest with each other and means a new kind of content cannot
  * end up with a page that quietly omits half of it.
+ *
+ * The page reads in one order: what this is, what it says, then where it came
+ * from. Coverage, freshness, and the source path used to sit above the first
+ * sentence, which put bookkeeping in front of the writing on every record.
  */
 export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode }) {
   const parent = node.parentId ? graph.nodes.find((candidate) => candidate.id === node.parentId) : undefined;
@@ -60,39 +60,26 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
           <h1>{node.title}</h1>
           {node.subtitle ? <p className="page-subtitle">{node.subtitle}</p> : null}
           {node.summary ? <p className="lede">{node.summary}</p> : null}
-          <Freshness lastReviewed={node.lastReviewed} provenance={node.provenance} />
         </div>
 
         <div className="page-head-aside">
-          <CoverageMeter coverage={node.coverage} />
           <Link className="button secondary" href={mapHref}>
             Show on the map <span aria-hidden="true">→</span>
           </Link>
-          <SourceLink file={node.file} sourceUrl={graph.sourceUrl} />
         </div>
       </header>
 
-      {node.signals.some((signal) => signal.value > 0) ? (
-        <div className="page-signals">
-          {node.signals
-            .filter((signal) => signal.value > 0)
-            .map((signal) => (
-              <span key={signal.label} className={`page-signal tone-${signal.tone}`}>
-                <b>{signal.value}</b>
-                {signal.label}
-              </span>
-            ))}
-        </div>
-      ) : null}
-
+      {/* No counts strip: every block below already carries its own count, so
+          repeating them here said the same thing twice before saying anything. */}
       <DetailBlocks blocks={node.blocks} />
 
-      <CoverageGaps coverage={node.coverage} />
-
-      <p className="page-note">
-        This {KIND_LABELS[node.kind].toLowerCase()} is projected from <code>{node.file}</code>. The repository is
-        canonical; this page is a view of it.
-      </p>
+      <Provenance
+        provenance={node.provenance}
+        lastReviewed={node.lastReviewed}
+        coverage={node.coverage}
+        file={node.file}
+        sourceUrl={graph.sourceUrl}
+      />
     </main>
   );
 }

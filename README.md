@@ -51,7 +51,9 @@ Optionally set `NEXT_PUBLIC_CONTENT_SOURCE_URL` to the repository's blob root �
 | Evidence | What do we believe, and what would we measure? |
 | Entities | What does the system transform, and where? |
 
-Progressive disclosure runs top to bottom. Zooming controls how much of each node is drawn. A stage expands **in place** to reveal its steps, so drilling into a process never costs you the surrounding system. Selecting anything opens a detail panel beside the canvas — a bottom sheet on a phone — and links inside that panel move within it, so you can follow a bet to its claim to the step it describes without leaving the graph.
+Progressive disclosure runs top to bottom. Zooming controls how much of each node is drawn. A stage expands **in place** to reveal its steps, so drilling into a process never costs you the surrounding system. Selecting anything opens a detail panel beside the canvas — a bottom sheet on a phone — and links inside that panel move within it, so you can follow a problem to the bet that answers it to the software that tests it without leaving the graph.
+
+Every record reads in the same order: what it is, what it says, then where it came from. Provenance, freshness, coverage, and the source file sit in one block at the end rather than in front of the writing.
 
 Press <kbd>⌘K</kbd> to search every primitive, including ones the current lens is not showing. The view state — lens, expanded stages, open primitive — lives in the URL, so any view is a link.
 
