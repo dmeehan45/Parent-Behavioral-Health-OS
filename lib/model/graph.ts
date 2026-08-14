@@ -564,7 +564,17 @@ export function projectModel(): ModelGraph {
   /* ---- Claims and metrics ---------------------------------------------- */
 
   for (const claim of claims) {
-    const targets = resolveTargets(claim.targets, stageById, stepById);
+    /*
+     * A relationship counts once, from whichever end wrote it down.
+     *
+     * `claim.targets` says what a Claim is about; `step.claims` says what a Step
+     * rests on. They are the same link seen from two sides, and a contributor
+     * has no reason to prefer one. Metrics already resolved both — claims did
+     * not, so a Step that named a Claim got it in a block while the evidence
+     * lens drew no line, and the two surfaces disagreed about the same content.
+     */
+    const declaredBy = steps.filter((step) => step.claims?.includes(claim.id)).map((step) => step.id);
+    const targets = resolveTargets([...claim.targets, ...declaredBy], stageById, stepById);
     nodes.push(
       finalise({
         id: nodeId("claim", claim.id),
@@ -580,7 +590,7 @@ export function projectModel(): ModelGraph {
         href: ROUTES.claim(claim.id),
         file: claim.file,
         signals: [
-          signal(claim.targets.length, "neutral", "target"),
+          signal(targets.length, "neutral", "target"),
           signal(claim.provenance?.references?.length ?? 0, "evidence", "reference"),
         ],
         coverage: claimCoverage(claim),

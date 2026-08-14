@@ -40,7 +40,13 @@ Two rules keep this working:
 
 - **Relationships belong in the projection, not the canvas.** If the map needs to
   know that two things are connected, derive the edge in `graph.ts`. Never infer
-  a relationship inside a React component.
+  a relationship inside a React component. `docs/relationships.md` covers when a
+  reference should become an edge and when it should stay a block — the answer
+  is usually that it should stay a block.
+- **A relationship counts once, from whichever end wrote it down.** `claim.targets`
+  and `step.claims` are the same link from two sides, and the projection resolves
+  both into one edge. When both ends may legitimately author a link, resolve both
+  and deduplicate; do not make contributors learn which side is read.
 - **Respect the server boundary.** `lib/model/graph.ts` reads the filesystem and
   is server-only. Anything a client component needs — kind labels, routes, lens
   bands — lives in `lib/model/kinds.ts`. Importing `graph.ts` from a `"use client"`
@@ -177,11 +183,16 @@ Two rules keep it from becoming another wall:
   say, because it is the question a reader leaves with rather than what they
   arrived for.
 
-It reads edges, so it only sees relationships the projection actually derives. A
-Problem's own `claims` and `metrics` frontmatter has no edge today, so open ends
-on a Problem page come only from whether anything answers it. Adding those edges
-would also change what the map draws — worth doing deliberately, not as a
-side effect of extending this.
+It reads edges, so it only sees relationships the projection actually derives —
+and that is a smaller set than the references in `content/`.
+`docs/relationships.md` explains what an edge is, which references become one,
+and why most of them should not.
+
+The rule that decides it: **an edge is the inverse index of an authored
+reference**, so it exists when some surface has to answer a question from the
+end that did not write the link down. A Problem's own `claims` and `metrics`
+stay blocks, because that question is already answered on the Stage the Problem
+bites, one click away and with more context.
 
 ## A bet carries the shape of its experiment, and the packet can refuse
 
