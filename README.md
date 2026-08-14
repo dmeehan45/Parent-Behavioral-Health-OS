@@ -1,6 +1,6 @@
 # Parent Behavioral Health OS
 
-An open, executable model of the operational machinery behind a best-in-class, AI-enabled, parent-focused behavioral-health practice platform.
+An open, executable model of the operational machinery behind a best-in-class, AI-enabled, parent-focused behavioral-health care-delivery operating system.
 
 ## Why this exists
 
@@ -19,6 +19,12 @@ Bet lands in the machine follows from its Problem, so nothing states the same
 trouble twice, and a Problem with no Bet under it stays visible as exactly that.
 
 Repository content is canonical. The React Flow graphs are projections of that content—not a second source of truth.
+
+## System boundary
+
+The model covers the **whole care-delivery operating system** that a practice-management platform could productize to make care higher quality, more accessible and affordable, better measured and improved over time, and more personalized. That includes the family and clinician experience, clinical care, and the surrounding platform work—such as clinician supply, onboarding, matching, coverage, and reliable operations—needed to deliver care.
+
+The boundary is set by what can become a product behavior or a prototype that an end user can evaluate. The model may show human decisions and external dependencies needed to understand that behavior, but organizational redesign, staffing choices, and other company actions that cannot be demonstrated as a product solution are context rather than prototype scope. It is a generalized reference model, not a description of or comparison with any named company.
 
 The map is live. Open it in a browser and leave it there: it polls a fingerprint of `content/`, so a push, a merge, or a local edit made through Claude Code, Codex, or any other tool wired to this repository appears on every open map within seconds, with the changed primitives highlighted. Nobody has to reload, and everybody is looking at the same picture.
 
@@ -69,7 +75,7 @@ Press <kbd>⌘K</kbd> to search every primitive, including ones the current lens
 
 ## What this is not
 
-This is not a production EHR, a replica of a specific healthcare company, or a completed operating model. It includes no patient records, PHI, production matching, authentication, billing, clinical workflow, or autonomous agent execution.
+This is not a production EHR, a replica of a specific healthcare company, or a completed operating model. It includes no patient records, PHI, production matching, authentication, production billing or clinical workflow, or autonomous agent execution. It can model those domains semantically where they affect care delivery and prototypeable product behavior without implementing regulated production infrastructure.
 
 ## Open-source positioning
 

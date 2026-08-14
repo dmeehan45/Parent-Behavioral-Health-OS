@@ -1,47 +1,43 @@
 # Goal
 
-Produce a repository-grounded adversarial review of the current parent-focused behavioral-health system map that challenges its scope, topology, mechanisms, evidence, metrics, and missing perspectives without prematurely changing canonical `content/`.
+Apply the accountable reviewer's D1-D8 decisions from the 2026-08-14 adversarial review so the repository explicitly models a productizable care-delivery operating system, makes metric beneficiaries visible, separates onboarding from matching and care initiation, and records the major care, quality, authority, evidence, and recovery questions that remain.
 
 # Acceptance criteria
 
-- The review distinguishes repository observations, reviewer inferences, externally sourced evidence, and decisions that remain with the accountable reviewer.
-- Every current Stage and top-level edge is assessed, including its carrier, plausible mechanism, counterexample, evidence status, and provisional verdict.
-- Parent, clinician, clinical-safety, family-systems, operations, equity, privacy/records, economics, evidence-methods, product-boundary, failure-mode, and first-principles perspectives are represented.
-- Important Step handoffs, entity lifecycles, explicit Claims, implied assumptions, and Metrics are challenged.
-- The output identifies foundational gaps and misshapen boundaries before proposing detailed enrichment.
-- Findings are prioritized into a decision queue with falsification or research needs; no unreviewed conclusion mutates canonical `content/`.
-- Relevant repository validation passes, changes are committed on the current feature branch, and a pull request is created.
+- The product boundary distinguishes prototypeable platform capabilities from care delivery and non-prototypeable organizational context without naming a specific company.
+- Metrics identify whose outcome they represent, including the practice-management platform as an actor, and the projection makes that context visible.
+- A first-principles care lifecycle contrast identifies missing domains and nonlinear paths without presenting unresearched detail as settled truth.
+- Administrative readiness ends at match readiness; matching and care initiation own distinct proposed transitions and do not collapse an accepted match into ongoing care.
+- Authoring and research guidance prompts for failure/recovery, metric interpretation, and proportionate constructive challenge while preserving human promotion.
+- Unresolved family/authority and quality questions—especially for clinician onboarding and patient matching—are explicitly logged.
+- All nine repository checks pass or any genuine environment limitation is documented.
+- Changes are committed on a feature branch and a pull request is created.
 
 # Tasks
 
-- [x] Inventory the canonical map quantitatively and inspect all Stage, Step, Entity, Claim, Metric, Problem, and Bet records.
-- [x] Establish review method, evidence labels, and limitations of simulated perspectives.
-- [x] Conduct first-principles and product-boundary review.
-- [x] Conduct perspective passes and synthesize missing workflows, actors, failure paths, and equity/safety concerns.
-- [x] Audit every Stage and top-level edge, then audit material Step handoffs and entity state transformations.
-- [x] Audit explicit and implicit claims plus metrics for evidence, validity, incentives, and gaming risks.
-- [x] Produce a prioritized decision queue and recommended research sequence in a committed review artifact.
-- [x] Validate the artifact, update this checklist, and commit the coherent change.
-- [ ] Create a pull request (blocked: this environment exposes no `make_pr` tool and the repository has no Git remote).
+- [x] Create a feature branch from the repository's current base revision and document the accepted system boundary (the checkout has no local `main` ref; `work` is the only base branch).
+- [x] Extend the Metric contract/projection with actor and decision context; enrich current metrics without inventing results.
+- [x] Add the independent care-delivery lifecycle contrast and log unresolved family, authority, quality, and measurement questions.
+- [x] Separate onboarding readiness, matching, and care-initiation transitions in canonical proposed content, including nonlinear recovery paths where they are known.
+- [x] Add lightweight failure/recovery and proportionate evidence prompts to authoring/research workflows.
+- [x] Update the adversarial review decision queue with dispositions and remaining accountable work.
+- [x] Run all nine repository checks and fix failures where possible.
+- [x] Update this plan, commit the coherent change, and create a pull request.
 
 # Relevant contracts
 
-- `content/` remains canonical and is not changed by this review.
-- Review material belongs outside `content/`; it may recommend later research handoffs or model-change PRs but cannot make those decisions implicitly.
-- Public sources are supporting evidence, not authority for company-specific operating claims. Simulated stakeholder perspectives generate questions, not lived-experience evidence.
-- The review must respect repository boundaries: no PHI, patient data, production EHR implementation, authentication, database, or regulated workflow is introduced.
+- `content/` remains canonical for model primitives; new system thinking must project through `lib/model/` rather than components.
+- Metric actor context is descriptive accountability, not access control or a production analytics schema.
+- New lifecycle detail remains `proposed`; open questions remain visibly unanswered rather than being filled with plausible clinical or legal detail.
+- Research may be passed through ordinary GitHub-connected chats, but only a named person's accepted decision can authorize a research-derived canonical claim.
 
 # Validation
 
-- Verify all canonical IDs and map edges are covered by the review using a deterministic local check.
-- Run `npm run validate:content`, `npm run validate:research`, `npm run lint`, `npm run lint:design`, and `npm run typecheck`.
-- Run `npm run build`; responsive testing is unnecessary unless the review causes a perceptible UI change.
+- Run `npm run validate:content`, `npm run validate:research`, `npm run test:research`, `npm run scan:safety`, `npm run lint`, `npm run lint:design`, `npm run typecheck`, `npm run build`, and `npm run test:responsive`.
 
 # Risks / decisions
 
-- This review can identify high-value hypotheses but cannot substitute for interviews with parents, clinicians, clinical leaders, or compliance specialists.
-- The phrase “best-in-class EHR” may conflict with the current artifact's marketplace and practice-platform scope; resolving that boundary is a foundational product decision, not a documentation edit.
-- Current public evidence can establish common EHR obligations and known risks, but it cannot validate the repository's specific causal edges without operational data or targeted research.
-- External source retrieval was unavailable in the execution environment, so this pass deliberately labels domain expectations as research questions and does not claim source-backed validation.
-- `npm run build` reached the Next.js production build but failed because the environment could not retrieve Google Font assets; content validation, research validation, lint, design lint, typecheck, and deterministic review-coverage validation passed.
-- Pull-request creation is blocked by environment configuration: the required `make_pr` tool is unavailable and `git remote -v` reports no remote to use with the GitHub CLI.
+- Legal/privacy, clinical safety, family authority, causal attribution, and detailed quality definitions require qualified or lived-experience input and will remain open questions.
+- The model should be comprehensive enough to expose prototype opportunities, but not imply that organizational change or non-demonstrable company actions are product capabilities.
+- D5 and D6 cannot be resolved in one pass; this change must improve the question structure without claiming premature answers.
+- `npm run build` and `npm run test:responsive` reach the production build but cannot retrieve the vendored Google-font build resources in this environment; the same network restriction blocks Playwright's Chromium download and therefore the requested screenshot. Development projection was verified through `/api/model`.

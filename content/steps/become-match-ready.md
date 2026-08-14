@@ -3,8 +3,6 @@ id: become-match-ready
 title: Become Match-Ready
 stage: clinician-onboarding
 order: 6
-next:
-  - first-successful-family
 purpose: >
   Confirm the proposed inputs needed for the clinician to receive family demand.
 entryConditions:

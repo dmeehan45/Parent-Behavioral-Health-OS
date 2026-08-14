@@ -53,6 +53,12 @@ ask ──▶ queue ──▶ brief ──▶ research ──▶ handoff ──�
 
    Branch from `main`, commit, open a pull request. Never edit `content/`.
 
+   The chat before that handoff can take as many short turns as useful. A person
+   may redirect the question, supply generalized non-confidential context, or
+   ask for counterexamples. The routine captures the synthesis and uncertainty,
+   not the transcript, and does not require every early idea to clear the same
+   evidence bar as a safety-critical canonical claim.
+
 5. **Review.** A person opens `/review`, reads the run, and decides. The page
    hands back a decision file to commit. This is the only step a person does,
    and it is the point of the whole arrangement.

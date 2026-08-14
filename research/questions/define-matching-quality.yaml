@@ -1,0 +1,9 @@
+id: define-matching-quality
+question: "What makes a patient matching experience high quality for families, patients, clinicians, and the practice-management platform, and how can it be measured without hiding constrained access?"
+askedBy: accountable-reviewer-2026-08-14
+createdAt: 2026-08-14
+status: open
+priority: high
+targets: [matching, propose-match, review-match, quality-outcomes]
+why: >
+  Speed and acceptance can hide poor fit, burden, inequitable access, constrained supply, rematching, and missing follow-up; the model needs actor-specific constructs and valid denominators.

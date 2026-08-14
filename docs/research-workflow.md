@@ -21,6 +21,11 @@ Running it on a schedule is described in `docs/research-routine.md`.
 2. Ask the agent to synthesize `research/handoffs/<run-id>.yaml` using
    `research/contract/v1.example.yaml` as the contract example. Do not include a
    raw transcript; quote no more than 25 words from one source across extracts.
+
+   The conversation can be exploratory and iterative. The user should be able
+   to correct scope, add context, ask follow-ups, and request stronger support
+   before the handoff is created. The handoff is the concise durable result,
+   not a demand that every thought be defended in advance.
 3. Through the provider's GitHub connector, create a feature branch from `main`,
    commit the handoff, and open a pull request to `main`. A coding agent with
    repository access performs these exact steps when connector capabilities are
@@ -64,6 +69,30 @@ letting a file drift away from the ID inside it.
   out-of-scope material; such a finding cannot propose a new canonical Claim.
 - Each unresolved question remains visible in the packet rather than being
   filled with plausible prose.
+
+## A proportionate bar
+
+The intake bar should improve an idea, not prevent one from being offered.
+
+- A question or Problem needs no evidence to be recorded.
+- A research handoff needs traceable public sources, atomic findings, honest
+  uncertainty, and a clear account of what it could change—not proof fit for a
+  production clinical policy.
+- The agent should challenge consequential leaps, counterexamples, conflicts,
+  and missing perspectives constructively. It should ask focused follow-ups or
+  preserve an uncertainty instead of turning the chat into an exhaustive
+  defense.
+- The reviewer may accept, edit, reject, defer, or request more research one
+  finding at a time. Partial progress is valid.
+- The bar rises with the proposed use. Exploration and a prototype can proceed
+  with explicit uncertainty; claims used for clinical safety, individual
+  selection, matching policy, or quality attribution require stronger,
+  appropriately qualified review.
+
+This keeps GitHub-connected ChatGPT, Claude, and similar conversations fast:
+run the brief, develop the thought through normal back-and-forth, then ask the
+agent to write the small contract artifact and open the intake pull request.
+Human promotion remains the one non-negotiable gate.
 
 Validation errors name the file and field. A stale contract, missing locator,
 unknown target, conflicting source identity, duplicate ID, excessive quotation,

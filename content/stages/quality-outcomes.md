@@ -22,3 +22,8 @@ Understand care quality and feed useful signals back into the operating system. 
 # Open questions
 
 - Which signals are useful early without overclaiming outcomes?
+
+- What does quality mean first for clinician onboarding and for the patient matching experience?
+- At what unit—encounter, relationship, clinician, family, or platform—can each construct be interpreted?
+- Who owns interpretation, what uncertainty and missingness must travel with it, and which decisions are permitted?
+- Which balancing measures prevent speed, throughput, or apparent outcomes from worsening access, burden, equity, or safety?
