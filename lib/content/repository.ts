@@ -327,6 +327,7 @@ export function getRepository() {
     requireProblem(bet.problem, problemIds, bet.file);
     bet.claims?.forEach((id) => requireRef(id, claimIds, bet.file, "claims"));
     bet.metrics?.forEach((id) => requireRef(id, metricIds, bet.file, "metrics"));
+    if (bet.participant) requireRef(bet.participant, entityIds, bet.file, "participant");
     if (bet.prototype?.route) requirePrototypeRoute(bet.prototype.route, bet.file);
   });
 
