@@ -8,8 +8,11 @@ import {
   CLAIM_KIND_MEANING,
   CONFIDENCE_LEVELS,
   CONFIDENCE_MEANING,
+  PROBLEM_TITLE_RULE,
   applySteps,
+  composeProblem,
   hasNowhereToLand,
+  problemMaterial,
   suggestedConfidence,
   suggestedKind,
   type ApplyChoice,
@@ -173,19 +176,7 @@ export function ApplyWorkspace({ items }: { items: Item[] }) {
               );
             })}
 
-            {/*
-              The model's loop is Problem → Bet → Prototype. Research produces
-              evidence, and evidence is not a plan. Generating a Problem from a
-              finding would be inventing content, so this asks the question
-              instead and gets out of the way.
-            */}
             <div className="apply-next">
-              <p className="field-label">Does this change what we should build?</p>
-              <p className="small muted">
-                A Claim is something we believe. A Problem is somewhere the machine breaks, and a Bet is what we would
-                try. If this finding makes one of those obvious, that is a separate, human piece of writing — nothing
-                here will guess it for you.
-              </p>
               <div className="chips">
                 {finding.suggestedTargets.map((target) => (
                   <Link className="chip" key={target.id} href={target.href}>
@@ -197,6 +188,114 @@ export function ApplyWorkspace({ items }: { items: Item[] }) {
           </article>
         );
       })}
+
+      {items.length ? <NameAProblem items={items} /> : null}
     </main>
+  );
+}
+
+/**
+ * The step after believing something: saying where the machine breaks.
+ *
+ * Research produces evidence, and evidence is not a plan — so this composes the
+ * references a Problem needs and stops. Naming the trouble stays a person's
+ * sentence, which is why the box is empty and the rule sits next to it.
+ *
+ * It takes several findings at once because that is how the reviewer usually
+ * arrives: three findings about the same failure are one Problem, and picking
+ * them apart into three would be worse than not offering this at all.
+ */
+function NameAProblem({ items }: { items: Item[] }) {
+  const [chosen, setChosen] = useState<string[]>([]);
+  const [title, setTitle] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const sources = items.filter(({ finding }) => chosen.includes(finding.decisionId));
+  const { targets, claims } = problemMaterial(sources);
+  const step = composeProblem(sources, title);
+
+  const toggle = (id: string) => {
+    setChosen((current) => (current.includes(id) ? current.filter((value) => value !== id) : [...current, id]));
+    setCopied(false);
+  };
+
+  return (
+    <section className="apply-problem" aria-label="Name a problem">
+      <h2>Does this say the machine breaks somewhere?</h2>
+      <p className="small muted">
+        A Claim is something we believe. A Problem is somewhere the machine breaks, and it is the thing a Bet has to
+        answer. If this research names one, compose it here — the targets, the claims, and the proof it was reviewed
+        come across on their own.
+      </p>
+
+      <fieldset className="review-decision">
+        <legend className="field-label">Which findings is it built on?</legend>
+        <div className="review-options">
+          {items.map(({ finding }) => (
+            <label className={`review-option stated${chosen.includes(finding.decisionId) ? " selected" : ""}`} key={finding.decisionId}>
+              <input
+                type="checkbox"
+                checked={chosen.includes(finding.decisionId)}
+                onChange={() => toggle(finding.decisionId)}
+              />
+              <span className="review-option-meaning">{finding.statement}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      {chosen.length ? (
+        <>
+          <div className="field">
+            <label htmlFor="problem-title">What is the trouble?</label>
+            <p className="small muted">{PROBLEM_TITLE_RULE}</p>
+            <input
+              id="problem-title"
+              type="text"
+              className="text-input"
+              value={title}
+              placeholder="A clinician can finish onboarding and still have no work"
+              onChange={(event) => {
+                setTitle(event.target.value);
+                setCopied(false);
+              }}
+            />
+          </div>
+
+          <p className="small muted">
+            {targets.length
+              ? `It would bite ${targets.join(", ")}.`
+              : "The findings you picked named nowhere in the machine, so there is nothing to target yet — a problem that bites nowhere is not a problem with this system."}
+            {claims.length ? ` It would rest on ${claims.join(", ")}.` : ""}
+          </p>
+        </>
+      ) : null}
+
+      {step ? (
+        <div className="apply-step">
+          <p className="apply-step-head">
+            <Badge tone="evidence">create</Badge> <code>{step.path}</code>
+          </p>
+          <p className="small muted">{step.explanation}</p>
+          <div className="review-actions">
+            <button
+              type="button"
+              className="button secondary"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(step.body);
+                  setCopied(true);
+                } catch {
+                  setCopied(false);
+                }
+              }}
+            >
+              {copied ? "Copied" : "Copy the file"}
+            </button>
+          </div>
+          <pre className="review-yaml">{step.body}</pre>
+        </div>
+      ) : null}
+    </section>
   );
 }

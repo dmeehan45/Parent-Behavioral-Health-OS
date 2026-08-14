@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { applySteps, hasNowhereToLand, suggestedConfidence, suggestedKind } from "../../lib/research/apply";
+import {
+  applySteps,
+  composeProblem,
+  hasNowhereToLand,
+  problemIdFrom,
+  suggestedConfidence,
+  suggestedKind,
+} from "../../lib/research/apply";
 import { openEnds } from "../../lib/model/open-ends";
 import type { ModelGraph, ModelNode } from "../../lib/model/types";
 import type { ReviewFinding, ReviewRun } from "../../lib/research/view";
@@ -99,6 +106,77 @@ test("a finding with only targets leaves its trace on each of them", () => {
 test("a finding with nowhere to land says so rather than composing nothing", () => {
   assert.equal(hasNowhereToLand(finding()), true);
   assert.deepEqual(applySteps(run, finding(), choice), []);
+});
+
+test("a problem composed from research carries its references and names nothing", () => {
+  const step = composeProblem(
+    [
+      {
+        run,
+        finding: finding({
+          proposedClaim: { id: "claim-availability-first", statement: "Parents choose on availability." },
+          suggestedTargets: [{ id: "matching", title: "Matching", href: "/stages/matching", kind: "stage" }],
+        }),
+      },
+    ],
+    "Families wait longer than the model can see",
+  );
+
+  assert.ok(step);
+  assert.equal(step.path, "content/problems/families-wait-longer-than-the-model-can-see.md");
+  assert.match(step.body, /^title: Families wait longer than the model can see$/m);
+  assert.match(step.body, /^targets: \[matching\]$/m);
+  assert.match(step.body, /^claims: \[claim-availability-first\]$/m);
+  // The authorization travels with it; content validation refuses a trace
+  // that no accepted decision backs.
+  assert.match(step.body, /^ {4}decision: decide-run-one-finding-one$/m);
+  // Every word of judgement stays the person's.
+  assert.match(step.body, /# What happens today\n\n<!--/);
+  assert.doesNotMatch(step.body, /Parents choose on availability/);
+});
+
+test("a problem draws on several findings at once, without repeating a target", () => {
+  const step = composeProblem(
+    [
+      {
+        run,
+        finding: finding({
+          suggestedTargets: [{ id: "matching", title: "Matching", href: "/stages/matching", kind: "stage" }],
+        }),
+      },
+      {
+        run,
+        finding: finding({
+          id: "finding-two",
+          decisionId: "decide-run-one-finding-two",
+          suggestedTargets: [
+            { id: "matching", title: "Matching", href: "/stages/matching", kind: "stage" },
+            { id: "propose-match", title: "Propose Match", href: "/steps/propose-match", kind: "step" },
+          ],
+        }),
+      },
+    ],
+    "Nobody owns the wait",
+  );
+
+  assert.ok(step);
+  assert.match(step.body, /^targets: \[matching, propose-match\]$/m);
+  assert.equal(step.body.match(/^ {4}finding: /gm)?.length, 2);
+});
+
+test("research that names nowhere composes no problem, because one that bites nowhere is not a problem", () => {
+  assert.equal(composeProblem([{ run, finding: finding() }], "Something is wrong"), undefined);
+  assert.equal(composeProblem([], "Something is wrong"), undefined);
+});
+
+test("the problem id is derived from the title, and survives an unnamed draft", () => {
+  assert.equal(problemIdFrom("A clinician can finish onboarding and still have no work"), "a-clinician-can-finish-onboarding-and-still-have");
+  assert.equal(problemIdFrom("  "), "");
+  const step = composeProblem(
+    [{ run, finding: finding({ suggestedTargets: [{ id: "matching", title: "Matching", href: "/stages/matching", kind: "stage" }] }) }],
+    "",
+  );
+  assert.equal(step?.path, "content/problems/the-problem-id.md");
 });
 
 test("evidence quality suggests a default without deciding it", () => {

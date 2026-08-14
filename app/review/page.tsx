@@ -186,8 +186,22 @@ function QueueList({ entries }: { entries: ReturnType<typeof projectReview>["que
               </>
             ) : null}
           </p>
+          {/* A gap is something the model noticed about itself; nobody has
+              asked it yet. The command carries what raised it, so the queued
+              question knows what it bites instead of arriving anonymous. */}
+          {entry.kind === "gap" ? <code className="queue-command">{askCommand(entry)}</code> : null}
         </li>
       ))}
     </ul>
   );
+}
+
+/** The exact line that queues this gap as a question, ready to paste. */
+function askCommand(entry: ReturnType<typeof projectReview>["queue"][number]) {
+  return [
+    "npm run research:ask --",
+    JSON.stringify(entry.question),
+    ...(entry.subject ? [`--targets ${entry.subject.id}`] : []),
+    `--why ${JSON.stringify(entry.detail)}`,
+  ].join(" ");
 }
