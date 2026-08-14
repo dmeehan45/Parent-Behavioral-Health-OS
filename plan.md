@@ -1,83 +1,60 @@
 # Goal
 
-Build on the completed D1-D8 system-boundary, metric-accountability, and lifecycle work with a deeper adversarial pass on clinician readiness, patient matching, and the first care transition. Produce decision-ready journey, measurement, misuse, evidence, candidate-Problem, and prototype analyses without promoting unreviewed research into canonical `content/`.
+Make the visualization and supporting pages easier to understand and quieter to use: plain language, less self-description, and progressive disclosure that leaves room for the reader's own reasoning.
 
 # Acceptance criteria
 
-- The pass reconstructs onboarding/readiness and matching from family, patient, clinician, and platform decisions rather than only the existing Stage sequence.
-- Readiness dimensions, expiring conditions, observable defects, counter-hypotheses, and attribution limits are explicit.
-- Matching distinguishes eligibility, recommendation, mutual review, acceptance, initiation, constrained supply, and recovery outcomes.
-- Every proposed measure states its denominator, horizon, missingness, confounders, balancing risks, permitted use, and prohibited inference.
-- Misuse and gaming risks are assessed before automation or clinician-level feedback is recommended.
-- Public research enters as validated research handoffs and generated review packets; it does not directly change `content/`.
-- Candidate Problems are ranked by harm, breadth, uncertainty, prototypeability, and learning value; prototype recommendations remain proposals pending reviewer decisions.
-- Work requiring lived experience, clinical/safety expertise, privacy review, or operational data is clearly assigned rather than guessed.
-- The completed D1-D8 implementation remains intact: product boundary, actor-aware Metrics, separated onboarding/matching/initiation transitions, failure/recovery prompts, and open research questions.
-- Relevant repository validation passes, changes are committed on a new branch, and a pull request is created if tooling permits.
+- The home page leads with what a reader can understand or try; repository, agent, and workflow mechanics are optional contributor detail.
+- The map has one obvious default task, while alternate views remain accessible through a secondary view chooser and direct URLs.
+- Records lead with their substance and essential relationships; governance metadata and supporting detail remain available without dominating the page.
+- Research review preserves evidence, prior art, and impact beside each decision while focusing attention on one finding at a time.
+- The guided-caseload prototype does not imply an unexplained matching algorithm or unsupported numerical precision.
+- Interface copy uses concrete reader language consistently while canonical values, relationships, authority, provenance, and research gates remain intact.
+- Each implementation pull request passes the full repository check suite and responsive checks its most content-heavy changed state.
 
 # Tasks
 
-- [x] Create a new branch and inventory the current onboarding, matching, initiation, Claims, Metrics, and queued research contracts.
-- [x] Preserve the completed D1-D8 implementation that this deeper pass analyzes rather than duplicating its completed task list.
-- [ ] Conduct bounded public research on clinician readiness/onboarding quality and matching/access/measurement quality (blocked: configured web search returned HTTP 401 and direct NCBI access returned proxy HTTP 403).
-- [ ] Write separate public-research handoffs and review packets (not produced because source retrieval was blocked; inventing sources would violate the intake contract).
-- [x] Produce the deep-dive decision packet: actor journeys, readiness model, matching failure/recovery model, metric protocol, and misuse register.
-- [x] Rank repository-grounded candidate Problems and recommend the smallest high-learning prototype targets without adding canonical Problems or Bets; source-backed ranking remains pending public research and direct evidence.
-- [x] Record the remaining direct-research, qualified-review, operational-data, and accountable-reviewer decisions.
-- [x] Run repository validation and safety checks, resolve the `plan.md` merge conflict in favor of the current deeper pass while retaining its completed prerequisite, and update this branch.
+- [x] Reassess the UX review against the current merged home-page and projection changes at `d03fc97`.
+- [x] Sequence the work into independently reviewable pull requests.
+- [ ] **PR 1 — Copy standard and front door.** Branch from the then-current `main`. Add a concise plain-language/progressive-disclosure standard to `docs/design-system.md` and its review checklist to `CONTRIBUTING.md`. Simplify `app/page.tsx` around understanding the care-delivery flow, examining problems, and trying a prototype. Keep the new derived doors and useful disclosures, but move agent commands, repository mechanics, and the full research-to-prototype explanation out of the default reading path. Add responsive coverage for the longest retained disclosure. Suggested commit: `ux: make the front door reader-first`.
+- [ ] **PR 2 — Map entry and view hierarchy.** After PR 1 merges, branch fresh from `main`. Keep `flow` as the default and replace four equally prominent lens tabs with a plain current-view label and accessible `Change view` control. Preserve lens IDs, keyboard shortcuts, URL state, graph derivation, and the full legend. Review visible lens names and empty states for plain language without changing the projection contract. Test keyboard use, direct lens URLs, phone orientation, and the detail-sheet scroll boundary. Suggested commit: `map: make the care flow the clear starting point`.
+- [ ] **PR 3 — Record reading hierarchy.** After PR 2 merges, branch fresh from `main`. Add presentation priority to projected detail blocks in `lib/model/` rather than matching labels in components. Lead record pages and sheets with primary content and essential links; disclose supporting blocks, provenance, coverage gaps, and contributor commands later. Keep authority visible wherever hiding it could make a proposal read as policy, and keep open ends capped, aggregated, and last. Test every primitive kind plus the longest sheet at phone and desktop sizes. Suggested commit: `records: put the substance before the bookkeeping`.
+- [ ] **PR 4 — Focused research decisions.** After PR 3 merges, branch fresh from `main`. Present one finding at a time while keeping that finding's evidence, uncertainty, prior art, possible model impact, and decision together. Translate visible disposition labels without changing stored enum values. Reveal decision-file mechanics only at completion. Preserve the human-only gate, accepted-versus-applied distinction, copy-to-file workflow, lack of server writes, and research validation. Test multi-finding navigation, draft retention, required rationales, keyboard flow, and generated decision output. Suggested commit: `research: focus review on one decision at a time`.
+- [ ] **PR 5 — Honest prototype recommendations.** After PR 4 merges, branch fresh from `main`. Replace unexplained exact fit scores in `components/guided-caseload.tsx` with evidence the synthetic case actually provides and explicit unresolved considerations. Reduce the initial choice set or disclose extra examples. Clarify that the prototype supports review rather than calculating clinical suitability, and make confirmation text describe only the simulated action. Do not add matching logic or canonical claims. Test capacity, selection, confirmation, reset, responsive behavior, and prototype session intake. Suggested commit: `prototype: remove false precision from caseload review`.
+- [ ] After each merge, recheck the remaining plan against current `main`; adjust only for repository changes that materially affect the next PR.
 
 # Relevant contracts
 
-- `content/` remains unchanged by this research pass. Any later canonical claim, Problem, Metric, or topology change requires an accepted, current decision and `researchTrace` where applicable.
-- Public sources can sharpen generalized hypotheses but cannot substitute for parent lived experience, clinician workflow observation, clinical judgment, legal/privacy advice, or company-specific operating evidence.
-- No PHI, private company material, raw transcript, production permissions, matching algorithm, or clinical protocol is introduced.
-- The D1-D8 implementation is the completed prerequisite for this pass. Its old execution checklist is intentionally not duplicated here; `plan.md` remains the current execution record rather than a cumulative changelog.
+- `content/` remains canonical. No PR in this sequence changes what the model claims unless a separately reviewed canonical change is explicitly authorized.
+- Components consume `ModelGraph`; presentation priority that depends on primitive meaning belongs in `lib/model/`.
+- Authority and provenance remain load-bearing. Progressive disclosure may reduce repetition but must not let proposed material read as validated or policy.
+- `/review` remains a reading surface with evidence adjacent to the decision. It never writes server-side, and acceptance remains separate from application.
+- Research remains off the map because it is outside the content revision contract.
+- Every PR is based on the latest `main` after the previous PR merges and targets `main`. These are sequential, not stacked.
+- No database, authentication, production integration, PHI, or matching engine is introduced.
 
 # Validation
 
-- Run `npm run generate:research-review`, `npm run validate:research`, `npm run test:research`, `npm run scan:safety`, `npm run validate:content`, `npm run lint`, `npm run lint:design`, `npm run typecheck`, and `git diff --check`.
+For every implementation PR run:
+
+- `npm run validate:content`
+- `npm run validate:projection`
+- `npm run validate:research`
+- `npm run test:research`
+- `npm run test:prototype`
+- `npm run scan:safety`
+- `npm run lint`
+- `npm run lint:design`
+- `npm run typecheck`
+- `npm run build`
+- `npm run test:responsive`
+- `git diff --check`
+
+PR-specific interaction checks are listed in each task and should be added only where they protect the changed behavior rather than pinning visual design.
 
 # Risks / decisions
 
-- Quantitative thresholds and causal attribution will remain undefined without operational data and predeclared analysis plans.
-- Family/patient authority, safety escalation, and permitted information sharing require qualified review and cannot be resolved by public research alone.
-- Prototype ranking is advisory until the accountable reviewer accepts the relevant research findings and Problem framing.
-- Public-source retrieval is an environment blocker rather than evidence that no research exists. The packet records repository observations, inferences, and hypotheses only; the two existing high-priority public-research questions remain open.
-Define a repeatable, human-accountable workflow for turning one canonical Bet into a small prototype that supports self-directed research and discovery without confusing a prototype with production software or allowing an agent to invent canonical claims.
-
-# Acceptance criteria
-
-- The workflow names the inputs inherited from the Problem, Bet, targeted system context, evidence, metrics, and repository design/build rules.
-- It separates facts, assumptions, open questions, and prototype decisions, and says when missing information should stop or narrow the build.
-- It defines the user checkpoints needed to refine scope and consequential decisions without turning every implementation detail into an approval request.
-- It describes a thin end-to-end user flow, synthetic-data and safety boundaries, learning instrumentation, review, and the path from learning back to research or canonical content.
-- It distinguishes work an agent may perform from decisions and promotions that remain human-accountable.
-- Existing authoring and repository orientation docs point contributors to the workflow.
-- Relevant repository checks pass, changes are committed on a feature branch, and a pull request is created.
-
-# Tasks
-
-- [x] Create a feature branch from the current merged base.
-- [x] Write the Bet-to-prototype workflow and its decision gates.
-- [x] Link the workflow from the repository and authoring guidance.
-- [x] Review the guidance against the current Bet, prototype shell, research workflow, and system boundaries.
-- [x] Run relevant validation and documentation checks. All non-build checks pass; build and responsive remain limited by blocked Google-font retrieval.
-- [x] Update this plan and commit the change. Pull-request creation was attempted but GitHub CLI has no authentication in this environment.
-- [x] Rebase onto current `origin/main` and align the workflow with the new record-page open ends and `/review/apply` learning path.
-
-# Relevant contracts
-
-- `content/` remains canonical; a prototype consumes model context but does not restate or silently amend it.
-- A Bet answers one Problem, and its system targets remain derived from that Problem.
-- Prototype routes use `PrototypeShell`, synthetic data, and no production integrations, PHI, authentication, or autonomous clinical/operational action.
-- Agent-produced research stays under `research/`; only a named person's accepted decision may authorize research-derived changes to canonical content.
-
-# Validation
-
-- Run the documentation-relevant content, research, safety, lint, design-lint, and type checks.
-- Inspect links and the final diff for consistency with the existing model and research contracts.
-
-# Risks / decisions
-
-- The workflow must enable self-directed progress without letting automation decide the purpose, safety boundary, evidence interpretation, or canonical promotion of a prototype.
-- Not every Bet is ready to prototype; an explicit narrow/defer outcome is necessary to avoid filling missing knowledge with plausible product behavior.
+- The current checkout has no local `main` ref or configured remote. Its starting commit, `d03fc97`, is the latest imported merge commit and already contains the home-page redesign and projection-conformance changes; the planning branch therefore starts there. Before PR 1 implementation, establish or fetch the actual current `main` ref and branch from it.
+- Simplifying governance display must not conceal authority. PR 3 should treat this as an interpretation-safety constraint, not a cosmetic preference.
+- Focusing review must not separate a decision from its evidence. PR 4 changes pacing, not the human-accountability contract.
+- The new home page already uses disclosures and derived navigation. PR 1 should edit that work rather than replace it wholesale.
