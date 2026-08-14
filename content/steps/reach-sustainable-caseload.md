@@ -22,8 +22,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 claims:
   - claim-first-caseload-retention
 authority: proposed

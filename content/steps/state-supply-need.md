@@ -17,8 +17,6 @@ exitConditions:
   - a supply need is stated specifically enough to search against
 roles:
   primary: [platform-operations]
-rules: []
-exceptions: []
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-14

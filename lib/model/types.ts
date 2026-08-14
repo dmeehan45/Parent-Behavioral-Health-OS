@@ -106,6 +106,11 @@ export type ModelNode = {
   file: string;
   signals: Signal[];
   coverage: Coverage;
+  /**
+   * For a bet: which parts of the approved experiment shape are still unwritten.
+   * Derived from the body's sections, so it is empty for every other kind.
+   */
+  experimentGaps?: string[];
   blocks: DetailBlock[];
   /** Lowercased haystack for the command palette. */
   searchText: string;

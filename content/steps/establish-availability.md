@@ -12,8 +12,6 @@ entryConditions:
 inputs:
   - entity: clinician
     state: preferences-defined
-activity: >
-  Establish enough usable appointment availability to participate in matching.
 outputs:
   - entity: availability
     state: matchable
@@ -24,8 +22,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-13

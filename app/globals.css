@@ -2756,6 +2756,64 @@ p:last-child {
   margin-bottom: 4px;
 }
 
+.apply-next:empty,
+.apply-next:has(.chips:empty) {
+  display: none;
+}
+
+/*
+ * Naming a problem from accepted research. Coral edges it because a Problem is
+ * where the machine breaks — the same category the map already teaches — and
+ * because it is the one block on this page that is an invitation rather than a
+ * composed change.
+ */
+.apply-problem {
+  margin: 40px 0 0;
+  padding: 20px;
+  border-left: 3px solid var(--kind-problem);
+  background: var(--surface-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.apply-problem h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+/* A checkbox row carries only the statement, so it does not need the third
+   column the radio rows use for their badge. */
+.review-option.stated {
+  grid-template-columns: auto 1fr;
+}
+
+.record-command {
+  margin: 32px 0 0;
+  padding: 16px 20px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.record-command .field-label {
+  margin-bottom: 4px;
+}
+
+/* A long command must scroll inside its own box rather than widening the page. */
+.queue-command {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  white-space: pre;
+}
+
 /*
  * The loose ends on a record. Coral is where the machine breaks and what we
  * have not proven, which is exactly what this is — so it reads as the same

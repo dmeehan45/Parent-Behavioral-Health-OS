@@ -15,11 +15,41 @@ function slug(question: string) {
     .join("-");
 }
 
+/**
+ * `--targets a,b` and `--why "..."`, so a question raised by a gap in the model
+ * arrives knowing what it bites and why anybody cared. Typing those back in by
+ * hand is the step that gets skipped, and a question with no targets is the one
+ * a later run cannot tell was ever about anything.
+ */
+function flag(name: string): string | undefined {
+  const argv = process.argv.slice(2);
+  const inline = argv.find((value) => value.startsWith(`--${name}=`));
+  if (inline) return inline.slice(name.length + 3).trim() || undefined;
+  const index = argv.indexOf(`--${name}`);
+  if (index < 0) return undefined;
+  const next = argv[index + 1];
+  return next && !next.startsWith("--") ? next.trim() || undefined : undefined;
+}
+
 run(() => {
-  const question = process.argv.slice(2).filter((value) => !value.startsWith("--")).join(" ").trim();
+  const flagged = new Set<string>();
+  const argv = process.argv.slice(2);
+  for (const [index, value] of argv.entries()) {
+    if (!value.startsWith("--")) continue;
+    flagged.add(value);
+    // The value of `--why "..."` is not part of the question.
+    if (!value.includes("=") && argv[index + 1] && !argv[index + 1].startsWith("--")) flagged.add(argv[index + 1]);
+  }
+  const question = argv.filter((value) => !flagged.has(value)).join(" ").trim();
   if (question.length < 10) {
     throw new Error('Write the question out.\n\n  npm run research:ask -- "How do parents choose a first clinician?"');
   }
+
+  const targets = (flag("targets") ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const why = flag("why");
 
   const stem = slug(question);
   if (!stem) throw new Error("That question has no words an ID can be made from. Write it in plain text.");
@@ -40,8 +70,8 @@ run(() => {
       `createdAt: ${new Date().toISOString().slice(0, 10)}`,
       "status: open",
       "priority: normal",
-      "# targets: [stage-or-step-ids this question bites]",
-      "# why: what changes about the model if we learn the answer",
+      targets.length ? `targets: [${targets.join(", ")}]` : "# targets: [stage-or-step-ids this question bites]",
+      why ? `why: ${JSON.stringify(why)}` : "# why: what changes about the model if we learn the answer",
       "",
     ].join("\n"),
   );

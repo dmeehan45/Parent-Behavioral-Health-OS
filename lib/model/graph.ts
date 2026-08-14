@@ -16,6 +16,7 @@ import {
   betCoverage,
   claimCoverage,
   entityCoverage,
+  experimentGaps,
   metricCoverage,
   problemCoverage,
   stageCoverage,
@@ -348,6 +349,19 @@ export function projectModel(): ModelGraph {
       (metric) => problem.metrics?.includes(metric.id) || metric.targets?.some((id) => problem.targets.includes(id)),
     );
 
+    // Only what the problem file itself names becomes an edge. A claim that
+    // merely targets the same stage is already joined to that stage; treating
+    // it as something this problem rests on would put weight on a coincidence.
+    const restsOn = [
+      ...claims.filter((claim) => problem.claims?.includes(claim.id)),
+      ...metrics.filter((metric) => problem.metrics?.includes(metric.id)),
+    ];
+
+    // A problem earns its place in the evidence lens the way a step does: by
+    // having evidence of its own to show. One that names none stays out rather
+    // than sitting on that canvas with nothing beneath it.
+    const problemLenses: LensId[] = restsOn.length > 0 ? ["bets", "evidence"] : ["bets"];
+
     nodes.push(
       finalise({
         id: nodeId("problem", problem.id),
@@ -386,7 +400,7 @@ export function projectModel(): ModelGraph {
             problemMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus)),
           ),
         ],
-        lenses: ["bets"],
+        lenses: problemLenses,
         searchText: [problem.title, problem.summary, problem.sections[SECTION.whatHappensToday], problem.id].join(" "),
       }, researchReferences(problem)),
     );
@@ -403,7 +417,20 @@ export function projectModel(): ModelGraph {
         source: nodeId(targetKind, target),
         target: nodeId("problem", problem.id),
         kind: "problem",
-        lenses: ["bets"],
+        // Carried into the evidence lens too, so a problem drawn there hangs
+        // under the part of the machine it bites instead of floating loose.
+        lenses: problemLenses,
+      });
+    }
+
+    for (const record of restsOn) {
+      const kind: NodeKind = "statement" in record ? "claim" : "metric";
+      edges.push({
+        id: `evidence:${problem.id}->${record.id}`,
+        source: nodeId("problem", problem.id),
+        target: nodeId(kind, record.id),
+        kind: "evidence",
+        lenses: ["evidence"],
       });
     }
   }
@@ -413,6 +440,7 @@ export function projectModel(): ModelGraph {
   for (const bet of bets) {
     const betClaims = claims.filter((claim) => bet.claims?.includes(claim.id));
     const betMetrics = metrics.filter((metric) => bet.metrics?.includes(metric.id));
+    const participant = bet.participant ? entityById.get(bet.participant) : undefined;
     const problem = problemById.get(bet.problem);
     // Where a bet lands in the machine follows from the problem it answers,
     // so a bet never restates it and the two can never disagree.
@@ -439,14 +467,22 @@ export function projectModel(): ModelGraph {
           signal(openQuestionCount(bet.sections), "warn", "question"),
         ],
         coverage: betCoverage(bet),
+        experimentGaps: experimentGaps(bet),
         blocks: [
           ...linksBlock(
             "The problem this answers",
             problem ? [link("problem", problem.id, problem.title, problem.status)] : [],
           ),
           ...proseBlock("Intervention", bet.sections[SECTION.bet]),
+          // Everything else the author wrote, in the order they wrote it —
+          // which for a bet with an experiment is the intervention, then what
+          // trying it would settle.
           ...markdownBlocks(bet.sections, [SECTION.bet]),
           ...linksBlock("Where it lands", targets),
+          ...linksBlock(
+            "Who it studies",
+            participant ? [link("entity", participant.id, participant.title)] : [],
+          ),
           ...linksBlock("Supporting claims", betClaims.map((claim) => link("claim", claim.id, claim.statement, claim.confidence))),
           ...linksBlock("Success would affect", betMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
         ],
@@ -462,6 +498,24 @@ export function projectModel(): ModelGraph {
         target: nodeId("bet", bet.id),
         kind: "bet",
         lenses: ["bets"],
+      });
+    }
+
+    // What the bet rests on. These are not drawn: the bets lens owns the
+    // problem-to-bet spine and the evidence lens owns claims and metrics, so a
+    // bet band on that canvas would be the same picture twice. They exist
+    // because the projection is read for more than the canvas — open ends can
+    // now tell a reader on a bet's page that its supporting claim is weakly
+    // held or that nothing under it is measured, which is exactly the loose end
+    // they are best placed to help with.
+    for (const record of [...betClaims, ...betMetrics]) {
+      const kind: NodeKind = "statement" in record ? "claim" : "metric";
+      edges.push({
+        id: `evidence:${bet.id}->${record.id}`,
+        source: nodeId("bet", bet.id),
+        target: nodeId(kind, record.id),
+        kind: "evidence",
+        lenses: ["evidence"],
       });
     }
 
@@ -510,7 +564,17 @@ export function projectModel(): ModelGraph {
   /* ---- Claims and metrics ---------------------------------------------- */
 
   for (const claim of claims) {
-    const targets = resolveTargets(claim.targets, stageById, stepById);
+    /*
+     * A relationship counts once, from whichever end wrote it down.
+     *
+     * `claim.targets` says what a Claim is about; `step.claims` says what a Step
+     * rests on. They are the same link seen from two sides, and a contributor
+     * has no reason to prefer one. Metrics already resolved both — claims did
+     * not, so a Step that named a Claim got it in a block while the evidence
+     * lens drew no line, and the two surfaces disagreed about the same content.
+     */
+    const declaredBy = steps.filter((step) => step.claims?.includes(claim.id)).map((step) => step.id);
+    const targets = resolveTargets([...claim.targets, ...declaredBy], stageById, stepById);
     nodes.push(
       finalise({
         id: nodeId("claim", claim.id),
@@ -526,7 +590,7 @@ export function projectModel(): ModelGraph {
         href: ROUTES.claim(claim.id),
         file: claim.file,
         signals: [
-          signal(claim.targets.length, "neutral", "target"),
+          signal(targets.length, "neutral", "target"),
           signal(claim.provenance?.references?.length ?? 0, "evidence", "reference"),
         ],
         coverage: claimCoverage(claim),

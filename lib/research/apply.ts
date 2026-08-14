@@ -57,6 +57,33 @@ export function suggestedConfidence(evidenceQuality: string): ConfidenceLevel {
   return "low";
 }
 
+/**
+ * A YAML scalar that survives whatever somebody typed.
+ *
+ * Quoted only when it has to be, because every content file in the repository
+ * writes plain titles unquoted and a composer that fought that would read as
+ * foreign. Two characters force the issue: a colon turns the line into a nested
+ * mapping and the file stops parsing, and a leading `#` turns it into a comment
+ * — which is the dangerous one, because the file still parses and the value
+ * silently becomes null.
+ */
+function scalar(value: string) {
+  return /^[A-Za-z0-9][^:#\n"']*$/.test(value) ? value : JSON.stringify(value);
+}
+
+/**
+ * A folded block, with *every* line indented.
+ *
+ * Indenting only the first line works until a reviewer's edited recommendation
+ * runs to a second one — and the review page collects it in a textarea, so that
+ * is a normal thing to type rather than an edge case. The result was a file
+ * that would not parse at all.
+ */
+function folded(label: string, value: string, indent = "  ") {
+  const lines = value.trim().split(/\r?\n/).map((line) => `${indent}${line.trim()}`);
+  return [`${label}: >`, ...lines].join("\n");
+}
+
 function traceBlock(run: ReviewRun, finding: ReviewFinding, indent = "") {
   return [
     `${indent}researchTrace:`,
@@ -100,8 +127,7 @@ export function applySteps(run: ReviewRun, finding: ReviewFinding, choice: Apply
       body: [
         "---",
         `id: ${finding.proposedClaim.id}`,
-        "statement: >",
-        `  ${statement}`,
+        folded("statement", statement),
         `kind: ${choice.kind}`,
         `confidence: ${choice.confidence}`,
         `targets: [${targets.join(", ")}]`,
@@ -146,4 +172,114 @@ export function applySteps(run: ReviewRun, finding: ReviewFinding, choice: Apply
 /** Whether an accepted finding has anywhere at all to land. */
 export function hasNowhereToLand(finding: ReviewFinding) {
   return !finding.proposedClaim && !finding.existingClaimCandidates.length && !finding.suggestedTargets.length;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Naming a problem from research                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The one thing that makes a Problem a Problem, said where it is written.
+ *
+ * A reviewer who has just accepted three findings about the same failure is
+ * holding everything a Problem needs except its name, and the references are
+ * fiddly enough to put anyone off — which is how a problem ends up unnamed, or
+ * named as the fix somebody already had in mind.
+ */
+export const PROBLEM_TITLE_RULE =
+  "Write the title as the trouble, not the fix. “A clinician can finish onboarding and still have no work” is a problem; “Add caseload automation” is a bet wearing a problem's clothes.";
+
+/** Mechanical, not editorial: the same slug rule the question queue uses. */
+export function problemIdFrom(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .split("-")
+    .filter(Boolean)
+    .slice(0, 8)
+    .join("-");
+}
+
+export type ProblemSource = { run: ReviewRun; finding: ReviewFinding };
+
+/** What a composed Problem would carry, before anyone has named it. */
+export function problemMaterial(sources: ProblemSource[]) {
+  const targets = [...new Set(sources.flatMap(({ finding }) => finding.suggestedTargets.map((target) => target.id)))];
+  const claims = [
+    ...new Set(
+      sources.flatMap(({ finding }) => [
+        ...(finding.proposedClaim ? [finding.proposedClaim.id] : []),
+        ...finding.existingClaimCandidates.map((claim) => claim.id),
+      ]),
+    ),
+  ];
+  return { targets, claims };
+}
+
+/**
+ * The Problem an accepted body of research would let somebody name.
+ *
+ * This composes references and nothing else. The targets are the stages and
+ * steps the findings already named, the claims are the ones this same review
+ * session creates or cites, and the trace is what proves a person authorized
+ * any of it. The title, the summary, and every word of the body stay empty,
+ * because a Problem generated from a finding would be invented content wearing
+ * the clothes of evidence — the one thing this repository asks nobody to do.
+ *
+ * Returns nothing when the research named nowhere the trouble bites: `targets`
+ * is required, and a problem that bites nowhere is not a problem with this
+ * system.
+ */
+export function composeProblem(sources: ProblemSource[], title: string): ApplyStep | undefined {
+  const { targets, claims } = problemMaterial(sources);
+  if (sources.length === 0 || targets.length === 0) return undefined;
+
+  const id = problemIdFrom(title) || "the-problem-id";
+  const named = title.trim();
+
+  const trace = sources.flatMap(({ run, finding }) => [
+    `  - run: ${run.id}`,
+    `    decision: ${finding.decisionId}`,
+    `    finding: ${finding.id}`,
+    `    stance: ${finding.evidenceStance}`,
+    `    sources: [${finding.sourceIds.join(", ")}]`,
+  ]);
+
+  return {
+    action: "create",
+    path: `content/problems/${id}.md`,
+    explanation:
+      "A Problem, carrying the research that says it is real. Everything below the frontmatter is yours to write — and the claims it cites have to land in the same change, or validation will not find them.",
+    body: [
+      "---",
+      `id: ${id}`,
+      // An unnamed draft leaves `title` empty on purpose. It fails validation
+      // by name, which is the right outcome: a plausible placeholder would pass
+      // and put filler in the model, and that is the one thing nothing here is
+      // allowed to do.
+      named ? `title: ${scalar(named)}` : "title: # write the trouble here, in one sentence",
+      `targets: [${targets.join(", ")}]`,
+      "status: open",
+      ...(claims.length ? [`claims: [${claims.join(", ")}]`] : []),
+      "authority: proposed",
+      "provenance: { source: public-research, references: [] }",
+      "researchTrace:",
+      ...trace,
+      "---",
+      "",
+      "# What happens today",
+      "",
+      "<!-- How the machine runs here now, and where it stops working. -->",
+      "",
+      "# Why it matters",
+      "",
+      "<!-- What it costs, and to whom. -->",
+      "",
+      "# Open questions",
+      "",
+      "<!-- What you would need to know to be sure. Delete this section if you have none. -->",
+      "",
+    ].join("\n"),
+  };
 }

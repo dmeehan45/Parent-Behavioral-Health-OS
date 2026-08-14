@@ -21,8 +21,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 metrics:
   - clinician-effort-to-activate
 authority: proposed

@@ -28,11 +28,26 @@ jobs:
       - name: Validate content
         run: npm run validate:content
 
+      # Content can be valid and still be invisible: `validate:content` proves a
+      # reference points at something real, and this proves the projection then
+      # does something with it. The gap between those two let a step declare a
+      # claim, render it in a block, and stay unconnected on every lens.
+      - name: Validate projection
+        run: npm run validate:projection
+
       - name: Validate research intake
         run: npm run validate:research
 
       - name: Test research intake
         run: npm run test:research
+
+      # The build packet's refusal is the part worth protecting: an agent that
+      # gets a brief for an unshaped bet will build against invented answers.
+      - name: Test prototype brief
+        run: npm run test:prototype
+
+      - name: Test the projection contract
+        run: npm run test:model
 
       # Contributions arrive here from conversations held elsewhere. This looks
       # for the shapes of things that must never be in a public repository —

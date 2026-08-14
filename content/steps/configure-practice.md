@@ -12,8 +12,6 @@ entryConditions:
 inputs:
   - entity: clinician
     state: verified
-activity: >
-  Establish the clinician’s basic practice configuration.
 outputs:
   - entity: practice
     state: configured
@@ -24,8 +22,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-13

@@ -19,8 +19,6 @@ exitConditions:
   - clinicians who plausibly fit the need are known to the system
 roles:
   primary: [platform-operations]
-rules: []
-exceptions: []
 metrics:
   - operating-effort-per-activation
 authority: proposed

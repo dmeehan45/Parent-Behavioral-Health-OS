@@ -40,7 +40,19 @@ Two rules keep this working:
 
 - **Relationships belong in the projection, not the canvas.** If the map needs to
   know that two things are connected, derive the edge in `graph.ts`. Never infer
-  a relationship inside a React component.
+  a relationship inside a React component. `docs/relationships.md` covers when a
+  reference should become an edge and when it should stay a block — the answer
+  is usually that it should stay a block.
+- **A relationship counts once, from whichever end wrote it down.** `claim.targets`
+  and `step.claims` are the same link from two sides, and the projection resolves
+  both into one edge. When both ends may legitimately author a link, resolve both
+  and deduplicate; do not make contributors learn which side is read.
+- **Every reference must be classified.** `lib/model/conformance.ts` declares,
+  for each reference field, either the edge the projection derives or a
+  deliberate block-only decision and its reason. `npm run validate:projection`
+  fails on a reference that is neither — which is what stops a schema field from
+  being validated, rendered, and still invisible to every surface that reads
+  edges. Adding a reference field means adding a row.
 - **Respect the server boundary.** `lib/model/graph.ts` reads the filesystem and
   is server-only. Anything a client component needs — kind labels, routes, lens
   bands — lives in `lib/model/kinds.ts`. Importing `graph.ts` from a `"use client"`
@@ -119,6 +131,17 @@ into "done", accepted research piles up having changed nothing — which is the
 failure this whole arrangement exists to prevent. `findingState()` in
 `lib/research/view.ts` is where that distinction lives.
 
+Applying an accepted finding also offers to compose the **Problem** it points
+at — carrying the targets, the claims and the trace, and leaving the title and
+every word of the body empty. Naming the trouble is still a person's sentence,
+and the rule that decides whether a Problem is a Problem is said next to the box
+where it is written: *the trouble, not the fix*.
+
+A prototype review comes back in the same way, as a handoff with a `session`
+source. Observations are not truth: one participant's reaction is a `reported`
+observation at best, and whether it changes what the model claims is decided at
+`/review` like anything else.
+
 Research is **not** painted on the map, and that is a decision rather than an
 omission. `projectModel()` reads `content/` and `contentRevision()` hashes
 `content/` only, so a badge on a node would go stale the moment a handoff landed
@@ -166,11 +189,47 @@ Two rules keep it from becoming another wall:
   say, because it is the question a reader leaves with rather than what they
   arrived for.
 
-It reads edges, so it only sees relationships the projection actually derives. A
-Problem's own `claims` and `metrics` frontmatter has no edge today, so open ends
-on a Problem page come only from whether anything answers it. Adding those edges
-would also change what the map draws — worth doing deliberately, not as a
-side effect of extending this.
+It reads edges, so it only sees relationships the projection actually derives —
+and that is a smaller set than the references in `content/`.
+`docs/relationships.md` explains what an edge is, which references become one,
+and why most of them should not.
+
+The rule that decides it: **an edge is the inverse index of an authored
+reference**, so it exists when some surface has to answer a question from the
+end that did not write the link down. A Problem's own `claims` and `metrics`
+stay blocks, because that question is already answered on the Stage the Problem
+bites, one click away and with more context.
+
+## A bet carries the shape of its experiment, and the packet can refuse
+
+A Bet says what we would try. Five optional sections — `# Learning decision`,
+`# Scope`, `# Assumptions`, `# Signals and safeguards`, `# Fidelity` — say what
+*trying it* would settle. They are the five things `docs/prototype-workflow.md`
+requires a person to approve before anything is built, and they live in the Bet
+so that approval is a pull request with history rather than a message in a chat.
+
+`npm run prototype:brief -- <bet-id>` composes everything a builder needs from
+the model: the bet and its experiment, the problem, the flow it lands on with
+roles and rules and exceptions, the evidence and where it is weak, the research
+that names any of it, known/assumed/unknown, and the build contract. Hand its
+output to a coding agent with this file and that is the whole handover.
+
+Three rules keep this from rotting:
+
+- **The packet is derived and printed, never committed.** A packet on disk would
+  be a second description of a Bet, stale the moment the model moved — the same
+  reason `research:brief` prints rather than writes.
+- **It refuses, and the refusal is the point.** A Bet with no learning decision
+  gets *not ready to build* and the questions to put to a person. Do not
+  "helpfully" fill those sections in to unblock a build: a guess written there
+  becomes something the built artifact makes look real, which is worse than the
+  gap. Naming what an experiment should teach is the person's judgement.
+- **Unknown means unknown.** Every unfilled modelable field is listed by name in
+  the packet. A blank field is not a licence to invent behaviour — label it in
+  the interface, keep it out of the flow, or ask.
+
+The sections describe the *test*. They never restate the problem or the
+intervention, which are already written down once each.
 
 ## The interface uses one design system
 
@@ -289,8 +348,10 @@ future layer. See `docs/future-agent-model.md`.
 
 ```bash
 npm run validate:content   # schema + cross-reference errors, names the file and field
+npm run validate:projection # references the projection would silently ignore
 npm run validate:research  # research handoffs, decisions, and generated packets
 npm run test:research      # the intake contract itself
+npm run test:prototype     # the build packet, and what it refuses to compose
 npm run scan:safety        # credentials, contact details, confidentiality markers
 npm run lint
 npm run lint:design        # brand values outside the token layer
@@ -299,7 +360,7 @@ npm run build
 npm run test:responsive    # phone and desktop smoke test; builds and serves the app
 ```
 
-CI runs all nine. Validation failures name the offending file and field.
+CI runs all of them. Validation failures name the offending file and field.
 
 `test:responsive` needs a browser once: `npx playwright install chromium`.
 

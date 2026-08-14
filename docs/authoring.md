@@ -24,7 +24,7 @@ renders a fixed set of section names per primitive:
 | Stage | `# Current model`, `# Open questions` |
 | Step | `# Current model`, `# Open questions` |
 | Problem | `# What happens today`, `# Why it matters`, `# Open questions` |
-| Bet | `# Bet`, `# Questions` |
+| Bet | `# Bet`, `# Questions`, and the five experiment sections below |
 | Entity, Claim, Metric | none — the body renders as a single block of prose |
 
 **Section names are a contract, not a convention.** A heading outside this table
@@ -131,12 +131,53 @@ A Bet is a proposed answer to one Problem, so the Problem comes first.
 Where the Bet lands in the machine is derived from its Problem's `targets`, so a
 Bet never declares targets of its own.
 
+## Shape the experiment before building anything
+
+A Bet says what we would try. Five further optional sections say what *trying it*
+would settle, and they are what somebody accountable approves before a prototype
+is built:
+
+```markdown
+# Learning decision
+
+Whether clinicians want a caseload assembled for them at all, or only shown
+what is available.
+
+# Scope
+
+# Assumptions
+
+# Signals and safeguards
+
+# Fidelity
+```
+
+Optionally add `participant: <entity-id>` to name the actor the experiment
+studies; `# Scope` still says which moment and what path.
+
+All five are optional, and a Bet is allowed to exist long before an experiment
+does. But `npm run prototype:brief` will not clear a build without them, and a
+Bet with a prototype underway and no learning decision says so on its own page.
+That is deliberate: a prototype tests a decision, and if no decision changes,
+there is no reason to build it yet.
+
+Do not restate the problem or the intervention in these sections. They describe
+the *test*, which is the one thing no other primitive holds.
+
 ## Link a prototype
 
-Before building, follow [`docs/prototype-workflow.md`](prototype-workflow.md) to
-derive a focused learning decision, participant flow, assumptions, safeguards,
-and human scope checkpoint from the Bet and its system context. A prototype is
-an executable question, not an automatic next step for every Bet.
+A prototype is an executable question, not an automatic next step for every Bet.
+Before building, compose the brief:
+
+```bash
+npm run prototype:brief -- <bet-id>
+```
+
+It gathers the Bet, its Problem, the flow it lands on, the evidence and its
+weaknesses, the honest unknowns, and this repository's build rules into one
+piece you can hand to whoever is building — human or agent — alongside
+`AGENTS.md`. It refuses to clear a build whose experiment has not been shaped.
+[`docs/prototype-workflow.md`](prototype-workflow.md) is the full workflow.
 
 Add a route under `app/prototypes/<id>/page.tsx` that renders only the interaction, wrapped in `PrototypeShell`:
 
@@ -158,8 +199,10 @@ prototype intentionally small.
 
 `route` is validated against the filesystem: the Bet page and the map both render
 a prominent launch control from it, so a route with no implementation would send
-a reader to a 404. A Bet without a prototype omits `route` entirely — a Bet is
-allowed to exist long before any software does.
+a reader to a 404. Validation also checks the route actually goes through
+`PrototypeShell`, because a page rendering without it silently drops the bet, the
+problem and the provenance. A Bet without a prototype omits `route` entirely — a
+Bet is allowed to exist long before any software does.
 
 ## What you never have to edit
 
