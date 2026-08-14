@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getRepository } from "../../lib/content/repository";
-import { readiness, renderPrototypeBrief } from "../../lib/prototype/brief";
+import { readiness, renderPrototypeBrief, researchIdsFor } from "../../lib/prototype/brief";
 import type { Bet } from "../../lib/schemas";
 import type { Repository } from "../../lib/content/repository";
 
@@ -90,6 +90,27 @@ test("unreadable research is reported, not silently treated as none", () => {
   assert.match(broken, /could not be read/);
   assert.match(broken, /npm run validate:research/);
   assert.match(renderPrototypeBrief(bet, repo, []), /No research names these records/);
+});
+
+/*
+ * Research names its targets by content id — `matching`, never `stage:matching`.
+ * The first version of this lookup prefixed them with a node kind, so it matched
+ * nothing except the problem's targets, which happened to be passed bare. That
+ * made the section look populated while silently dropping the research about the
+ * bet itself and the claims it rests on — the most relevant kind there is.
+ */
+test("the research lookup uses the ids research actually writes", () => {
+  const ids = researchIdsFor(bet, repo);
+  for (const id of ids) {
+    assert.doesNotMatch(id, /^(stage|step|bet|problem|claim|metric):/, `'${id}' is a node id, not a content id`);
+  }
+  assert.ok(ids.includes(bet.id), "research about the bet itself would be missed");
+  assert.ok(ids.includes(bet.problem), "research about the problem would be missed");
+  for (const claim of bet.claims ?? []) assert.ok(ids.includes(claim), `research about ${claim} would be missed`);
+  for (const metric of bet.metrics ?? []) assert.ok(ids.includes(metric), `research about ${metric} would be missed`);
+  const problem = repo.problems.find((candidate) => candidate.id === bet.problem);
+  for (const target of problem?.targets ?? []) assert.ok(ids.includes(target), `research about ${target} would be missed`);
+  assert.equal(new Set(ids).size, ids.length, "an id repeats, so a finding would be listed twice");
 });
 
 test("a bet pointing at a problem that does not exist stops the build", () => {
