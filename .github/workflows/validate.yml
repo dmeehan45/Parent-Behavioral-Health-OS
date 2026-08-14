@@ -34,6 +34,11 @@ jobs:
       - name: Test research intake
         run: npm run test:research
 
+      # The build packet's refusal is the part worth protecting: an agent that
+      # gets a brief for an unshaped bet will build against invented answers.
+      - name: Test prototype brief
+        run: npm run test:prototype
+
       # Contributions arrive here from conversations held elsewhere. This looks
       # for the shapes of things that must never be in a public repository —
       # credentials, contact details, patient identifiers, confidentiality
