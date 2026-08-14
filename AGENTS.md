@@ -138,6 +138,14 @@ Research from a chat — Claude, ChatGPT, anything — enters as a handoff under
 `research/`, never as an edit to `content/`. `docs/research-workflow.md` covers
 one run; `docs/research-routine.md` covers running it on a schedule.
 
+When research is conducted through conversation, also follow
+`docs/conversational-research.md`. The agent is responsible for helping the user
+learn along with the repository: orient from the current model before external
+research, pressure-test findings before handoff, and close reviewed/applied work
+with a learning checkpoint before moving to the next question. Do not rely on
+chat history as the source of current understanding; reconstruct it from the
+repository and let the user correct the framing.
+
 The rule that matters here: **an agent cannot change what the model claims.**
 A canonical record cites research through `researchTrace`, and that citation
 only validates against an `accept` or `accept-with-edits` decision, written by a
