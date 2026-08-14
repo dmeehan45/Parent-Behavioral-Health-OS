@@ -879,15 +879,16 @@ function repositoryUrl(sourceUrl?: string): string | undefined {
  * printing them slash-separated reads as machine bookkeeping — the reader
  * cannot tell which ID is the run and has nowhere to go next. So the trace is
  * rendered as a sentence that says what the research did to this belief and
- * names the packet where the reasoning and the reviewer's decision are written
- * down.
+ * names where the reasoning and the reviewer's decision can be read. That is
+ * the run's page rather than a file: the packet is derived, and a reader sent
+ * to a path that may not exist learns nothing.
  */
 function researchReferences(record: { provenance?: { references?: string[] }; researchTrace?: Array<{ run: string; decision: string; finding: string; stance: string; sources: string[] }> }): string[] | undefined {
   const references = [...(record.provenance?.references ?? [])];
   for (const trace of record.researchTrace ?? []) {
     references.push(
       `Research run ${trace.run} ${trace.stance} this: finding ${trace.finding}, evidence ${trace.sources.join(", ")}, ` +
-        `accepted in decision ${trace.decision}. Read research/reviews/${trace.run}.md.`,
+        `accepted in decision ${trace.decision}. Read the run at /review/${trace.run}.`,
     );
   }
   return references.length > 0 ? references : undefined;

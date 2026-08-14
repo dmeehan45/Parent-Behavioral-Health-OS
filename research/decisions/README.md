@@ -4,9 +4,10 @@ The accountable reviewer owns this directory. One file per research run, named
 for its run ID: `research/decisions/<run-id>.yaml`.
 
 A handoff proposes; nothing here is written by an agent on the reviewer's
-behalf. `research/reviews/<run-id>.md` ends with a ready-to-fill skeleton
-carrying the run ID and the reviewed handoff hash — copy it here, replace every
-`TODO`, and run `npm run validate:research`.
+behalf. The review packet ends with a ready-to-fill skeleton carrying the run ID
+and the reviewed handoff hash — copy it here, replace every `TODO`, and run
+`npm run validate:research`. Read the packet at `/review/<run-id>`, or in the
+comment CI leaves on the intake pull request.
 
 ```yaml
 contractVersion: 1

@@ -146,7 +146,6 @@ export function projectReview(): ReviewIndex {
       provenance: `${handoff.run.provenance.method} — ${handoff.run.provenance.context}`,
       hash,
       file,
-      packetFile: `research/reviews/${handoff.run.id}.md`,
       decisionFile: `research/decisions/${handoff.run.id}.yaml`,
       answers: (handoff.run.answers ?? []).map((id) => ({ id, question: questionText.get(id) ?? id })),
       sources,

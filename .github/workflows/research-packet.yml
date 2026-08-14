@@ -1,0 +1,146 @@
+name: Research packet
+
+# Render the review packet onto the intake pull request.
+#
+# The packet is a pure function of the handoff: `renderReview()` reads the
+# parsed handoff and its hash and nothing else. It used to be required in the
+# repository, which quietly made a build artifact an input — and the actor this
+# whole workflow is written for is a conversational agent on a GitHub connector,
+# which can write files through the contents API and cannot run Node. The one
+# step it could not perform was the one step it could not skip.
+#
+# So the packet is derived here instead, and posted where the reviewer already
+# is. `research/reviews/` may still hold a packet — validation checks that one
+# matches its handoff — but nothing requires it to.
+#
+# This job holds no model key and decides nothing. The reviewer's decision file
+# remains the only thing that authorizes a change to `content/`.
+
+on:
+  pull_request:
+    paths:
+      - "research/handoffs/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: research-packet-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  packet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Render the packets
+        run: npm run generate:research-review
+
+      # Always produced, including for a pull request from a fork, where the
+      # token is read-only and the comment step below cannot run.
+      - name: Keep them as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-packets
+          path: research/reviews/*.md
+          if-no-files-found: warn
+
+      - name: Post them on the pull request
+        # A fork's `pull_request` token cannot write comments. Failing here would
+        # report a broken intake when the intake is fine, so the artifact above
+        # is the fork's copy and this step stands down.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            // Only the handoffs this pull request touches. Regeneration writes
+            // every packet, and a comment carrying packets the reader did not
+            // propose is noise on the one page they have to read carefully.
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: issue_number,
+              per_page: 100,
+            });
+            const runs = files
+              .filter((file) => file.status !== "removed")
+              .map((file) => /^research\/handoffs\/(.+)\.ya?ml$/.exec(file.filename)?.[1])
+              .filter((id) => id && id !== "example-public-research");
+
+            const marker = "<!-- research-packet -->";
+            const sections = [];
+            for (const id of runs) {
+              const packet = path.join("research", "reviews", `${id}.md`);
+              if (!fs.existsSync(packet)) continue;
+              sections.push(
+                `<details>`,
+                `<summary><b>${id}</b></summary>`,
+                "",
+                fs.readFileSync(packet, "utf8").trim(),
+                "",
+                `</details>`,
+                "",
+              );
+            }
+            if (!sections.length) {
+              core.info("No handoff in this pull request produced a packet.");
+              return;
+            }
+
+            let body = [
+              marker,
+              "## Review packet",
+              "",
+              `Generated from the handoff${runs.length > 1 ? "s" : ""} in this pull request. Nothing here is` +
+                " canonical and nothing here is a decision: it is what a reviewer reads.",
+              "",
+              `Decide at **/review**, or copy the decision skeleton below into \`research/decisions/<run-id>.yaml\`.`,
+              "",
+              ...sections,
+              "_Derived from the handoff, never committed. This comment is rewritten in place as the handoff changes._",
+            ].join("\n");
+
+            // GitHub rejects a comment over 65536 characters. A packet that long
+            // means an unusually large run, and silently posting a truncated one
+            // would hand the reviewer an incomplete skeleton to paste.
+            if (body.length > 60000) {
+              body = [
+                marker,
+                "## Review packet",
+                "",
+                `Too large to post (${body.length} characters). Download the \`research-packets\` artifact` +
+                  " from this run, or read the run at **/review**.",
+              ].join("\n");
+            }
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            // One comment, rewritten. A handoff corrected three times should not
+            // leave three packets in the thread, two of them wrong.
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              core.info(`Updated comment ${existing.id}`);
+              return;
+            }
+            const created = await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            core.info(`Posted comment ${created.data.id}`);

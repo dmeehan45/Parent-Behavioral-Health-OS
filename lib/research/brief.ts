@@ -112,7 +112,10 @@ export function renderBrief(
     `Write one handoff at \`research/handoffs/<run-id>.yaml\` following \`research/contract/v1.example.yaml\`.`,
     item ? `Set \`run.answers: [${item.id}]\`.` : "Leave `run.answers` out; this question is not queued.",
     "Quote no more than 25 words from any one source. Commit no transcript, no private material, and nothing identifying a real person.",
-    "Then run `npm run generate:research-review`, `npm run validate:research`, and `npm run scan:safety`.",
+    "",
+    "Branch from `main`, commit that one file, and open a pull request. Nothing else belongs in an intake:",
+    "the review packet is derived, and CI renders it onto the pull request for the reviewer to read.",
+    "If you can run commands here, `npm run validate:research` and `npm run scan:safety` say the same thing sooner.",
     "",
   );
 

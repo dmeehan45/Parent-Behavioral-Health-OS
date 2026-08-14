@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import {
   checkForRepeatedFindings,
   checkHandoffTargets,
@@ -12,7 +10,7 @@ import {
   validateDecisions,
 } from "../lib/research/intake";
 import { checkAnsweredQuestions, loadQuestions } from "../lib/research/questions";
-import { packetIsCurrent, renderReview } from "../lib/research/review";
+import { checkCommittedPackets } from "../lib/research/review";
 import { run } from "./report";
 
 // Order matters. Handoffs are parsed and checked against themselves first, then
@@ -29,20 +27,9 @@ run(() => {
   validateDecisions(handoffs, decisions);
   checkSupersedes(handoffs, decisions);
 
-  if (process.argv.includes("--check-reviews")) {
-    for (const loaded of handoffs) {
-      const file = path.join("research", "reviews", `${loaded.handoff.run.id}.md`);
-      if (!fs.existsSync(file)) {
-        throw new Error(`${file}: missing. Run npm run generate:research-review and commit the packet.`);
-      }
-      if (!packetIsCurrent(fs.readFileSync(file, "utf8"), renderReview(loaded))) {
-        throw new Error(
-          `${file}: stale. It does not match ${loaded.file}. ` +
-            `Run npm run generate:research-review and commit the result; the packet is generated, never hand-edited.`,
-        );
-      }
-    }
-  }
+  // A committed packet must match its handoff; a missing one is fine, because
+  // the packet is derived and CI renders it onto the pull request.
+  if (process.argv.includes("--check-reviews")) checkCommittedPackets(handoffs);
 
   checkHandoffTargets(handoffs);
 

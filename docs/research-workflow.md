@@ -30,19 +30,31 @@ Running it on a schedule is described in `docs/research-routine.md`.
    commit the handoff, and open a pull request to `main`. A coding agent with
    repository access performs these exact steps when connector capabilities are
    unavailable.
-4. Run `npm run generate:research-review` and `npm run validate:research`.
-   Commit the deterministic review packet. CI runs both validation modes and
-   verifies that generated packets are current.
+
+   **Commit the handoff and nothing else.** An intake is one file. Everything a
+   reviewer reads is derived from it, and a connector cannot run anything, so
+   asking it for a generated artifact asks for the one thing it cannot do.
+4. CI takes it from there. `.github/workflows/research-packet.yml` renders the
+   review packet onto the pull request as a comment, rewritten in place if you
+   correct the handoff. Validation checks the handoff's shape, references, and
+   safety declarations.
+
+   If you *can* run commands, `npm run validate:research` and
+   `npm run scan:safety` say the same thing sooner, and
+   `npm run generate:research-review` writes the packet to `research/reviews/`
+   for reading locally. Committing it is optional; if you do, CI checks that it
+   still matches the handoff, because a packet is generated and never
+   hand-edited.
 5. The accountable reviewer decides, at **`/review`**. The page puts each
    finding next to its evidence, what earlier runs concluded from the same
    sources, and what it would change in the model, then hands back a complete
    decision file to save as `research/decisions/<run-id>.yaml`. Run
    `npm run validate:research` again.
 
-   The committed packet at `research/reviews/<run-id>.md` carries the same
-   skeleton in text, for reviewing from GitHub without running the app. Either
-   way a partial review is valid: the validator reports what is still
-   outstanding rather than failing.
+   The packet comment on the intake pull request carries the same skeleton in
+   text, for reviewing from GitHub without running the app. Either way a partial
+   review is valid: the validator reports what is still outstanding rather than
+   failing.
 6. After this intake PR is reviewed, create a separate model-change PR from
    `main`. **`/review/apply`** composes each accepted decision into the file to
    create or the frontmatter to add, with the `researchTrace` already filled in.
@@ -50,9 +62,9 @@ Running it on a schedule is described in `docs/research-routine.md`.
    belief this is, and how confident you are. Never copy the research staging
    record into canonical prose wholesale.
 
-The run ID is the join between all four files, so each is named for it:
-`research/handoffs/<run-id>.yaml`, `research/reviews/<run-id>.md`,
-`research/decisions/<run-id>.yaml`, and the `run` field of every
+The run ID is the join between everything the run produces, so each is named for
+it: `research/handoffs/<run-id>.yaml`, `research/decisions/<run-id>.yaml`, the
+derived packet wherever it is rendered, and the `run` field of every
 `researchTrace` that cites it. Validation enforces the naming rather than
 letting a file drift away from the ID inside it.
 
@@ -156,13 +168,18 @@ regex-shaped could, and the check does not pretend otherwise.
   the packet asks the reviewer. Deterministic tools never resolve semantics.
 - **Sensitive/private material suspected:** do not commit it. Stop, remove it
   from the synthesis, and record only a non-sensitive uncertainty if useful.
-- **CI unavailable:** run the two npm commands locally and commit their artifacts.
+- **CI unavailable:** run `npm run validate:research` and `npm run scan:safety`
+  locally, and read the packet with `npm run generate:research-review`.
 - **A canonical record cites a run with no decision yet:** content validation
   refuses it and names the decision file to write. Acceptance is what authorizes
   a canonical change; `reject`, `defer`, and `needs-research` do not.
-- **Packet reported stale after you only read it:** regenerate and commit. Line
-  endings and trailing whitespace are ignored in the comparison, so this means
-  the handoff itself moved, not that an editor touched the file.
+- **Packet reported stale after you only read it:** this only happens to a packet
+  someone committed. Regenerate it, or delete it — it does not need to be in the
+  repository. Line endings and trailing whitespace are ignored in the comparison,
+  so a stale report means the handoff itself moved, not that an editor touched
+  the file.
+- **Connector cannot run the repository's commands:** it is not supposed to. Commit
+  the handoff alone; CI renders the packet onto the pull request and validates.
 
 The architecture rationale and complete trust boundary are recorded in
 `docs/decisions/0001-git-native-research-intake.md`.

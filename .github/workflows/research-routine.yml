@@ -45,24 +45,56 @@ jobs:
           npm run --silent research:queue > queue.txt
           cat queue.txt
 
+      # The brief goes in the issue because the agent that reads the issue
+      # cannot produce it. A GitHub connector writes files through the contents
+      # API and does not execute Node, so "run `research:brief` first" asked for
+      # something impossible — and the brief is the step that keeps runs
+      # separate. A run that skips it restates what an earlier run found, and
+      # validation rejects that. This job already has a checkout and a Node, so
+      # it computes the brief and hands it over.
+      - name: Brief the top of the queue
+        run: |
+          set -euo pipefail
+          top="$(npm run --silent research:queue -- --top)"
+          if [ -z "$top" ]; then
+            echo "Nothing is queued and the model shows no gaps."
+            exit 0
+          fi
+          printf '%s' "$top" > top.txt
+          npm run --silent research:brief -- "$top" > brief.txt
+          cat brief.txt
+
       - name: Publish it to the routine issue
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require("fs");
             const queue = fs.readFileSync("queue.txt", "utf8");
+            const read = (file) => (fs.existsSync(file) ? fs.readFileSync(file, "utf8").trim() : "");
+            const top = read("top.txt");
+            const brief = read("brief.txt");
+
             const marker = "<!-- research-routine -->";
             const body = [
               marker,
               "## What to research next",
               "",
-              "Pick the top item, then run `npm run research:brief -- <question-id>` and follow it.",
-              "`docs/research-routine.md` describes the loop; `docs/research-workflow.md` describes one run.",
+              top
+                ? `Top of the queue: **${top}**. Its brief is below — read it before researching.`
+                : "Nothing is queued and the model shows no gaps. Add a question with `npm run research:ask`.",
+              "",
+              "Commit the handoff and nothing else. The review packet is derived, and CI renders it onto the",
+              "pull request. `docs/research-routine.md` describes the loop; `docs/research-workflow.md` one run.",
               "",
               "```text",
               queue.trim(),
               "```",
               "",
+              // Folded, because the brief is longer than the queue and only the
+              // run that is about to start needs to read all of it.
+              ...(brief
+                ? ["<details>", `<summary><b>Brief: ${top}</b></summary>`, "", "```text", brief, "```", "", "</details>", ""]
+                : []),
               `_Refreshed ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC. This issue is rewritten in place, not reopened._`,
             ].join("\n");
 

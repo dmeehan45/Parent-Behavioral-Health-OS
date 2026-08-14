@@ -167,7 +167,6 @@ export type ReviewRun = {
   provenance: string;
   hash: string;
   file: string;
-  packetFile: string;
   decisionFile: string;
   answers: Array<{ id: string; question: string }>;
   sources: ReviewSource[];
