@@ -6,14 +6,23 @@ import type { Bet } from "../../lib/schemas";
 import type { Repository } from "../../lib/content/repository";
 
 const repo = getRepository();
-const bet = repo.bets[0];
+
+/**
+ * A bet's *frontmatter* comes from the repository, so these tests exercise the
+ * real problem, steps, claims and metrics. Its *sections* are always set here.
+ *
+ * Reading them from `content/` instead was a real defect: the tests passed only
+ * while the one bet in the model happened to have no experiment written down,
+ * and the first person to shape one broke the suite. Authoring content must
+ * never require a code change, and that has to be true of the tests too.
+ */
+const bare: Bet = { ...repo.bets[0], sections: {} };
 
 /** The same bet, with its experiment written down. */
 function shaped(overrides: Record<string, string> = {}): Bet {
   return {
-    ...bet,
+    ...bare,
     sections: {
-      ...bet.sections,
       "Learning decision": "Whether a clinician wants a caseload assembled at all.",
       Scope: "A clinician who has just become match-ready.",
       Assumptions: "That enough families are waiting.",
@@ -25,11 +34,11 @@ function shaped(overrides: Record<string, string> = {}): Bet {
 }
 
 test("a bet with no experiment shape is refused, and told what is missing", () => {
-  const verdict = readiness(bet);
+  const verdict = readiness(bare);
   assert.equal(verdict.ready, false);
   assert.deepEqual(verdict.missing, ["Learning decision", "Scope", "Assumptions", "Signals and safeguards", "Fidelity"]);
 
-  const brief = renderPrototypeBrief(bet, repo, []);
+  const brief = renderPrototypeBrief(bare, repo, []);
   assert.match(brief, /\*\*Not yet — do not start building\.\*\*/);
   // The refusal has to explain each gap, or it is just a closed door.
   for (const name of verdict.missing) assert.match(brief, new RegExp(`\\*\\*${name}\\*\\* —`));
@@ -60,7 +69,7 @@ test("one missing section is enough to refuse", () => {
 // A blank model field must never quietly become plausible product behaviour, so
 // every one of them is listed by name rather than silently skipped.
 test("unfilled model fields are listed as unknown, attributed to the record they are on", () => {
-  const brief = renderPrototypeBrief(bet, repo, []);
+  const brief = renderPrototypeBrief(bare, repo, []);
   const unknown = brief.slice(brief.indexOf("### Unknown"));
   assert.match(unknown, /Do not invent these/);
   assert.match(unknown, /— on the bet/);
@@ -86,10 +95,10 @@ test("weakly held evidence is flagged rather than passed on as settled", () => {
 // Research is staging and is allowed to be broken. Saying nothing would read as
 // "nothing has been researched", which is a different and misleading claim.
 test("unreadable research is reported, not silently treated as none", () => {
-  const broken = renderPrototypeBrief(bet, repo, [], false);
+  const broken = renderPrototypeBrief(bare, repo, [], false);
   assert.match(broken, /could not be read/);
   assert.match(broken, /npm run validate:research/);
-  assert.match(renderPrototypeBrief(bet, repo, []), /No research names these records/);
+  assert.match(renderPrototypeBrief(bare, repo, []), /No research names these records/);
 });
 
 /*
@@ -100,21 +109,21 @@ test("unreadable research is reported, not silently treated as none", () => {
  * bet itself and the claims it rests on — the most relevant kind there is.
  */
 test("the research lookup uses the ids research actually writes", () => {
-  const ids = researchIdsFor(bet, repo);
+  const ids = researchIdsFor(bare, repo);
   for (const id of ids) {
     assert.doesNotMatch(id, /^(stage|step|bet|problem|claim|metric):/, `'${id}' is a node id, not a content id`);
   }
-  assert.ok(ids.includes(bet.id), "research about the bet itself would be missed");
-  assert.ok(ids.includes(bet.problem), "research about the problem would be missed");
-  for (const claim of bet.claims ?? []) assert.ok(ids.includes(claim), `research about ${claim} would be missed`);
-  for (const metric of bet.metrics ?? []) assert.ok(ids.includes(metric), `research about ${metric} would be missed`);
-  const problem = repo.problems.find((candidate) => candidate.id === bet.problem);
+  assert.ok(ids.includes(bare.id), "research about the bet itself would be missed");
+  assert.ok(ids.includes(bare.problem), "research about the problem would be missed");
+  for (const claim of bare.claims ?? []) assert.ok(ids.includes(claim), `research about ${claim} would be missed`);
+  for (const metric of bare.metrics ?? []) assert.ok(ids.includes(metric), `research about ${metric} would be missed`);
+  const problem = repo.problems.find((candidate) => candidate.id === bare.problem);
   for (const target of problem?.targets ?? []) assert.ok(ids.includes(target), `research about ${target} would be missed`);
   assert.equal(new Set(ids).size, ids.length, "an id repeats, so a finding would be listed twice");
 });
 
 test("a bet pointing at a problem that does not exist stops the build", () => {
-  const orphan = { ...bet, problem: "no-such-problem" } as Bet;
+  const orphan = { ...bare, problem: "no-such-problem" } as Bet;
   const brief = renderPrototypeBrief(orphan, { ...repo } as Repository, []);
   assert.match(brief, /names a problem that does not exist/);
 });
