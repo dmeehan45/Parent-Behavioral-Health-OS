@@ -89,6 +89,22 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
           repeating them here said the same thing twice before saying anything. */}
       <DetailBlocks blocks={node.blocks} />
 
+      {/* Everything above is what the model says about this bet. This is how to
+          get all of it, plus the problem, the flow, the evidence and the build
+          contract, in one piece somebody can hand to whoever is building. A line
+          of text rather than a control: it composes nothing and changes nothing,
+          and the terminal is where the person running it already is. */}
+      {node.kind === "bet" ? (
+        <section className="record-command" aria-label="Build from this bet">
+          <h2 className="field-label">Building against this</h2>
+          <p className="small muted">
+            Composes everything on this page, the problem it answers, the steps it lands on, the evidence and its
+            weaknesses, the honest unknowns, and this repository&rsquo;s build rules — as one brief.
+          </p>
+          <code className="queue-command">npm run prototype:brief -- {node.contentId}</code>
+        </section>
+      ) : null}
+
       <ResearchAbout items={research} />
 
       <OpenEnds ends={openEnds(graph, node)} />

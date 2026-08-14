@@ -2786,6 +2786,17 @@ p:last-child {
   grid-template-columns: auto 1fr;
 }
 
+.record-command {
+  margin: 32px 0 0;
+  padding: 16px 20px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.record-command .field-label {
+  margin-bottom: 4px;
+}
+
 /* A long command must scroll inside its own box rather than widening the page. */
 .queue-command {
   display: block;

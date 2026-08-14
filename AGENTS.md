@@ -291,6 +291,7 @@ future layer. See `docs/future-agent-model.md`.
 npm run validate:content   # schema + cross-reference errors, names the file and field
 npm run validate:research  # research handoffs, decisions, and generated packets
 npm run test:research      # the intake contract itself
+npm run test:prototype     # the build packet, and what it refuses to compose
 npm run scan:safety        # credentials, contact details, confidentiality markers
 npm run lint
 npm run lint:design        # brand values outside the token layer
@@ -299,7 +300,7 @@ npm run build
 npm run test:responsive    # phone and desktop smoke test; builds and serves the app
 ```
 
-CI runs all nine. Validation failures name the offending file and field.
+CI runs all ten. Validation failures name the offending file and field.
 
 `test:responsive` needs a browser once: `npx playwright install chromium`.
 
