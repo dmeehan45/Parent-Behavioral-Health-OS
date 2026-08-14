@@ -3,6 +3,8 @@ id: select-clinician
 title: Evaluate & Select
 stage: clinician-supply
 order: 5
+next:
+  - selection-complete
 purpose: >
   Apply deeper judgement to decide whether a candidate meets the quality bar.
 entryConditions:

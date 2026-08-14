@@ -63,6 +63,39 @@ so the same revision always draws the same picture and a shared URL shows the sa
 view. A reader dragging a node is overriding a derived position locally; it is not
 an edit to the model.
 
+## The flow has to carry what the states claim
+
+A Step says what it consumes and what it produces; `next` says what the flow does
+afterwards. Those are two authored facts about one sequence, and they can
+disagree. When one Step outputs a Clinician in `match-ready` and another takes a
+Clinician in `match-ready` as an input, the model is asserting a handoff — and a
+missing `next` makes it a handoff nothing carries. `checkFlowContinuity` in
+`lib/content/flow.ts` refuses that. It runs inside `getRepository()`, so it holds
+for the live map and not only for `npm run validate:content`, and it reports
+every stranded handoff rather than the first: one missing link usually strands
+several, and the nearest is rarely the one that sorts first.
+
+This is not a completeness rule, and it must not become one:
+
+- **A Step with no `next` is fine.** The ladder ends somewhere, and nothing
+  consumes what the last Step produces.
+- **A state nobody produces is fine.** That is a part of the system nobody has
+  modelled yet — `propose-match` needs a Family in `match-ready`, and no Step
+  makes one, because `family-demand` has no Steps at all. The interface says so,
+  as an open end on the Step that feels the absence. Validation stays quiet,
+  because the answer is somebody describing what really happens, not a plausible
+  Step invented to satisfy a checker.
+
+Only the contradiction fails: both ends written down, and no path between them.
+
+Worth knowing why it exists. Splitting `first-successful-family` into separate
+matching and care-initiation Steps was a real improvement, and it removed the one
+`next` that carried a clinician out of onboarding without writing a replacement.
+The process graph fell into five disconnected islands, every check stayed green,
+and `/map` drew five stranded chains with nothing saying that was wrong — because
+the entity states still described the sequence correctly, and no check read the
+shape of the flow.
+
 ## The map follows the repository
 
 `/map` is rendered on the server and then keeps itself current: the browser polls
