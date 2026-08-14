@@ -13,6 +13,14 @@ The model separates human navigation from semantic depth. A human sees a compact
 - **Bet:** a proposed answer to one Problem, with an optional prototype.
 - **Prototype:** working software that makes a Bet concrete without becoming production infrastructure.
 
+## Boundary: the productizable care-delivery system
+
+This artifact models the whole care-delivery operating system that a practice-management platform could productize. Its intended outcomes include care quality, access and affordability or coverage, measurement and learning, personalization, participant experience, and a viable platform business. No one outcome silently outranks the others; Metrics name whose interest they represent so trade-offs stay visible.
+
+The model includes care work, participant decisions, and surrounding platform operations when they are necessary to explain or prototype a product behavior. Non-prototypeable organizational changes and other company actions may be named as context or an open dependency, but they are not Bets. This is wider than an EHR and narrower than a complete company operating model.
+
+The `Practice Management Platform` Entity is the accountable builder/operator actor. It is not a substitute for the clinician, family, patient, or configured Practice, and platform efficiency is not evidence of a good care outcome.
+
 Authority (`reference`, `proposed`, `validated`, or `policy`) keeps tentative ideas distinct from approved rules. The seed model is proposed and generalized.
 
 `content/map.yaml` owns top-level topology. `next` references in Step files own the internal process sequence. Both are directed relationships rather than assumptions about a universal funnel.

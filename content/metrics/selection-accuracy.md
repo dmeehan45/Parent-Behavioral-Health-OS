@@ -4,6 +4,13 @@ title: Selection Accuracy
 unit: percent
 direction: higher
 targets: [clinician-supply, quality-outcomes, select-clinician]
+perspectives:
+  - { actor: practice-management-platform, role: primary }
+  - { actor: clinician, role: balancing }
+  - { actor: family, role: balancing }
+decisionOwner: practice-management-platform
+decision: >
+  Decide whether selection judgments are valid enough to revise; do not use this metric for individual selection until quality and attribution are defined.
 dataStatus: unknown
 provenance: { source: author, references: [] }
 ---

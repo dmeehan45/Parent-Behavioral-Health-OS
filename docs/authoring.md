@@ -57,6 +57,8 @@ change.
 
 Create `content/steps/<id>.md` with `id`, `title`, and an existing `stage`. Add `next` references only when the sequence is known. Purpose, state references, roles, rules, exceptions, claims, and metrics are optional.
 
+Before calling a Step understood, briefly test the applicable failure cases: rejection, delay, disagreement, incorrect information, deterioration, dropout, re-entry, and closure. Record an `exception` only when the route or outcome is actually known; otherwise put the uncertainty in `# Open questions`. A perfectly linear happy path is not the default, but invented recovery detail is not completeness.
+
 A Step does not list the Bets aimed at it. Problems name the Steps they bite,
 and Bets name their Problem, so the link already exists in one direction and
 does not need repeating in the other.
@@ -86,7 +88,13 @@ Create `content/claims/<id>.md`. Choose a constrained `kind`, `confidence`, and 
 
 ## Add a Metric
 
-Create `content/metrics/<id>.md` with `id` and `title`. `dataStatus` explicitly distinguishes an important metric from one currently measured.
+Create `content/metrics/<id>.md` with `id` and `title`. `dataStatus` explicitly distinguishes an important metric from one currently measured. Also name:
+
+- `perspectives`: Entity actors for whom the metric is `primary`, a `balancing` safeguard, or an `operator` measure;
+- `decisionOwner`: the Entity actor accountable for interpreting it; and
+- `decision`: the specific choice it can inform.
+
+These fields prevent a platform efficiency measure from being presented as success for a family or clinician. Before treating a consequential metric as actionable, keep its denominator or unit, time horizon, missingness, confounders, balancing risks, and uncertainty visible in its definition or as open research. Do not invent those details merely to fill coverage.
 
 ## Name a Problem
 

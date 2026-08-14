@@ -22,3 +22,6 @@ Convert an accepted match into successfully started care. This is a provisional 
 # Open questions
 
 - Where does intent fail to become a first session?
+
+- Which quality signals distinguish quick initiation from appropriate, understandable, and sustainable care?
+- When should cancellation, disagreement, changed need, or lack of intent route to rescheduling, rematching, transfer, or closure?

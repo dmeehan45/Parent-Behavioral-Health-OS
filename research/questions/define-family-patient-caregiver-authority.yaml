@@ -1,0 +1,9 @@
+id: define-family-patient-caregiver-authority
+question: "Which family, patient, caregiver, and care-team roles and changing authority relationships must a parent-focused care-delivery platform distinguish?"
+askedBy: accountable-reviewer-2026-08-14
+createdAt: 2026-08-14
+status: open
+priority: high
+targets: [family-demand, matching, care-initiation, practice-operations]
+why: >
+  Participation, consent, sharing, conflicting accounts, and changing authority cannot be reasoned about through one undifferentiated Family entity, but the model should not prematurely create a production permission schema.
