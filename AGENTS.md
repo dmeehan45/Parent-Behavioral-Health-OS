@@ -105,9 +105,52 @@ breaks:
 - **44px is the floor for anything you tap**, focus is the reference ring built
   from `:focus-visible`, and motion is 0.15s on the system's one easing curve.
 
+### A pane that scrolls must be bounded by a definite height
+
+The map is one screen: a canvas and a detail pane that scroll *inside* the
+viewport while the page itself does not move. Every layout bug this interface has
+had in that view is the same bug, and it is worth naming because it is invisible
+until the content gets long.
+
+**`min-height` does not bound anything.** `body { min-height: 100dvh }` gives the
+shell a floor, not a height, and a flex or grid container whose own height is
+indefinite sizes itself to its content. So the constraint silently inverts: the
+pane stops being bounded by the shell and the shell starts being sized by the
+pane. `overflow-y: auto` on the pane then does nothing, because a box that is
+always exactly as tall as its content never overflows.
+
+The failure looks like this, and none of it reads as a layout bug:
+
+- the pane renders correctly with short content and only breaks once a record is
+  taller than the window, so it survives every casual check;
+- the wheel scrolls the *document* by the overflow amount instead, dragging the
+  canvas and the nav off-screen;
+- the bottom of the pane sits below the fold and can look unreachable.
+
+The tell is a single measurement: **a scrollport whose height does not change
+when the window height changes is sized by its content, not by the screen.**
+`.sheet-body` measured 708px at both a 900px and a 700px viewport. That is the
+whole diagnosis.
+
+So, when you add or move a scrolling region:
+
+- Give it an ancestor chain with a **definite** height — `height`, `dvh`, a grid
+  row, or a fixed-position box. The phone's sheet already gets this right with
+  `position: fixed; height: 86dvh`; the desktop sheet had nothing equivalent.
+- Keep `min-height: 0` on every flex and grid item between that ancestor and the
+  scrollport, or the automatic minimum size re-introduces the same growth.
+- Prefer `%`/`dvh` over `calc(100dvh - a-number-you-typed)`. A measured header is
+  a number that goes stale; React Flow's root has the same requirement, which is
+  why the canvas lives in a grid row rather than a flex item.
+
 `npm run test:responsive` is a thin Playwright smoke test at phone and desktop
 widths. Keep it thin — it exists to stop a push from silently breaking the phone,
 not to pin the design down. Add a case when a responsive bug gets past it.
+
+It already asserts the map does not grow past the viewport, and that assertion
+passed all the way through the bug above, because it only ever checked `/map`
+with nothing open. **Check the state that holds the most content, not the empty
+one** — the empty state is the one that cannot fail.
 
 ## Incompleteness is valid
 
