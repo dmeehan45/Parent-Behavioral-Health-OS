@@ -1,0 +1,168 @@
+contractVersion: 1
+run:
+  id: 2026-08-14-what-makes-clinician-onboarding-high-quality
+  question: "What makes clinician onboarding high quality for clinicians, families, patients, and the practice-management platform, beyond administrative speed?"
+  synthesis: >
+    Public evidence supports defining clinician onboarding quality as multidimensional readiness rather than administrative completion, one score, or one moment. High-quality onboarding should prepare clinicians for the platform-specific and technology-enabled work they will encounter, make critical telehealth capabilities observable where feasible, and keep downstream service and clinical outcomes analytically separate unless an explicit attribution basis is established. Patient-facing safety, privacy, communication, technology, and access constraints that can be prepared for before matching belong in readiness; conditions created by a particular patient, family, match, or later care relationship should not be assigned to onboarding by default. Activation speed can remain a simple operational measure while burden or rework are treated as separate balancing signals when needed. The evidence does not support a universal composite readiness score, pass threshold, or attribution window; those require context-specific validation.
+  createdAt: 2026-08-14
+  preparedBy:
+    kind: conversational-agent
+    provider: OpenAI
+    model: GPT-5.6-Sol
+  provenance:
+    method: public-research
+    context: >
+      Bounded synthesis of recent peer-reviewed implementation science, clinician onboarding, telebehavioral and telehealth competency, training, simulation, remote mental-health implementation, and EHR workflow research, plus public U.S. HHS telebehavioral guidance. Recent evidence was preferred for technology- and workflow-dependent claims; an older 2020 physician-onboarding study was retained because it directly studied experienced clinicians entering unfamiliar care environments and was paired with newer corroboration. Repository context was used only to identify relevant canonical targets. Raw transcript excluded.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+  answers: [define-onboarding-quality]
+sources:
+  - id: source-proctor-implementation-outcomes-review
+    identity: proctor-2023-implementation-outcomes-review
+    kind: publication
+    title: "Ten years of implementation outcomes research: a scoping review"
+    locator:
+      doi: 10.1186/s13012-023-01286-z
+    access: available
+    publishedAt: 2023-07-25
+  - id: source-lagoo-physician-onboarding
+    identity: lagoo-2020-physician-onboarding
+    kind: publication
+    title: "Safely Practicing in a New Environment: A Qualitative Study to Inform Physician Onboarding Practices"
+    locator:
+      doi: 10.1016/j.jcjq.2020.03.002
+    access: available
+    publishedAt: 2020-04-23
+  - id: source-wiese-clinical-orientation
+    identity: wiese-2022-clinical-orientation
+    kind: publication
+    title: "Orientation of medical trainees to a new clinical environment (the ready-steady-go model): a constructivist grounded theory study"
+    locator:
+      doi: 10.1186/s12909-022-03105-3
+    access: available
+    publishedAt: 2022-01-14
+  - id: source-merrill-telebehavioral-social-work
+    identity: merrill-2022-telebehavioral-social-work-competencies
+    kind: publication
+    title: "CTiBS and Clinical Social Work: Telebehavioral Health Competencies for LCSWs in the Age of COVID-19"
+    locator:
+      doi: 10.1007/s10615-021-00827-7
+    access: available
+    publishedAt: 2022-01-13
+  - id: source-jiang-telemental-training-review
+    identity: jiang-2024-telemental-training-review
+    kind: publication
+    title: "Education and training of telemental health providers: a systematic review"
+    locator:
+      doi: 10.3389/fpubh.2024.1385532
+    access: available
+    publishedAt: 2024-05-22
+  - id: source-liew-telepsychiatry-simulation
+    identity: liew-2023-telepsychiatry-simulation
+    kind: publication
+    title: "A Telepsychiatry Simulation for Suicide Assessment: Teaching Telemedicine Safety Competencies"
+    locator:
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC10148301/
+    access: available
+    publishedAt: 2023-04-29
+  - id: source-jacob-telehealth-competencies
+    identity: jacob-2025-telehealth-competencies
+    kind: publication
+    title: "Defining core competencies for telehealth in healthcare higher education: A Delphi study"
+    locator:
+      doi: 10.1016/j.msksp.2024.103244
+    access: available
+    publishedAt: 2024-12-09
+  - id: source-hhs-telebehavioral-emergency-plan
+    identity: hhs-telebehavioral-emergency-plan
+    kind: web
+    title: "Creating an emergency plan for telebehavioral health"
+    locator:
+      url: https://telehealth.hhs.gov/providers/best-practice-guides/telehealth-for-behavioral-health/preparing-patients-for-telebehavioral-health/creating-a-telehealth-emergency-plan
+    access: available
+    publishedAt: 2024-09-18
+  - id: source-galvin-remote-mental-health
+    identity: galvin-2022-remote-mental-health-implementation
+    kind: publication
+    title: "Patient and provider perspectives of the implementation of remote consultations for community-dwelling people with mental health conditions: A systematic mixed studies review"
+    locator:
+      doi: 10.1016/j.jpsychires.2022.10.051
+    access: available
+    publishedAt: 2022-11-07
+  - id: source-sieja-ehr-training
+    identity: sieja-2021-ehr-training-optimization
+    kind: publication
+    title: "The influence of a Sprint optimization and training intervention on time spent in the electronic health record (EHR)"
+    locator:
+      doi: 10.1093/jamiaopen/ooab073
+    access: available
+    publishedAt: 2021-08-23
+findings:
+  - id: finding-separate-readiness-from-downstream-outcomes
+    statement: >
+      Onboarding quality should be evaluated as an implementation and readiness construct distinct from downstream service and clinical outcomes, so later outcomes are not attributed to onboarding without an explicit causal basis.
+    sourceIds: [source-proctor-implementation-outcomes-review]
+    suggestedTargets: [clinician-onboarding, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The 2023 review supports separating outcome classes and reports that few studies have empirically tested links from implementation outcomes to service or clinical outcomes. This does not mean onboarding can never influence later outcomes; any attribution still needs an explicit causal argument and evidence.
+  - id: finding-readiness-includes-operating-environment
+    statement: >
+      Clinician onboarding can affect safe and effective practice through knowledge of the local care environment, support paths, emergency processes, and patient-scope boundaries; administrative setup alone does not establish operational readiness.
+    sourceIds: [source-lagoo-physician-onboarding, source-wiese-clinical-orientation, source-hhs-telebehavioral-emergency-plan]
+    suggestedTargets: [clinician-onboarding, become-match-ready]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The 2020 study is older than the preferred window for workflow-dependent evidence but was retained because it directly studied experienced physicians entering unfamiliar care environments; a newer 2022 clinical-orientation study and current HHS telebehavioral guidance point in the same direction. The exact workflows that matter on a behavioral-health practice platform still require context-specific evidence.
+  - id: finding-demonstrate-critical-readiness
+    statement: >
+      For platform-specific or technology-enabled tasks where failure is consequential, administrative completion alone is weak evidence of readiness; demonstrated performance against explicit competencies can provide stronger evidence.
+    sourceIds: [source-merrill-telebehavioral-social-work, source-jiang-telemental-training-review, source-liew-telepsychiatry-simulation]
+    suggestedTargets: [clinician-onboarding, become-match-ready]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The evidence supports competency-based assessment in training contexts but does not establish a specific assessment method, pass threshold, or requirement to simulate every workflow for already licensed practicing clinicians. It does not justify using onboarding as an unvalidated second screen of general clinical competence or as a substitute for longitudinal evidence about clinician quality; any gate should distinguish readiness for the new operating environment from selection criteria and preserve remediation where appropriate.
+  - id: finding-patient-facing-conditions-constrain-readiness
+    statement: >
+      A clinician is not fully ready just because their account is configured; onboarding should prepare them for patient-facing safety, privacy, communication, technology, and access constraints that can reasonably be handled before matching or a first encounter.
+    sourceIds: [source-jacob-telehealth-competencies, source-galvin-remote-mental-health, source-hhs-telebehavioral-emergency-plan]
+    suggestedTargets: [clinician-onboarding, become-match-ready, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Onboarding should not own every later access or experience outcome. Conditions created by a particular patient's needs or preferences, a specific match, or the later care relationship belong to matching or care initiation unless there is a clear onboarding dependency.
+  - id: finding-separate-burden-from-speed-and-self-report
+    statement: >
+      Objective clinician operating burden can be measured separately from activation speed and subjective experience, so those signals should not be treated as interchangeable measures of onboarding quality.
+    sourceIds: [source-sieja-ehr-training]
+    suggestedTargets: [clinician-onboarding, clinician-effort-to-activate, operating-effort-per-activation]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The study evaluated EHR optimization and training in an established practice rather than initial onboarding. It supports keeping objective burden conceptually separate more strongly than it supports adding a complex onboarding metric suite. A simple operational success measure can remain primary until burden or rework is needed as a balancing or diagnostic signal.
+questions:
+  - id: question-critical-match-ready-workflows
+    question: "Which observable workflows are sufficiently safety-, access-, or quality-critical to gate match-ready status for practicing behavioral-health clinicians?"
+  - id: question-readiness-gate-versus-remediation
+    question: "When a clinician is not yet ready on an onboarding-specific capability, which failures should block matching, trigger remediation, or remain monitored without gating so onboarding does not become an unvalidated second selection screen?"
+  - id: question-onboarding-attribution-window
+    question: "Which post-activation defects are sufficiently proximal to onboarding to count as onboarding-quality signals, and where should attribution explicitly stop?"
+  - id: question-correctness-versus-completeness
+    question: "Which clinician attributes that affect matching or first-care execution require correctness checks rather than only completeness checks before a clinician becomes match-ready?"
+  - id: question-minimal-onboarding-measurement
+    question: "What is the smallest useful onboarding measurement set that lets the platform optimize a simple success metric first while adding burden, rework, or readiness dimensions only when they change a decision?"
