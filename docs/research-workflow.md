@@ -6,6 +6,9 @@ reviewable proposal without making chat history or unreviewed research canonical
 Running it on a schedule is described in `docs/research-routine.md`.
 Source selection and evidence appraisal are governed by
 `docs/research-source-quality.md`; agents should read it before researching.
+When the run happens in conversation with a person, follow
+`docs/conversational-research.md` as well: orient together before researching and
+close with a learning checkpoint before moving to the next question.
 
 ## Happy path
 
@@ -19,13 +22,29 @@ Source selection and evidence appraisal are governed by
 
    The brief is not optional housekeeping. A run that skips it will restate
    something an earlier run already found, and validation rejects that.
+
+   For a human-guided run, do not jump from the brief straight into external
+   research. Read the target canonical records and explain the current model,
+   material prior decisions, important unknowns, the question this run will
+   answer, and what is out of scope. Let the user correct that framing first.
+   A connector that cannot run `research:brief` reconstructs the same orientation
+   from `research/questions/`, prior handoffs and decisions, and the target
+   records under `content/`.
 1. Research a question in chat using public, non-sensitive material. Prefer
    recent evidence when the claim depends on current technology, workflow,
    regulation, or care-delivery practice; use older evidence deliberately rather
    than treating old and new sources as interchangeable. Record publication
    dates when known and make material age, directness, design, or transferability
    limitations explicit in the handoff.
-2. Ask the agent to synthesize `research/handoffs/<run-id>.yaml` using
+
+   Keep the research conversational. Distinguish what the repository currently
+   believes from what external evidence says and from what the agent is inferring.
+   Surface conflicts, explain the emerging model in ordinary language, and pause
+   when the evidence reveals a scope change or a choice the user should make.
+2. Before writing the handoff, pressure-test the small candidate finding set with
+   the user. Show the material uncertainties and let the user challenge, narrow,
+   or request stronger support. Then synthesize
+   `research/handoffs/<run-id>.yaml` using
    `research/contract/v1.example.yaml` as the contract example. Do not include a
    raw transcript; quote no more than 25 words from one source across extracts.
 
@@ -68,6 +87,18 @@ Source selection and evidence appraisal are governed by
    It composes what is derivable and asks you for what is not: what kind of
    belief this is, and how confident you are. Never copy the research staging
    record into canonical prose wholesale.
+7. For a human-guided run, close with the learning checkpoint from
+   `docs/conversational-research.md` before selecting another research problem.
+   Briefly cover what changed, what became clearer, what was narrowed or ruled
+   out, what remains unknown, which new questions may be worth queueing, and the
+   current model in plain language. Ask the user whether that matches their
+   understanding.
+
+   Do not automatically turn every unknown into a queued question. Propose only
+   the few that would materially deepen the model or unblock a decision, and
+   queue the ones the user agrees are worth pursuing. Do not begin the next
+   queued problem until this checkpoint has happened unless the user explicitly
+   skips it.
 
 The run ID is the join between everything the run produces, so each is named for
 it: `research/handoffs/<run-id>.yaml`, `research/decisions/<run-id>.yaml`, the
@@ -122,9 +153,11 @@ The intake bar should improve an idea, not prevent one from being offered.
   appropriately qualified review.
 
 This keeps GitHub-connected ChatGPT, Claude, and similar conversations fast:
-run the brief, develop the thought through normal back-and-forth, then ask the
-agent to write the small contract artifact and open the intake pull request.
-Human promotion remains the one non-negotiable gate.
+run the brief, orient with the user, develop the thought through normal
+back-and-forth, pressure-test the finding set, then write the small contract
+artifact and open the intake pull request. After review/application, teach the
+updated model back to the user before moving on. Human promotion remains the one
+non-negotiable gate.
 
 Validation errors name the file and field. A stale contract, missing locator,
 unknown target, conflicting source identity, duplicate ID, excessive quotation,
