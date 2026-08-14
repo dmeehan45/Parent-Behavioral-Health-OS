@@ -79,7 +79,8 @@ and they are a canonical part of it rather than a note in a plan:
 | Section | What it settles |
 | --- | --- |
 | `# Learning decision` | What somebody should be better able to decide after trying this. If no decision changes, there is no reason to build it yet. |
-| `# Scope` | Who encounters it, at what moment, the thinnest path that tests the decision, and what is deliberately not represented. |
+| `# Scope` | Who encounters it, at what moment, and the thinnest path that tests the decision. |
+| `# Out of scope` | What is deliberately not represented, and why. A builder who is not told this invents it, and the prototype grows until it is testing something else. |
 | `# Assumptions` | What the prototype assumes in order to run, kept apart from what the model claims. |
 | `# Signals and safeguards` | The observable signal that would support or weaken the bet, and the harm to watch while looking for it. |
 | `# Fidelity` | How real this needs to be, dimension by dimension, so polish has a stated reason. |
@@ -88,10 +89,80 @@ A Bet may also name `participant: <entity-id>` — the actor the experiment
 studies, in a form the projection can link. `# Scope` still says which moment
 and what path.
 
+When something is out of scope because the model has not decided it yet, name
+the question rather than only describing the gap:
+
+```yaml
+awaiting: [define-matching-quality]
+```
+
+`# Out of scope` says what is excluded; `awaiting` says which open question the
+exclusion is waiting on. Keeping both means the two cannot drift, the packet
+tells a builder the boundary is provisional rather than arbitrary — *do not
+resolve any of it in the prototype* — and `/review` can show that a bet is
+already scoped around not knowing the answer, which is the difference between a
+question worth answering next and one that merely exists.
+
 The readiness check is therefore mechanical rather than a matter of memory: the
 brief names exactly which sections are missing and what each one is for, and a
 Bet with a prototype underway and no learning decision says so on its own page
 under **Where this is still open**.
+
+### Refining the experiment is what re-opens the build
+
+Readiness answers a question about the *bet*. Once something is built, there is
+a second question about the *artifact*, and it is the one that goes stale: a
+scope widened after the software was written leaves the prototype testing the
+old question while `prototype.status: working` claims otherwise.
+
+So a built prototype records the experiment it was checked against:
+
+```yaml
+prototype:
+  status: working
+  route: /prototypes/guided-first-caseload
+  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7
+```
+
+`npm run prototype:brief` prints that value; a **person** writes it, because it
+says *somebody looked at both of these*. This is the same trust boundary the
+research intake uses, for the same reason: **a machine can prove staleness; only
+a person can assert conformance.** Nothing reads the prototype's source and
+decides whether it implements a scope — that is semantics, which deterministic
+tooling here does not resolve.
+
+Refine any of the five sections and the stamp no longer matches. Validation says
+which section moved and what to do:
+
+```text
+Stale prototype in content/bets/guided-first-caseload.md: # Scope changed after
+the prototype was last checked against it, so prototype.status 'working' is
+claiming something nobody has confirmed since.
+```
+
+and the packet turns that refinement into the brief for the next build — it
+leads with what changed and hands over the new text verbatim:
+
+```text
+## Is this ready to build?
+
+**The experiment moved.** Something is already built here, and one section has
+changed since anybody last checked the software against it. What follows is what
+to build *to* — the rest of the packet is unchanged and still applies.
+
+### What changed
+
+**Scope** — now reads: …
+```
+
+Two honest answers, and one dishonest one. Restamp if the software still tests
+the refined section; drop `prototype.status` to `concept` if it does not.
+Leaving it as it is is the only answer that is not available.
+
+The check lives in `npm run validate:content`, not in the content loader.
+Refining a bet must not make the repository unloadable — that would take down
+the map, every record page, and the packet whose whole job is to explain what
+changed.
 
 If a section is unanswered, ask the person a focused question, narrow the
 prototype to the answerable part, or defer it. Do not compensate by inventing

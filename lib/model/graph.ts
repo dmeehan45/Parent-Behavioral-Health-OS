@@ -22,6 +22,7 @@ import {
   stageCoverage,
   stepCoverage,
 } from "@/lib/model/coverage";
+import { conformance } from "@/lib/prototype/conformance";
 import { contentRevision, fingerprint } from "@/lib/model/revision";
 import { AUTHORITY_TERMS, EDGE_LEGEND, isFeedbackRelationship } from "@/lib/model/vocabulary";
 import type {
@@ -469,6 +470,7 @@ export function projectModel(): ModelGraph {
         ],
         coverage: betCoverage(bet),
         experimentGaps: experimentGaps(bet),
+        experimentDrift: conformance(bet).drifted,
         blocks: [
           ...linksBlock(
             "The problem this answers",
@@ -486,6 +488,9 @@ export function projectModel(): ModelGraph {
           ),
           ...linksBlock("Supporting claims", betClaims.map((claim) => link("claim", claim.id, claim.statement, claim.confidence))),
           ...linksBlock("Success would affect", betMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
+          // A plain list rather than links: these point into `research/`, which
+          // is staging and has no record page to send a reader to.
+          ...listBlock("Waiting on research", bet.awaiting),
         ],
         lenses: ["bets"],
         searchText: [bet.title, problem?.title, bet.sections[SECTION.bet], bet.id].join(" "),

@@ -145,12 +145,23 @@ what is available.
 
 # Scope
 
+# Out of scope
+
 # Assumptions
 
 # Signals and safeguards
 
 # Fidelity
 ```
+
+`# Out of scope` is separate from `# Scope` on purpose. Scope held four things
+at once, so a bet that named what it deliberately left out counted the same as
+one that did not — and a builder handed the second invents the difference.
+
+Where something is out of scope because the model has not decided it yet, name
+the open question with `awaiting: [<question-id>]`. The exclusion then reads as
+provisional rather than arbitrary, and the research queue can see that a bet is
+waiting on the answer.
 
 Optionally add `participant: <entity-id>` to name the actor the experiment
 studies; `# Scope` still says which moment and what path.
@@ -203,6 +214,20 @@ a reader to a 404. Validation also checks the route actually goes through
 `PrototypeShell`, because a page rendering without it silently drops the bet, the
 problem and the provenance. A Bet without a prototype omits `route` entirely — a
 Bet is allowed to exist long before any software does.
+
+Once the prototype is built and you have checked it against the five experiment
+sections, record which experiment that was:
+
+```yaml
+prototype:
+  status: working
+  route: /prototypes/<id>
+  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7   # printed by prototype:brief
+```
+
+Refine any of those sections afterwards and validation says which one moved, so
+software cannot go on quietly testing a question the bet no longer asks. Restamp
+if it still tests the refined section; set `status: concept` if it does not.
 
 ## What you never have to edit
 

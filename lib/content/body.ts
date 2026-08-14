@@ -23,6 +23,7 @@ export const SECTION = {
   questions: "Questions",
   learningDecision: "Learning decision",
   scope: "Scope",
+  outOfScope: "Out of scope",
   assumptions: "Assumptions",
   signals: "Signals and safeguards",
   fidelity: "Fidelity",
@@ -35,15 +36,24 @@ export const SECTION = {
  * things before anything is built. They had nowhere to live but a chat, so the
  * approval left no record, and every build re-derived them.
  *
- * Five named sections rather than one free-form block, because the names are
- * what make readiness *derivable*: coverage counts them, open ends can say
- * which is missing, and the build packet can refuse to say "build" without
- * them. All five stay optional — a Bet is allowed to exist long before an
- * experiment does.
+ * Named sections rather than one free-form block, because the names are what
+ * make readiness *derivable*: coverage counts them, open ends can say which is
+ * missing, and the build packet can refuse to say "build" without them. All of
+ * them stay optional — a Bet is allowed to exist long before an experiment does.
+ *
+ * `# Out of scope` is separate from `# Scope`, and it is the one split worth
+ * making. Scope held four things — participant, moment, in-scope path, and
+ * exclusions — so a scope that named what it deliberately left out counted the
+ * same as one that did not, and a builder handed the second invents the
+ * difference. Exclusions are the half that stops a prototype quietly growing,
+ * which makes them worth gating on their own. The other three stay together:
+ * `participant` already has a structured field, and the moment and the path are
+ * one thought.
  */
 export const EXPERIMENT_SECTIONS = [
   SECTION.learningDecision,
   SECTION.scope,
+  SECTION.outOfScope,
   SECTION.assumptions,
   SECTION.signals,
   SECTION.fidelity,
@@ -52,7 +62,8 @@ export const EXPERIMENT_SECTIONS = [
 /** What each one is for, said where somebody is deciding whether to write it. */
 export const EXPERIMENT_SECTION_MEANING: Record<string, string> = {
   [SECTION.learningDecision]: "What somebody should be better able to decide after trying this. If no decision changes, there is no reason to build it yet.",
-  [SECTION.scope]: "Who encounters it, at what moment in the flow, the thinnest path that tests the decision, and what is deliberately not represented.",
+  [SECTION.scope]: "Who encounters it, at what moment in the flow, and the thinnest path that tests the decision.",
+  [SECTION.outOfScope]: "What is deliberately not represented, and why. A builder who is not told this invents it, and the prototype grows until it is testing something else.",
   [SECTION.assumptions]: "What the prototype assumes in order to run, kept separate from what the model claims. A blank model field is not a licence to invent behaviour.",
   [SECTION.signals]: "The observable signal that would support or weaken the bet, and the harm or trade-off to watch while looking for it.",
   [SECTION.fidelity]: "How real this needs to be, dimension by dimension, so polish has a stated reason and low fidelity is a choice rather than an apology.",

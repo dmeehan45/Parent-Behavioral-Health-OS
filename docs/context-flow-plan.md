@@ -375,14 +375,13 @@ build, the prototype was rebuilt to the approved scope, and the whole thing was
 checked. Five things only broke at that point, and they are worth keeping
 because each is a gap the design did not predict.
 
-**Nothing checks that the built artifact matches the approved scope.** The
-packet gates on whether the five sections *exist*, and once they do it says
-"ready" forever. Approving a scope of two modes side by side while the built
-prototype offered one produced no error anywhere: not in validation, not in the
-packet, not on the page. Dropping `prototype.status` from `working` back to
-`concept` was a judgement call nothing prompted. This is the largest remaining
-hole in the arrangement — the readiness gate is about the *bet*, and there is
-no corresponding gate about the *artifact*.
+**Nothing checks that the built artifact matches the approved scope.** *Closed
+— see [The second gate](#the-second-gate) below.* The packet gated on whether
+the five sections *exist*, and once they did it said "ready" forever. Approving
+a scope of two modes side by side while the built prototype offered one produced
+no error anywhere: not in validation, not in the packet, not on the page.
+Dropping `prototype.status` from `working` back to `concept` was a judgement call
+nothing prompted.
 
 **A shaped Bet broke the test suite.** `tests/prototype/brief.test.ts` read its
 fixture from `getRepository()` and asserted the bet had no experiment sections
@@ -401,17 +400,110 @@ failure a reviewer's eye skips. The check now fails on any custom property
 nothing defines, respecting `var(--x, fallback)` and properties `next/font`
 supplies. It found the bug it was written for, and nothing else.
 
-**`# Scope` holds four things, and coverage counts it as one.** Participant,
-moment, in-scope path and exclusions all live in one section, so the model
-cannot tell a scope that names its exclusions from one that does not — and
-exclusions are the half that stops a prototype quietly growing. Splitting the
-section would make that derivable; it would also make five sections into eight,
-which is why it was not done here rather than because it is wrong.
+**`# Scope` holds four things, and coverage counts it as one.** *Closed — see
+[Naming the boundary](#naming-the-boundary).* Participant, moment, in-scope path
+and exclusions all lived in one section, so the model could not tell a scope that
+named its exclusions from one that did not — and exclusions are the half that
+stops a prototype quietly growing.
 
 **The Bet cannot point at the open question it is deliberately not answering.**
-The approved scope excludes match quality *because* `define-matching-quality` is
-queued, and the interface says the scores are provisional — but nothing in the
-model links the Bet to that question. Both statements are prose, so they can
-drift apart, and the queue cannot show that a bet is already waiting on it. An
-edge from a Bet to a research question would fix it, and is the one piece of new
-model shape this run actually argued for.
+*Closed — see [Naming the boundary](#naming-the-boundary).* The approved scope
+excludes match quality *because* `define-matching-quality` is queued, and the
+interface says the scores are provisional — but nothing in the model linked the
+Bet to that question. Both statements were prose, so they could drift apart, and
+the queue could not show that a bet was already waiting on it.
+
+## The second gate
+
+The largest of those findings is closed. Readiness asks a question about the
+*bet*; this asks the one about the *artifact*, and it is the one that goes stale
+— because refining a bet is the normal thing to do to one.
+
+A built prototype records the experiment it was checked against:
+
+```yaml
+prototype:
+  status: working
+  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7
+```
+
+The value is a digest per experiment section, in order, printed by
+`prototype:brief` and written by a person. Refine any section and it no longer
+matches; because the digests are positional, the failure names the section that
+moved rather than shrugging at the whole thing.
+
+**The split is the design.** A machine can prove staleness; only a person can
+assert conformance. Nothing here reads the prototype's source and decides
+whether it implements a scope — that is semantics, and deterministic tooling in
+this repository does not resolve semantics. It proves the cheaper, sufficient
+thing: that somebody looked at both, and that neither has moved since. This is
+the mechanism `researchTrace` already uses, where a citation over a superseded
+handoff hash stops validating.
+
+Two decisions inside it are worth keeping.
+
+**The gate belongs in `validate:content`, not the content loader.** The first
+version threw from `getRepository()`, which was wrong in a way that took thirty
+seconds to demonstrate and is worth recording: refining a scope made the whole
+repository unloadable, so the map, every record page, and the prototype packet
+all failed — including the packet whose error message told you to run it. A gate
+that breaks the tool for fixing it is not a gate. `research/` already had this
+rule; the same reasoning applies to anything a person edits mid-flight.
+
+**The refinement is the brief.** When the stamp is stale, the packet leads with
+*what changed* and prints the refined sections verbatim, then says the rest of
+the packet still applies. That is the point of the whole arrangement in one
+screen: a person sharpens the scope, and the next builder is handed the sharper
+scope as the thing to build to, without anybody re-assembling it.
+
+What is still true: nothing verifies the software *actually* implements the
+scope, and nothing can. The gate makes it impossible to drift silently, not
+impossible to be wrong.
+
+## Naming the boundary
+
+The two remaining findings were the same finding twice: a prototype's boundary
+was written down in a way nothing could read. Both are closed.
+
+**`# Out of scope` is its own section.** Scope held participant, moment, path
+and exclusions, so a bet that said what it deliberately left out counted exactly
+the same as one that did not — and readiness passed either way. Exclusions are
+the half that stops a prototype quietly growing, so they are gated on their own
+now. Only that one split was made: `participant` already has a structured field,
+and the moment and the path are one thought. Six sections, not eight.
+
+**`awaiting` names the open question an exclusion is waiting on.** The scope
+excludes match quality *because* `define-matching-quality` is queued, and until
+now those were two pieces of prose that agreed by coincidence. The Bet names the
+question, so the packet can tell a builder the boundary is provisional — *do not
+resolve any of it in the prototype* — and `/review` marks the question as one a
+bet is already scoped around, which is the difference between a question worth
+answering next and one that merely exists.
+
+It is a reference into `research/`, and deliberately **not** an edge. The far end
+is not a model record: it is staging, and drawing it would put unreviewed
+material on the map and go stale the moment a handoff landed. It is declared
+block-only in `lib/model/conformance.ts` with that reason, because a reference
+nobody classified is the thing that registry exists to prevent.
+
+Splitting a section changed the fingerprint's length, which made every existing
+stamp uncomparable — so the gate from the previous section fired on its first
+real content change. The honest answer happened to be *restamp*: the exclusion
+text moved verbatim, the software still tests both sections, and a person checked
+before saying so. That is the discipline working, not a formality: the check
+fired, somebody looked, and the looking is the whole point.
+
+### The same test bug, three times
+
+The fixtures in `tests/prototype/` spread a real bet to borrow its problem,
+claims and metrics, and inherited its editorial state along with them. That broke
+the suite three separate times — `sections` when a bet was first shaped,
+`prototype` when one was first stamped, `awaiting` when one first named a
+question — and each time it was fixed by clearing one more field.
+
+Clearing fields is whack-a-mole; the fixture now lists what it *takes*. A field
+added to `Bet` tomorrow is absent by default, which is the safe direction. The
+general rule, since this repository will keep adding fields to records that tests
+borrow: **a fixture should opt in to what it borrows, not opt out of what it does
+not.** A test that misses new state is inconvenient; one that silently inherits
+it is wrong, and it fails somewhere unrelated to the change that caused it.

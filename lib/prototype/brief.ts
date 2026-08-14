@@ -7,6 +7,7 @@ import {
   stageCoverage,
   stepCoverage,
 } from "@/lib/model/coverage";
+import { conformance } from "@/lib/prototype/conformance";
 import type { Bet, Claim, Metric, Stage, Step } from "@/lib/schemas";
 import type { ReviewFinding, ReviewRun } from "@/lib/research/view";
 
@@ -193,10 +194,57 @@ export function renderPrototypeBrief(
   /* ---- The verdict, first ------------------------------------------------ */
 
   lines.push(heading(2, "Is this ready to build?"), "");
-  if (verdict.ready) {
+  const conforms = conformance(bet);
+
+  if (verdict.ready && conforms.state === "stale") {
+    // The most useful state the packet has, and the reason this section exists
+    // at all: the experiment was refined after the software was built, so the
+    // difference *is* the brief. Say what moved, then hand over the new text.
+    const which = conforms.drifted.length === 1 ? "one section has" : `${conforms.drifted.length} sections have`;
+    lines.push(
+      `**The experiment moved.** Something is already built here, and ${which} changed since anybody last checked the`,
+      "software against it. What follows is what to build *to* — the rest of the packet is unchanged and still applies.",
+      "",
+      heading(3, "What changed"),
+      "",
+    );
+    for (const name of conforms.drifted) {
+      lines.push(`**${name}** — now reads:`, "", (bet.sections[name] ?? "").trim(), "");
+    }
+    lines.push(
+      "When the software tests these again, record it on the bet so the next reader is not guessing:",
+      "",
+      "```yaml",
+      "prototype:",
+      `  builtAgainst: ${conforms.fingerprint}`,
+      "```",
+      "",
+      "If it no longer tests them and will not soon, set `prototype.status` to `concept` instead. Both answers are",
+      "honest; leaving it as it is is the only one that is not.",
+      "",
+    );
+  } else if (verdict.ready && conforms.state === "current") {
+    lines.push(
+      "**Already built, and current.** The software has been checked against this experiment and neither has moved",
+      "since. Use the rest of this packet to change it, not to start it.",
+      "",
+    );
+  } else if (verdict.ready) {
     lines.push(
       "**Yes.** The experiment has been shaped and approved in the Bet, so you can build the in-scope path below",
       "without asking anybody to invent it for you.",
+      "",
+      "When it is built and you have checked it against the five sections, record that on the bet:",
+      "",
+      "```yaml",
+      "prototype:",
+      `  status: working`,
+      `  route: /prototypes/${bet.id}`,
+      `  builtAgainst: ${conforms.fingerprint}`,
+      "```",
+      "",
+      "Validation asks for it, because `status: working` claims the software tests this experiment and nothing else",
+      "can establish that somebody looked.",
       "",
     );
   } else {
@@ -232,7 +280,19 @@ export function renderPrototypeBrief(
   const shaped = EXPERIMENT_SECTIONS.filter((name) => bet.sections[name]?.trim());
   if (shaped.length) {
     lines.push(heading(2, "The experiment, as approved"), "");
-    for (const name of shaped) lines.push(heading(3, name), "", bet.sections[name].trim(), "");
+    for (const name of shaped) {
+      lines.push(heading(3, name), "", bet.sections[name].trim(), "");
+      // Beside the exclusion it explains, so an exclusion reads as something
+      // waiting on an answer rather than as an arbitrary line somebody drew.
+      if (name === SECTION.outOfScope && bet.awaiting?.length) {
+        lines.push(
+          `Some of this is out of scope because the model has not decided it yet. Open research: ` +
+            `${bet.awaiting.map((id) => `\`${id}\``).join(", ")}. Do not resolve any of it in the prototype — ` +
+            `label it, keep it out of the flow, or ask.`,
+          "",
+        );
+      }
+    }
   }
 
   /* ---- The problem ------------------------------------------------------- */

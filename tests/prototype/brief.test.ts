@@ -2,32 +2,56 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { getRepository } from "../../lib/content/repository";
 import { readiness, renderPrototypeBrief, researchIdsFor } from "../../lib/prototype/brief";
+import { EXPERIMENT_SECTIONS } from "../../lib/content/body";
 import type { Bet } from "../../lib/schemas";
 import type { Repository } from "../../lib/content/repository";
 
 const repo = getRepository();
 
 /**
- * A bet's *frontmatter* comes from the repository, so these tests exercise the
- * real problem, steps, claims and metrics. Its *sections* are always set here.
+ * A fixture that opts *in* to what it borrows.
  *
- * Reading them from `content/` instead was a real defect: the tests passed only
- * while the one bet in the model happened to have no experiment written down,
- * and the first person to shape one broke the suite. Authoring content must
- * never require a code change, and that has to be true of the tests too.
+ * These tests want the real problem, steps, claims and metrics, so the packet is
+ * exercised against a model that actually exists. They do not want any of the
+ * bet's editorial state, and spreading the record to get the first meant
+ * inheriting the second — which broke this suite three separate times, each on a
+ * different field: `sections` when a bet was first shaped, `prototype` when one
+ * was first stamped, and `awaiting` when one first named a research question.
+ *
+ * Listing what is taken fixes the whole class rather than the instance. A field
+ * added to `Bet` tomorrow is absent here by default, which is the safe
+ * direction: a test that misses new state is inconvenient, one that silently
+ * inherits it is wrong.
  */
-const bare: Bet = { ...repo.bets[0], sections: {} };
+const source = repo.bets[0];
+const bare: Bet = {
+  id: source.id,
+  title: source.title,
+  file: source.file,
+  problem: source.problem,
+  claims: source.claims,
+  metrics: source.metrics,
+  confidence: source.confidence,
+  authority: source.authority,
+  body: "",
+  sections: {},
+} as Bet;
 
-/** The same bet, with its experiment written down. */
+/**
+ * The same bet, with its experiment written down.
+ *
+ * Every section is filled from `EXPERIMENT_SECTIONS` rather than listed here, so
+ * splitting or adding one does not quietly turn every "ready to build" case into
+ * an unshaped one. Only the sections a test actually reads back are given
+ * particular wording.
+ */
 function shaped(overrides: Record<string, string> = {}): Bet {
   return {
     ...bare,
     sections: {
+      ...Object.fromEntries(EXPERIMENT_SECTIONS.map((name) => [name, `Approved text for ${name.toLowerCase()}.`])),
       "Learning decision": "Whether a clinician wants a caseload assembled at all.",
-      Scope: "A clinician who has just become match-ready.",
       Assumptions: "That enough families are waiting.",
-      "Signals and safeguards": "Accept, edit, or decline. Watch for reluctant acceptance.",
-      Fidelity: "Interaction high; match quality out of scope.",
       ...overrides,
     },
   };
@@ -36,7 +60,7 @@ function shaped(overrides: Record<string, string> = {}): Bet {
 test("a bet with no experiment shape is refused, and told what is missing", () => {
   const verdict = readiness(bare);
   assert.equal(verdict.ready, false);
-  assert.deepEqual(verdict.missing, ["Learning decision", "Scope", "Assumptions", "Signals and safeguards", "Fidelity"]);
+  assert.deepEqual(verdict.missing, [...EXPERIMENT_SECTIONS]);
 
   const brief = renderPrototypeBrief(bare, repo, []);
   assert.match(brief, /\*\*Not yet — do not start building\.\*\*/);
@@ -120,6 +144,25 @@ test("the research lookup uses the ids research actually writes", () => {
   const problem = repo.problems.find((candidate) => candidate.id === bare.problem);
   for (const target of problem?.targets ?? []) assert.ok(ids.includes(target), `research about ${target} would be missed`);
   assert.equal(new Set(ids).size, ids.length, "an id repeats, so a finding would be listed twice");
+});
+
+/*
+ * An exclusion that says "we have not decided this" and a queued research
+ * question saying the same thing were two pieces of prose that could drift. The
+ * bet now names the question, and the packet says so where the exclusion is
+ * read — so a builder learns the boundary is waiting on an answer rather than
+ * arbitrary, and knows not to resolve it themselves.
+ */
+test("an exclusion waiting on research says which question, beside the exclusion", () => {
+  const waiting = { ...shaped(), awaiting: ["define-matching-quality"] } as Bet;
+  const brief = renderPrototypeBrief(waiting, repo, []);
+
+  const section = brief.slice(brief.indexOf("### Out of scope"), brief.indexOf("### Assumptions"));
+  assert.match(section, /define-matching-quality/, "the awaited question is not beside the exclusion");
+  assert.match(section, /Do not resolve any of it in the prototype/);
+
+  // A bet waiting on nothing says nothing, rather than an empty heading.
+  assert.doesNotMatch(renderPrototypeBrief(shaped(), repo, []), /Open research:/);
 });
 
 test("a bet pointing at a problem that does not exist stops the build", () => {

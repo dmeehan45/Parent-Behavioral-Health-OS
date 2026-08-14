@@ -186,6 +186,8 @@ export type QueueEntry = {
   detail: string;
   /** For a gap, the record it is about. */
   subject?: { id: string; title: string; href: string; kind: string };
+  /** Titles of bets that named this question as something they are waiting on. */
+  blocking?: string[];
 };
 
 export type ReviewIndex = {

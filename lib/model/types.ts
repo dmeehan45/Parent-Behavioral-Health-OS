@@ -111,6 +111,11 @@ export type ModelNode = {
    * Derived from the body's sections, so it is empty for every other kind.
    */
   experimentGaps?: string[];
+  /**
+   * For a bet: which experiment sections have moved since the prototype was
+   * last checked against them. Empty unless something is built and has drifted.
+   */
+  experimentDrift?: string[];
   blocks: DetailBlock[];
   /** Lowercased haystack for the command palette. */
   searchText: string;
