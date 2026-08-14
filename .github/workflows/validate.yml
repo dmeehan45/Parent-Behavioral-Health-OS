@@ -34,6 +34,13 @@ jobs:
       - name: Test research intake
         run: npm run test:research
 
+      # Contributions arrive here from conversations held elsewhere. This looks
+      # for the shapes of things that must never be in a public repository —
+      # credentials, contact details, patient identifiers, confidentiality
+      # markers carried over from an internal document.
+      - name: Scan for confidential material
+        run: npm run scan:safety
+
       - name: Lint
         run: npm run lint
 

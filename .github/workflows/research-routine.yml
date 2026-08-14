@@ -1,0 +1,87 @@
+name: Research routine
+
+# Twice a day, publish what the research routine should pick up next.
+#
+# This job holds no model key and calls no provider. It runs the repository's
+# own `research:queue` command and keeps a single issue up to date with the
+# result, so a person — or a conversational agent connected through a GitHub
+# connector — has one place to open and one thing to do next.
+#
+# Deliberately not: a runner that does the research. That would need a provider
+# credential, which is the thing this whole arrangement is built to avoid. The
+# research happens in a conversation; this only says what is worth researching.
+
+on:
+  schedule:
+    # 08:00 and 20:00 UTC. Cron here is always UTC.
+    - cron: "0 8,20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: research-routine
+  cancel-in-progress: false
+
+jobs:
+  queue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Read the queue
+        id: queue
+        run: |
+          set -euo pipefail
+          npm run --silent research:queue > queue.txt
+          cat queue.txt
+
+      - name: Publish it to the routine issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const queue = fs.readFileSync("queue.txt", "utf8");
+            const marker = "<!-- research-routine -->";
+            const body = [
+              marker,
+              "## What to research next",
+              "",
+              "Pick the top item, then run `npm run research:brief -- <question-id>` and follow it.",
+              "`docs/research-routine.md` describes the loop; `docs/research-workflow.md` describes one run.",
+              "",
+              "```text",
+              queue.trim(),
+              "```",
+              "",
+              `_Refreshed ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC. This issue is rewritten in place, not reopened._`,
+            ].join("\n");
+
+            const { owner, repo } = context.repo;
+            // One issue, rewritten. A new issue every twelve hours would bury
+            // the repository in a queue nobody reads.
+            const existing = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue is:open in:body "${marker}"`,
+            });
+            const found = existing.data.items[0];
+            if (found) {
+              await github.rest.issues.update({ owner, repo, issue_number: found.number, body });
+              core.info(`Updated #${found.number}`);
+              return;
+            }
+            const created = await github.rest.issues.create({
+              owner,
+              repo,
+              title: "Research routine: what to research next",
+              body,
+            });
+            core.info(`Opened #${created.data.number}`);

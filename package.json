@@ -12,6 +12,11 @@
     "validate:content": "tsx scripts/validate-content.ts",
     "validate:research": "tsx scripts/validate-research.ts --check-reviews",
     "generate:research-review": "tsx scripts/generate-research-review.ts",
+    "scan:safety": "tsx scripts/scan-safety.ts",
+    "research:queue": "tsx scripts/research-queue.ts",
+    "research:ask": "tsx scripts/research-ask.ts",
+    "research:brief": "tsx scripts/research-brief.ts",
+    "research:new": "tsx scripts/research-new.ts",
     "test:research": "tsx --test tests/research/*.test.ts",
     "test:responsive": "playwright test"
   },

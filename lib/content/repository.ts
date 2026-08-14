@@ -208,6 +208,12 @@ function checkResearchTrace(items: Array<Stage | Step | Entity | Claim | Metric 
   if (!traced.length) return;
   const handoffs = readResearchRecords("handoffs", (value) => handoffSchema.parse(value), (record) => record.run.id);
   const decisions = readResearchRecords("decisions", (value) => decisionFileSchema.parse(value), (record) => record.runId);
+  const superseded = new Map<string, string>();
+  for (const record of decisions.values()) {
+    for (const decision of record.decisions) {
+      if (decision.supersedes) superseded.set(decision.supersedes, decision.id);
+    }
+  }
   for (const item of traced) for (const trace of item.researchTrace ?? []) {
     const handoff = handoffs.get(trace.run);
     if (!handoff) {
@@ -234,6 +240,16 @@ function checkResearchTrace(items: Array<Stage | Step | Entity | Claim | Metric 
       throw new Error(
         `Invalid researchTrace in ${item.file}: decision '${trace.decision}' is '${decision.disposition}'. ` +
           `Only 'accept' and 'accept-with-edits' authorize a canonical change.`,
+      );
+    }
+    // A later run is allowed to retire an earlier run's conclusion. When it
+    // does, the authorization goes with it: the model cannot keep citing a
+    // decision that has since been replaced.
+    const replacedBy = superseded.get(trace.decision);
+    if (replacedBy) {
+      throw new Error(
+        `Invalid researchTrace in ${item.file}: decision '${trace.decision}' has been superseded by '${replacedBy}'. ` +
+          `Cite the superseding decision, or revisit whether this record still holds.`,
       );
     }
     const hash = crypto.createHash("sha256").update(JSON.stringify(handoff)).digest("hex");

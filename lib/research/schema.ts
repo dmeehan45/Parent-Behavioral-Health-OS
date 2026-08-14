@@ -32,6 +32,10 @@ export const handoffSchema = z.object({
       containsPrivateCompanyMaterial: z.literal(false),
       rawTranscriptIncluded: z.literal(false),
     }),
+    // Which queued questions this run set out to answer. Optional, so it does
+    // not change the hash of any handoff written before it existed, and so a
+    // run that followed its own nose is still a valid run.
+    answers: z.array(idSchema).optional(),
   }),
   sources: z
     .array(
@@ -91,6 +95,28 @@ export const decisionFileSchema = z.object({
   ),
 });
 
+/**
+ * A question waiting to be researched.
+ *
+ * One file per question, because two people or two agents adding a question on
+ * the same day should not conflict in Git. A question is a complete
+ * contribution: naming what we do not know is worth recording whether or not
+ * anyone answers it.
+ */
+export const questionSchema = z.object({
+  id: idSchema,
+  question: z.string().min(10).max(500),
+  askedBy: z.string().min(1),
+  createdAt: z.coerce.date(),
+  // `closed` is a human retiring a question. Being answered is not a status —
+  // it is derived from the runs that declare they answered it, so the two can
+  // never disagree.
+  status: z.enum(["open", "parked", "closed"]).default("open"),
+  priority: z.enum(["high", "normal", "low"]).default("normal"),
+  targets: z.array(idSchema).default([]),
+  why: z.string().max(1000).optional(),
+});
+
 export const researchTraceSchema = z.object({
   run: idSchema,
   decision: idSchema,
@@ -99,5 +125,24 @@ export const researchTraceSchema = z.object({
   sources: z.array(idSchema).min(1),
 });
 
+export const safetyAllowlistSchema = z.object({
+  approved: z
+    .array(
+      z.object({
+        file: z.string().min(1),
+        rule: z.string().min(1),
+        // The match is recorded as a hash, never as text. Approving a flagged
+        // credential by pasting it into an allowlist would commit the
+        // credential a second time, in the file that says it is fine.
+        match: z.string().regex(/^[a-f0-9]{16}$/, "expected the 16-character hash printed by npm run scan:safety"),
+        approvedBy: z.string().min(1),
+        reason: z.string().min(1).max(500),
+      }),
+    )
+    .default([]),
+});
+
 export type ResearchHandoff = z.infer<typeof handoffSchema>;
 export type DecisionFile = z.infer<typeof decisionFileSchema>;
+export type ResearchQuestion = z.infer<typeof questionSchema>;
+export type SafetyAllowlist = z.infer<typeof safetyAllowlistSchema>;

@@ -1,0 +1,134 @@
+import type { Tone } from "@/lib/model/types";
+
+/**
+ * Everything the review interface needs that is not read off the filesystem.
+ *
+ * `lib/research/projection.ts` reads `research/` and is server-only, the same
+ * way `lib/model/graph.ts` is. The decision composer is a client component, so
+ * the shapes and the vocabulary it renders live on this side of the boundary.
+ */
+
+export const DISPOSITIONS = ["accept", "accept-with-edits", "reject", "defer", "needs-research"] as const;
+export type Disposition = (typeof DISPOSITIONS)[number];
+
+/**
+ * What each disposition commits the reviewer to.
+ *
+ * The review is where a person's own thinking gets sharpened, so the interface
+ * says what the words mean rather than assuming the reviewer remembers. These
+ * describe the contract, not any particular run, which is why they can live in
+ * code.
+ */
+export const DISPOSITION_MEANING: Record<Disposition, string> = {
+  accept: "This is right, and the model should change to reflect it. Authorizes a later canonical edit.",
+  "accept-with-edits": "Right in substance, wrong as written. Say what the model should say instead.",
+  reject: "Not true, not relevant, or not good enough evidence. Say why, so a later run does not repeat it.",
+  defer: "Might be right; not worth acting on now. Say what would make it worth revisiting.",
+  "needs-research": "Not answerable on this evidence. Say what would settle it.",
+};
+
+export const DISPOSITION_TONE: Record<Disposition, Tone> = {
+  accept: "evidence",
+  "accept-with-edits": "evidence",
+  reject: "warn",
+  defer: "quiet",
+  "needs-research": "accent",
+};
+
+/** Dispositions that authorize a canonical change. */
+export const AUTHORIZING: Disposition[] = ["accept", "accept-with-edits"];
+
+export function requiresRationale(disposition: Disposition) {
+  return ["reject", "defer", "needs-research"].includes(disposition);
+}
+
+export function requiresEditedRecommendation(disposition: Disposition) {
+  return disposition === "accept-with-edits";
+}
+
+export const CLASSIFICATION_MEANING: Record<string, string> = {
+  new: "The run believes nothing in the model says this yet.",
+  duplicate: "The run believes an existing Claim already says this.",
+  qualifying: "The run believes this narrows or conditions an existing Claim.",
+  conflicting: "The run believes this contradicts something the model holds.",
+  "out-of-scope": "Company-specific or otherwise outside this generalized model.",
+};
+
+export const QUALITY_MEANING: Record<string, string> = {
+  primary: "The source is the evidence itself.",
+  secondary: "The source reports on evidence gathered elsewhere.",
+  "expert-opinion": "A qualified person's judgement, not a measurement.",
+  unknown: "The run could not tell.",
+};
+
+export type ReviewSource = {
+  id: string;
+  identity: string;
+  kind: string;
+  title: string;
+  access: string;
+  locator: string;
+  url?: string;
+  /** Earlier runs that read the same source. */
+  alsoReadBy: string[];
+};
+
+export type PriorArt = {
+  run: string;
+  finding: string;
+  statement: string;
+  state: string;
+};
+
+export type ReviewFinding = {
+  id: string;
+  decisionId: string;
+  statement: string;
+  classification: string;
+  evidenceStance: string;
+  evidenceQuality: string;
+  generalizedApplicability: boolean;
+  sourceIds: string[];
+  suggestedTargets: Array<{ id: string; title: string; href: string; kind: string }>;
+  existingClaimCandidates: Array<{ id: string; statement: string; href: string }>;
+  proposedClaim?: { id: string; statement: string };
+  extract?: string;
+  uncertainty?: string;
+  priorArt: PriorArt[];
+  decision?: { disposition: string; rationale?: string; editedRecommendation?: string; supersedes?: string };
+  supersededBy?: string;
+};
+
+export type ReviewRun = {
+  id: string;
+  question: string;
+  synthesis: string;
+  createdAt: string;
+  preparedBy: string;
+  provenance: string;
+  hash: string;
+  file: string;
+  packetFile: string;
+  decisionFile: string;
+  answers: Array<{ id: string; question: string }>;
+  sources: ReviewSource[];
+  findings: ReviewFinding[];
+  openQuestions: Array<{ id: string; question: string }>;
+  reviewer?: string;
+  decided: number;
+  total: number;
+};
+
+export type ReviewIndex = {
+  runs: ReviewRun[];
+  /** Accepted decisions from earlier runs, offered as supersede targets. */
+  supersedable: Array<{ id: string; run: string; statement: string }>;
+  sourceUrl?: string;
+};
+
+export function runStatus(run: ReviewRun): { label: string; tone: Tone } {
+  if (run.total === 0) return { label: "nothing to review", tone: "quiet" };
+  if (run.decided === 0) return { label: "awaiting review", tone: "warn" };
+  if (run.decided < run.total) return { label: `${run.decided} of ${run.total} reviewed`, tone: "accent" };
+  return { label: "reviewed", tone: "evidence" };
+}
