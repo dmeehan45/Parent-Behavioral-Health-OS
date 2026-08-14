@@ -2442,6 +2442,93 @@ p:last-child {
   gap: 20px;
 }
 
+/*
+ * The guided-caseload prototype reads downward rather than in two columns: the
+ * clinician, then the choice of how to build, then the caseload itself. The
+ * choice has to come before the list, because which mode you are in changes
+ * what the list means.
+ */
+.caseload {
+  display: grid;
+  gap: 20px;
+}
+
+/* The decision under test. Two equal targets, so neither reads as the default
+   by being larger or first-and-only. */
+.mode-switch {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
+}
+
+.mode {
+  display: grid;
+  gap: 4px;
+  min-height: 44px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.mode:hover {
+  border-color: var(--accent);
+}
+
+.mode.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.panel-title {
+  margin: 10px 0 8px;
+}
+
+/*
+ * A quality signal the model has not decided yet, said so in the interface.
+ * Gold is what we propose to change rather than what we have established, which
+ * is exactly what these scores are — and the words say it too, because colour is
+ * never the only signal.
+ */
+.provisional {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  background: var(--warn-soft);
+  border-left: 3px solid var(--kind-bet);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.family-why {
+  display: block;
+  margin-top: 6px;
+}
+
+.family.chosen .family-state {
+  color: var(--accent);
+}
+
+/* Departing from what was proposed is the most informative thing a participant
+   can do, so the interface acknowledges it rather than letting it pass. */
+.badge-changed {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink);
+  background: var(--warn-soft);
+  border-radius: 999px;
+}
+
+.closing p {
+  max-width: 60ch;
+}
+
 .clinician-card {
   padding: var(--ds-space-8);
   background: var(--accent-ink);
