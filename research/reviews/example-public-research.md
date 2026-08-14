@@ -37,6 +37,22 @@ Allowed response: accept | reject | defer | needs-research | accept-with-edits.
 
 - **source-project-readme** (available, repository): Parent Behavioral Health OS README; identity `github-parent-health-os-readme`.
 
+## Recording decisions
+
+Copy this into `research/decisions/example-public-research.yaml`, replace every `TODO`, and run `npm run validate:research`.
+
+```yaml
+contractVersion: 1
+runId: example-public-research
+reviewedHandoffHash: 94073564b95b46415a0433f5b0d2e34c1099e0ca1070a730ba81f580feb72f66
+reviewer: TODO who is accountable for this decision
+decisions:
+  - id: decide-example-public-research-finding-review-first
+    disposition: TODO accept | reject | defer | needs-research | accept-with-edits
+    # rationale: required for reject, defer, and needs-research
+    # editedRecommendation: required for accept-with-edits
+```
+
 ## Canonical change gate
 
 No canonical change is authorized by this packet. Create a decision file, validate it, and apply accepted decisions in a separate model-change pull request referencing the run and decision IDs.

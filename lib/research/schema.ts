@@ -73,7 +73,13 @@ export const decisionFileSchema = z.object({
   contractVersion: z.literal(1),
   runId: idSchema,
   reviewedHandoffHash: z.string().regex(/^[a-f0-9]{64}$/),
-  reviewer: z.string().min(1),
+  // The point of the decision file is that a named person is accountable for
+  // what enters the model. The review packet ships a `TODO` placeholder here so
+  // the skeleton is copy-paste; leaving it in place is not a review.
+  reviewer: z
+    .string()
+    .min(1)
+    .refine((value) => !/^todo\b/i.test(value.trim()), "name the accountable reviewer; the packet's placeholder is not one"),
   decisions: z.array(
     z.object({
       id: idSchema,

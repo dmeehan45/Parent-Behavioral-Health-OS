@@ -13,16 +13,25 @@ reviewable proposal without making chat history or unreviewed research canonical
    commit the handoff, and open a pull request to `main`. A coding agent with
    repository access performs these exact steps when connector capabilities are
    unavailable.
-4. Run `npm run validate:research` and `npm run generate:research-review`.
+4. Run `npm run generate:research-review` and `npm run validate:research`.
    Commit the deterministic review packet. CI runs both validation modes and
    verifies that generated packets are current.
-5. The accountable reviewer answers every decision in
-   `research/decisions/<run-id>.yaml` using an allowed disposition. Run
-   `npm run validate:research` again.
+5. The accountable reviewer answers the decisions in
+   `research/decisions/<run-id>.yaml` using an allowed disposition. The packet
+   ends with a ready-to-fill skeleton carrying the run ID and the reviewed
+   handoff hash — copy it, replace every `TODO`, run `npm run validate:research`
+   again. A partial review is valid: the validator reports what is still
+   outstanding rather than failing.
 6. After this intake PR is reviewed, create a separate model-change PR from
    `main`. Apply only accepted decisions and add `researchTrace` entries naming
    the run, decision, finding, stance, and source IDs. Never copy the research
    staging record into canonical prose wholesale.
+
+The run ID is the join between all four files, so each is named for it:
+`research/handoffs/<run-id>.yaml`, `research/reviews/<run-id>.md`,
+`research/decisions/<run-id>.yaml`, and the `run` field of every
+`researchTrace` that cites it. Validation enforces the naming rather than
+letting a file drift away from the ID inside it.
 
 ## Contract summary
 
@@ -64,6 +73,12 @@ a rationale. Later work supersedes rather than erases old decisions.
 - **Sensitive/private material suspected:** do not commit it. Stop, remove it
   from the synthesis, and record only a non-sensitive uncertainty if useful.
 - **CI unavailable:** run the two npm commands locally and commit their artifacts.
+- **A canonical record cites a run with no decision yet:** content validation
+  refuses it and names the decision file to write. Acceptance is what authorizes
+  a canonical change; `reject`, `defer`, and `needs-research` do not.
+- **Packet reported stale after you only read it:** regenerate and commit. Line
+  endings and trailing whitespace are ignored in the comparison, so this means
+  the handoff itself moved, not that an editor touched the file.
 
 The architecture rationale and complete trust boundary are recorded in
 `docs/decisions/0001-git-native-research-intake.md`.
