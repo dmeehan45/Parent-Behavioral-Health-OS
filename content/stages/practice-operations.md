@@ -5,6 +5,9 @@ order: 6
 summary: >
   Enable clinicians and families to participate in care effectively over time.
 status: exploring
+exitConditions:
+  - a clinician can run a full week of scheduled care without unresolved operational friction
+  - families can attend and continue care without operator intervention
 authority: proposed
 provenance:
   source: author

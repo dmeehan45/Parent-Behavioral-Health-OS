@@ -5,6 +5,9 @@ order: 1
 summary: >
   Create and understand sufficient appropriate family demand.
 status: exploring
+exitConditions:
+  - a family's care need is understood well enough to describe the clinician it requires
+  - demand can be stated as a supply requirement, not only as a volume
 authority: proposed
 provenance:
   source: author

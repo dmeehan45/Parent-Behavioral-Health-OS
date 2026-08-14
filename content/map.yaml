@@ -2,6 +2,7 @@ id: parent-health-operating-system
 title: Parent Behavioral Health Operating System
 stages: [family-demand, clinician-supply, clinician-onboarding, matching, care-initiation, practice-operations, quality-outcomes, retention-growth]
 edges:
+  - { from: family-demand, to: clinician-supply, relationship: informs }
   - { from: clinician-supply, to: clinician-onboarding, relationship: flows_to }
   - { from: clinician-onboarding, to: matching, relationship: enables }
   - { from: family-demand, to: matching, relationship: supplies }

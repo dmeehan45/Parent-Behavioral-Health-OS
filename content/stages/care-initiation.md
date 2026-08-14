@@ -5,6 +5,9 @@ order: 5
 summary: >
   Convert an accepted match into successfully started care.
 status: exploring
+exitConditions:
+  - a first session has taken place
+  - both sides intend to continue into a care relationship
 authority: proposed
 provenance:
   source: author
