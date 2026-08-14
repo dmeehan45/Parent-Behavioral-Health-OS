@@ -89,6 +89,6 @@ export const EDGE_LEGEND: Array<{ kind: EdgeKind; label: string; description: st
   { kind: "problem", label: "Problem", description: "Where a stage or step is thought to break." },
   { kind: "bet", label: "Bet", description: "A solution proposed against a problem." },
   { kind: "prototype", label: "Prototype", description: "Working software that makes a bet concrete." },
-  { kind: "evidence", label: "Evidence", description: "A claim or metric attached to what it describes." },
+  { kind: "evidence", label: "Evidence", description: "A claim or metric attached to what it describes, or what rests on it." },
   { kind: "state", label: "State change", description: "An entity a step reads or produces." },
 ];
