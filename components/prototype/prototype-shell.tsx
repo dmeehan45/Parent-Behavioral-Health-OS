@@ -90,7 +90,11 @@ export function PrototypeShell({ route, children }: { route: string; children: R
 
       <section className="prototype-context">
         <h2>What this prototype is testing</h2>
-        <DetailBlocks blocks={[...(problem ? [problem] : []), ...(targets ? [targets] : []), ...context]} />
+        {/* Level three: these sit under this section's own h2, not under the h1. */}
+        <DetailBlocks
+          blocks={[...(problem ? [problem] : []), ...(targets ? [targets] : []), ...context]}
+          headingLevel={3}
+        />
       </section>
     </main>
   );

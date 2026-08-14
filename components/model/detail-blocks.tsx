@@ -20,11 +20,21 @@ import type { DetailBlock } from "@/lib/model/types";
 export function DetailBlocks({
   blocks,
   onNavigate,
+  headingLevel = 2,
 }: {
   blocks: DetailBlock[];
   onNavigate?: (nodeId: string) => void;
+  /**
+   * What these block labels are headings *of*. On a full page the blocks are the
+   * page's own sections and sit under its `h1`; inside the detail sheet they sit
+   * under the record's `h2`. Fixing this at `h3` skipped a level on every record
+   * page in the model, which is the outline a screen reader navigates by.
+   */
+  headingLevel?: 2 | 3;
 }) {
   if (blocks.length === 0) return null;
+
+  const Heading = `h${headingLevel}` as const;
 
   return (
     <div className="detail-blocks">
@@ -35,7 +45,7 @@ export function DetailBlocks({
           case "prose":
             return (
               <section className="detail-block" key={key}>
-                <h3 className="field-label">{block.label}</h3>
+                <Heading className="field-label">{block.label}</Heading>
                 <p className="detail-prose">{block.value}</p>
               </section>
             );
@@ -43,7 +53,7 @@ export function DetailBlocks({
           case "markdown":
             return (
               <section className="detail-block" key={key}>
-                <h3 className="field-label">{block.label}</h3>
+                <Heading className="field-label">{block.label}</Heading>
                 <Markdown source={block.value} />
               </section>
             );
@@ -51,7 +61,7 @@ export function DetailBlocks({
           case "list":
             return (
               <section className="detail-block" key={key}>
-                <h3 className="field-label">{block.label}</h3>
+                <Heading className="field-label">{block.label}</Heading>
                 <ul className="detail-list">
                   {block.items.map((item, itemIndex) => (
                     <li key={`${key}-${itemIndex}`}>{item}</li>
@@ -63,7 +73,7 @@ export function DetailBlocks({
           case "states":
             return (
               <section className="detail-block" key={key}>
-                <h3 className="field-label">{block.label}</h3>
+                <Heading className="field-label">{block.label}</Heading>
                 <ul className="state-list">
                   {block.items.map((item, itemIndex) => (
                     <li key={`${key}-${itemIndex}`}>
@@ -87,7 +97,7 @@ export function DetailBlocks({
           case "rules":
             return (
               <section className="detail-block" key={key}>
-                <h3 className="field-label">{block.label}</h3>
+                <Heading className="field-label">{block.label}</Heading>
                 <ul className="rule-list">
                   {block.items.map((rule) => (
                     <li key={rule.id}>
@@ -102,9 +112,9 @@ export function DetailBlocks({
           case "links":
             return (
               <section className="detail-block" key={key}>
-                <h3 className="field-label">
+                <Heading className="field-label">
                   {block.label} <span className="field-count">{block.items.length}</span>
-                </h3>
+                </Heading>
                 <ul className="link-list">
                   {block.items.map((item) => {
                     const body = (

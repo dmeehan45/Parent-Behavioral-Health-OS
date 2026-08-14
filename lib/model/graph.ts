@@ -81,8 +81,20 @@ function firstSentence(value?: string): string | undefined {
 
 type LinkItem = { id: string; title: string; href: string; kind: NodeKind; meta?: string };
 
+/**
+ * `unknown` is the schema's way of saying a field was never filled in, which is
+ * the same thing as having no meta at all — and repeating the word down the
+ * right edge of a list of metrics reads as noise before it reads as honesty. The
+ * gap is still recorded; it is said once, in coverage, rather than per row.
+ */
 function link(kind: NodeKind, contentId: string, title: string, meta?: string): LinkItem {
-  return { id: nodeId(kind, contentId), title, href: ROUTES[kind](contentId), kind, meta };
+  return {
+    id: nodeId(kind, contentId),
+    title,
+    href: ROUTES[kind](contentId),
+    kind,
+    meta: meta === "unknown" ? undefined : meta,
+  };
 }
 
 function linksBlock(label: string, items: LinkItem[]): DetailBlock[] {

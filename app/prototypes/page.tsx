@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge, Breadcrumb, ConfidenceBadge } from "@/components/model/badges";
+import { Badge, Breadcrumb, ConfidenceBadge, KindBadge } from "@/components/model/badges";
 import { projectModel } from "@/lib/model/graph";
 
 export const dynamic = "force-dynamic";
@@ -64,9 +64,14 @@ export default function PrototypesPage() {
                     <Badge tone={launchable ? "accent" : "quiet"}>{prototype.status ?? "unknown"}</Badge>
                     <ConfidenceBadge confidence={bet?.confidence} />
                   </div>
+                  {/* The kind is said in words, not only in coral. Everywhere
+                      else a cross-reference carries its badge; here the hue was
+                      the only thing marking this as a problem, which reads as an
+                      error message rather than a link to one. */}
                   {problem ? (
                     <Link className="card-problem" href={problem.href}>
-                      {problem.title}
+                      <KindBadge kind="problem" subtle />
+                      <span>{problem.title}</span>
                     </Link>
                   ) : null}
                   <h2>{bet?.title ?? prototype.title}</h2>

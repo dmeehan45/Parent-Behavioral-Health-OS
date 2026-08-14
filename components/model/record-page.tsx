@@ -24,6 +24,10 @@ import type { ModelGraph, ModelNode } from "@/lib/model/types";
  */
 export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode }) {
   const parent = node.parentId ? graph.nodes.find((candidate) => candidate.id === node.parentId) : undefined;
+  // Authority is the guardrail that keeps a proposal from reading as policy, so
+  // what the word means cannot live in a `title` a touch reader never sees. The
+  // map has the legend for this; a record page has nowhere else to put it.
+  const authorityMeaning = graph.vocab.authority.find((term) => term.id === node.authority)?.description;
 
   const mapHref = (() => {
     const params = new URLSearchParams();
@@ -48,14 +52,17 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
         <div className="page-head-main">
           <div className="page-head-badges">
             <KindBadge kind={node.kind} />
-            <AuthorityBadge
-              authority={node.authority}
-              title={graph.vocab.authority.find((term) => term.id === node.authority)?.description}
-            />
+            <AuthorityBadge authority={node.authority} title={authorityMeaning} />
             <ConfidenceBadge confidence={node.confidence} />
             {node.status ? <Badge tone="quiet">{node.status}</Badge> : null}
             {node.dataStatus ? <Badge tone="quiet">data {node.dataStatus}</Badge> : null}
           </div>
+
+          {authorityMeaning ? (
+            <p className="authority-note">
+              <strong>{node.authority}</strong> — {authorityMeaning}
+            </p>
+          ) : null}
 
           <h1>{node.title}</h1>
           {node.subtitle ? <p className="page-subtitle">{node.subtitle}</p> : null}

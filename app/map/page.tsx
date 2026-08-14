@@ -22,8 +22,15 @@ function readView(params: Record<string, string | string[] | undefined>, lensIds
   const lensParam = single("lens") as LensId | undefined;
   const lens = lensParam && lensIds.includes(lensParam) ? lensParam : "flow";
 
+  // An id that no longer resolves is passed through rather than dropped. The
+  // sheet already has a "No longer in the model" state for the live case, and
+  // silently ignoring it left someone following a shared link to a renamed
+  // primitive looking at the default view with no idea why.
+  // Anything shaped like a node id is kept even when nothing answers to it; the
+  // sheet renders its "No longer in the model" state and the reader learns why
+  // they are not looking at what they were sent.
   const openParam = single("open");
-  const open = openParam && nodeIds.has(openParam) ? openParam : undefined;
+  const open = openParam?.includes(":") ? openParam : undefined;
 
   const expand = (single("expand") ?? "")
     .split(",")

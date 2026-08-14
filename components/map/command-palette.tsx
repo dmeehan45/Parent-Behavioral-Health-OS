@@ -148,10 +148,28 @@ export function CommandPalette({
         />
 
         {results.length === 0 ? (
-          <p className="palette-empty">
-            Nothing in the model matches that yet. The model is deliberately incomplete — this may be a gap worth
-            filling in <code>content/</code>.
-          </p>
+          /* Somewhere to go from here. The copy was right and the reader still
+             had to work out for themselves that backspacing was the only way
+             on, which is a dead end with a good explanation attached. */
+          <div className="palette-empty">
+            <p>
+              Nothing in the model matches that yet. The model is deliberately incomplete — this may be a gap worth
+              filling in <code>content/</code>.
+            </p>
+            <div className="palette-empty-actions">
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  setQuery("");
+                  setActive(0);
+                  inputRef.current?.focus();
+                }}
+              >
+                Clear search
+              </button>
+            </div>
+          </div>
         ) : (
           <ul className="palette-results" ref={listRef}>
             {results.map((node, index) => (

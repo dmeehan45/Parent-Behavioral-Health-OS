@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { GraphCanvas } from "@/components/map/graph-canvas";
 import { CommandPalette } from "@/components/map/command-palette";
@@ -141,6 +141,11 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
 
   return (
     <div className={`workspace${openNode || openId ? " sheet-open" : ""}`}>
+      {/* The map is a page and needs a name. It had no h1 at all, so its only
+          headings were the ones inside the legend and the detail sheet, and a
+          screen reader landed on a document with no top-level label. */}
+      <h1 className="visually-hidden">System map</h1>
+
       <div className="workspace-bar">
         {/* The tab labels name the four views; their node counts were four more
             numbers on the busiest control on the page, answering a question
@@ -245,14 +250,53 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
 }
 
 function Legend({ graph, onClose }: { graph: ModelGraph; onClose: () => void }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  /**
+   * Announcing a dialog and then leaving the reader outside it is worse than
+   * not announcing one. Focus moves to the heading on open and back to whatever
+   * opened it on close, so the vocabulary key is somewhere a keyboard can get
+   * to without hunting for it.
+   */
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    headingRef.current?.focus();
+    return () => {
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
+
   return (
     <div className="legend" role="dialog" aria-label="Map legend">
       <div className="legend-head">
-        <h2>How to read this map</h2>
+        <h2 ref={headingRef} tabIndex={-1}>
+          How to read this map
+        </h2>
         <button type="button" className="icon-button" onClick={onClose} aria-label="Close legend">
           ✕
         </button>
       </div>
+
+      {/*
+       * What each lens shows.
+       *
+       * This lived only in the tab's `title`, which a touch reader cannot reach
+       * at all and a keyboard reader reaches inconsistently — so on a phone the
+       * four tabs were four unexplained words. The legend is where vocabulary
+       * belongs, and it is reachable everywhere now.
+       */}
+      <section>
+        <h3 className="field-label">The four views</h3>
+        <ul className="legend-list">
+          {graph.lenses.map((entry) => (
+            <li key={entry.id}>
+              <span>
+                <strong>{entry.label}</strong> {entry.description}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* The legend is where someone learns the vocabulary, so it says what each
           word means rather than only pairing it with a colour. */}

@@ -339,11 +339,14 @@ p:last-child {
   box-shadow: var(--ds-shadow-lift);
 }
 
+/* At the system's own 44px floor. These are the sheet's close and back and the
+   legend's dismiss — the controls a reader reaches for most on a phone, and the
+   ones it is most expensive to miss. */
 .icon-button {
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: var(--ds-touch-target);
+  height: var(--ds-touch-target);
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
@@ -600,6 +603,8 @@ p:last-child {
 .brand {
   display: inline-flex;
   align-items: center;
+  /* The header is 64px tall and this was a 22px target inside it. */
+  min-height: var(--ds-touch-target);
   gap: 10px;
   font-weight: var(--ds-weight-bold);
   font-size: 14px;
@@ -676,8 +681,18 @@ p:last-child {
   padding: 0 20px;
 }
 
-/* The article measure. Long-form reading is the point of every record page,
-   and 720px is the single most important number in the system's layout. */
+/*
+ * The article measure. Long-form reading is the point of every record page, and
+ * 720px is the single most important number in the system's layout.
+ *
+ * Scoped to the block container, not to two particular descendants. As
+ * `.detail-prose` and a direct-child `.prose` it reached almost nothing: a
+ * markdown block renders `.prose` nested inside `.detail-blocks`, and a list
+ * block renders `.detail-list`, so measured line length on a stage page ran to
+ * about 112 characters — roughly 1.6x the comfortable maximum, on exactly the
+ * pages the number was written for.
+ */
+.shell.page .detail-blocks,
 .shell.page > .prose,
 .shell.page .detail-prose {
   max-width: var(--ds-container-text);
@@ -770,7 +785,7 @@ p:last-child {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 36px;
+  min-height: var(--ds-touch-target);
   padding: 7px 12px;
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -798,7 +813,7 @@ p:last-child {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 36px;
+  min-height: var(--ds-touch-target);
   padding: 7px 11px;
   background: transparent;
   border: 1px solid var(--line);
@@ -835,7 +850,7 @@ p:last-child {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 36px;
+  min-height: var(--ds-touch-target);
   padding: 7px 12px;
   background: transparent;
   border: 1px solid var(--line);
@@ -944,8 +959,8 @@ p:last-child {
 }
 
 .canvas-controls button {
-  width: 40px;
-  height: 40px;
+  width: var(--ds-touch-target);
+  height: var(--ds-touch-target);
   background: var(--surface);
   border: 0;
   color: var(--ink-2);
@@ -1456,7 +1471,7 @@ p:last-child {
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 40px;
+  min-height: var(--ds-touch-target);
   padding: 8px 10px;
   background: var(--surface-2);
   border: 1px solid transparent;
@@ -1596,6 +1611,13 @@ p:last-child {
   padding: 24px 18px;
   font-size: 14px;
   color: var(--ink-2);
+}
+
+.palette-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .palette-foot {
@@ -1751,6 +1773,21 @@ p:last-child {
   color: var(--ink-3);
 }
 
+/* Says what the authority badge above it means, in words, on the page rather
+   than in a tooltip. Sized to be read after the badge, not before the title. */
+.authority-note {
+  margin: -6px 0 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: var(--ds-container-text);
+}
+
+.authority-note strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
 .page-head-aside {
   flex: 0 0 auto;
   display: flex;
@@ -1771,6 +1808,55 @@ p:last-child {
 .empty-note {
   padding: 32px 0;
   color: var(--ink-2);
+}
+
+/* ==========================================================================
+   Loading
+
+   The shape of a record page's header, held while the server renders one.
+   Reduced motion is honoured globally, which stops the shimmer rather than the
+   layout — the placeholder still says "something is coming here".
+   ========================================================================== */
+
+.skeleton-head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: var(--ds-container-text);
+}
+
+.skeleton {
+  display: block;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  animation: skeleton-pulse 1.4s var(--ds-ease) infinite;
+}
+
+.skeleton-crumb {
+  width: 180px;
+  height: 12px;
+}
+
+.skeleton-badges {
+  width: 240px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+}
+
+.skeleton-title {
+  width: min(100%, 520px);
+  height: 40px;
+}
+
+.skeleton-lede {
+  width: 100%;
+  height: 44px;
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.45;
+  }
 }
 
 /* `min()` on the track floor is what stops the grid forcing the page wider than
@@ -1810,14 +1896,25 @@ p:last-child {
 
 /* The problem sits above the title as a kicker: what it is for, then what it is
    called. */
+/* Padded to a full-height hit area, with the padding taken back out of the
+   margins so the card's visual rhythm is unchanged. */
 .card-problem {
-  display: block;
-  margin-bottom: -6px;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 5px 0;
+  margin: -5px 0 -11px;
   color: var(--kind-problem);
   font-size: 12px;
   font-weight: 650;
   line-height: 1.35;
   text-decoration: none;
+}
+
+.card-problem .kind-badge {
+  flex: 0 0 auto;
+  position: relative;
+  top: 1px;
 }
 
 .card-problem:hover {
@@ -2026,7 +2123,7 @@ p:last-child {
   color: var(--ds-blue-light);
 }
 
-.clinician-card h3 {
+.clinician-card h2 {
   margin: 8px 0 2px;
   font-size: 24px;
   letter-spacing: -0.03em;
@@ -2111,6 +2208,44 @@ p:last-child {
   padding-top: 14px;
   border-top: 1px solid var(--line);
   font-size: 13px;
+}
+
+.capacity-actions,
+.capacity-done {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 14px;
+}
+
+.capacity-done {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 14px;
+  background: var(--evidence-soft);
+  border: 1px solid color-mix(in srgb, var(--evidence) 30%, transparent);
+  border-radius: var(--radius);
+}
+
+/* A full caseload is a real constraint, so a card that would exceed it reads as
+   unavailable rather than merely not working when tapped. */
+.family:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.family:disabled:hover {
+  border-color: var(--line-strong);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button:disabled:hover {
+  background: var(--accent);
 }
 
 /* ==========================================================================
@@ -2207,7 +2342,7 @@ p:last-child {
   .search-trigger,
   .live-pill,
   .legend-toggle {
-    width: 40px;
+    width: var(--ds-touch-target);
     justify-content: center;
     padding: 0;
     font-size: 17px;
@@ -2231,19 +2366,26 @@ p:last-child {
   .canvas-minimap {
     width: 104px;
     height: 68px;
-    margin: 0 12px 12px 0;
+    margin: 0 12px calc(12px + var(--canvas-inset, 0px)) 0;
   }
 
   /* There is no room beside the minimap on a phone, so the controls stack
      above it: 68px of minimap, its 12px margin, and a 12px gap. */
   .canvas-controls {
     flex-direction: column;
-    margin: 0 12px 92px 0;
+    margin: 0 12px calc(92px + var(--canvas-inset, 0px)) 0;
   }
 
-  .canvas-controls button {
-    width: 44px;
-    height: 44px;
+  /*
+   * Lift both above the sheet when one is open.
+   *
+   * The sheet rises to its peek height over the bottom of the canvas, which is
+   * exactly where zoom, fit and the minimap live — so opening a primitive took
+   * away the only orientation aids on the screen at the moment they were most
+   * needed. The peek height is the one number involved, so it sets the inset.
+   */
+  .workspace.sheet-open .workspace-canvas {
+    --canvas-inset: 46dvh;
   }
 
   .detail-sheet {
@@ -2266,12 +2408,14 @@ p:last-child {
     transform: translateY(0);
   }
 
+  /* A grab strip the width of the sheet, at the height of everything else you
+     are meant to be able to hit. */
   .sheet-grip {
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    height: 26px;
+    height: var(--ds-touch-target);
     background: transparent;
     border: 0;
     cursor: grab;
@@ -2326,9 +2470,18 @@ p:last-child {
 
 @media (max-width: 560px) {
   /* The mark keeps the way home; the full name costs more width than the
-     destinations it pushes off the edge are worth. */
+     destinations it pushes off the edge are worth. The anchor keeps its own
+     `aria-label`, so dropping the words costs nothing to a screen reader —
+     but it left a 16px dot grid as the only way home, so the link keeps a
+     full-size hit area around a mark that stays small. */
   .brand-text {
     display: none;
+  }
+
+  .brand {
+    min-width: var(--ds-touch-target);
+    min-height: var(--ds-touch-target);
+    justify-content: center;
   }
 
   .lens-tab {
