@@ -106,6 +106,31 @@ Three consequences worth knowing before you touch any of it:
   decision. Do not add a way to skip it, and do not add server-side writes to
   make it "complete" — it hands back a decision file, and Git records it.
 
+### Where research appears, and where it deliberately does not
+
+`/review` is ordered by what is owed rather than by what exists: waiting on you,
+accepted but not yet in the model, worth investigating, decided. A record page
+carries a **Research about this** block, and the navigation carries a count of
+findings waiting on a person.
+
+**Accepted and applied are different states.** A reviewer accepting a finding
+authorizes a change to `content/`; it does not make one. If those two collapse
+into "done", accepted research piles up having changed nothing — which is the
+failure this whole arrangement exists to prevent. `findingState()` in
+`lib/research/view.ts` is where that distinction lives.
+
+Research is **not** painted on the map, and that is a decision rather than an
+omission. `projectModel()` reads `content/` and `contentRevision()` hashes
+`content/` only, so a badge on a node would go stale the moment a handoff landed
+and would not correct itself until something canonical changed. Record pages
+render per request, so that is where the connection is safe to make.
+
+Surfaces outside `/review` read research through `lib/research/glance.ts`, which
+swallows its errors on purpose. A malformed staging file is a normal thing to
+encounter; it must not take down the navigation on every route and every record
+page along with it. The research page itself does not use those helpers — there,
+a parse failure is the most important thing on the screen.
+
 ## The interface uses one design system
 
 The UI follows the **Family Health Provider** design system, vendored into

@@ -80,6 +80,37 @@ export type PriorArt = {
   state: string;
 };
 
+/**
+ * Where a finding has got to, in one word.
+ *
+ * `accepted` and `applied` are deliberately different states. A reviewer
+ * accepting a finding authorizes a change to the model; it does not make one.
+ * Without somewhere to see the gap between the two, accepted research quietly
+ * piles up having changed nothing, which is the failure this whole arrangement
+ * is otherwise designed to prevent.
+ */
+export type FindingState = "awaiting" | "accepted" | "applied" | "rejected" | "deferred" | "needs-research" | "superseded";
+
+export const FINDING_STATE_LABEL: Record<FindingState, string> = {
+  awaiting: "awaiting review",
+  accepted: "accepted, not yet in the model",
+  applied: "in the model",
+  rejected: "rejected",
+  deferred: "deferred",
+  "needs-research": "needs more research",
+  superseded: "superseded",
+};
+
+export const FINDING_STATE_TONE: Record<FindingState, Tone> = {
+  awaiting: "warn",
+  accepted: "accent",
+  applied: "evidence",
+  rejected: "quiet",
+  deferred: "quiet",
+  "needs-research": "accent",
+  superseded: "quiet",
+};
+
 export type ReviewFinding = {
   id: string;
   decisionId: string;
@@ -97,7 +128,35 @@ export type ReviewFinding = {
   priorArt: PriorArt[];
   decision?: { disposition: string; rationale?: string; editedRecommendation?: string; supersedes?: string };
   supersededBy?: string;
+  /** Canonical records whose `researchTrace` cites this finding's decision. */
+  appliedIn: Array<{ id: string; title: string; href: string; kind: string }>;
+  state: FindingState;
 };
+
+/**
+ * A disposition is what the reviewer chose; a state is where the finding got
+ * to. They are close enough to be mistaken for each other and are not the same
+ * list — mapping them by cast rendered an empty badge for every rejected and
+ * deferred finding.
+ */
+const STATE_OF_DISPOSITION: Record<string, FindingState> = {
+  reject: "rejected",
+  defer: "deferred",
+  "needs-research": "needs-research",
+};
+
+export function findingState(finding: {
+  decision?: { disposition: string };
+  supersededBy?: string;
+  appliedIn: unknown[];
+}): FindingState {
+  if (finding.supersededBy) return "superseded";
+  if (!finding.decision) return "awaiting";
+  if (AUTHORIZING.includes(finding.decision.disposition as Disposition)) {
+    return finding.appliedIn.length ? "applied" : "accepted";
+  }
+  return STATE_OF_DISPOSITION[finding.decision.disposition] ?? "awaiting";
+}
 
 export type ReviewRun = {
   id: string;
@@ -119,10 +178,22 @@ export type ReviewRun = {
   total: number;
 };
 
+/** A question waiting to be researched, or a gap the model has in itself. */
+export type QueueEntry = {
+  kind: "question" | "gap";
+  id: string;
+  question: string;
+  detail: string;
+  /** For a gap, the record it is about. */
+  subject?: { id: string; title: string; href: string; kind: string };
+};
+
 export type ReviewIndex = {
   runs: ReviewRun[];
   /** Accepted decisions from earlier runs, offered as supersede targets. */
   supersedable: Array<{ id: string; run: string; statement: string }>;
+  /** What a run should pick up next: asked questions first, then model gaps. */
+  queue: QueueEntry[];
   sourceUrl?: string;
 };
 
@@ -131,4 +202,18 @@ export function runStatus(run: ReviewRun): { label: string; tone: Tone } {
   if (run.decided === 0) return { label: "awaiting review", tone: "warn" };
   if (run.decided < run.total) return { label: `${run.decided} of ${run.total} reviewed`, tone: "accent" };
   return { label: "reviewed", tone: "evidence" };
+}
+
+/** Every finding across every run, flattened, with its run for context. */
+export function allFindings(runs: ReviewRun[]) {
+  return runs.flatMap((run) => run.findings.map((finding) => ({ run, finding })));
+}
+
+/** Research that names this record as somewhere it would land, or already has. */
+export function researchAbout(runs: ReviewRun[], nodeId: string) {
+  return allFindings(runs).filter(
+    ({ finding }) =>
+      finding.suggestedTargets.some((target) => target.id === nodeId) ||
+      finding.appliedIn.some((record) => record.id === nodeId),
+  );
 }
