@@ -76,20 +76,26 @@ question → brief → research → handoff → review → decision → model ch
 
 | Join | Built? | Exercised? |
 | --- | --- | --- |
-| Ask a question / derive one from a gap | yes | yes — 3 questions queued, gaps derived live |
-| Brief a run from prior findings | yes | no |
-| Research → handoff → CI packet | yes | **once, on an example about the intake contract itself** |
-| `/review` → decision file | yes | no — 0 decisions exist |
-| Decision → `content/` with `researchTrace` | yes | no — 0 canonical records carry a trace |
+| Ask a question / derive one from a gap | yes | yes — questions queued, gaps derived live |
+| Brief a run from prior findings | yes | conversationally — the connector reconstructs the orientation the brief composes |
+| Research → handoff → CI packet | yes | **yes — once for real**: `2026-08-14-what-makes-clinician-onboarding-high-quality`, 5 findings, 10 sources |
+| Review → decision file | yes | yes — one decision file, 5 dispositions, 3 of them `accept-with-edits`, decided in conversation and recorded by the agent |
+| Decision → `content/` with `researchTrace` | yes | yes — 5 canonical records now carry a trace |
 | Problem → Bet | yes | yes — 1 Problem, 1 Bet |
 | Bet → experiment sections → packet | yes | yes — once, and it worked |
 | Packet → prototype → conformance stamp | yes | yes — once, and the gate fired for real when `# Out of scope` was split |
 | Prototype → session handoff → review | yes | no — `prototype.status` is `working`, never `tested` |
 
-**Read that column carefully.** The right-hand half of the loop — a bet becoming
-a shaped experiment becoming a built prototype — has been walked end to end and
-the design survived contact. The left-hand half — research becoming belief — is
-fully built and has never carried a single real finding about care delivery.
+**Both halves have now been walked once.** The research half carried its first
+real finding set on 2026-08-14 — `define-onboarding-quality` was answered,
+decided, and applied the same day, and the queue derives its `Answered` state
+without anyone editing the question file. What that run cost is the evidence
+behind [`context-intake-plan.md`](context-intake-plan.md): four pull requests
+for one run, every finding read and dispositioned individually, the decision
+made in conversation through a lane no document described, and two new craft
+documents added to a documentation surface this file already flags as
+duplicative. The remaining unwalked join is the prototype session — no
+prototype has ever been `tested`.
 
 ## 4. What it does not do
 
@@ -113,9 +119,9 @@ Not deliberately — these are the gaps:
 - **Six of ten candidate care transformations are unmodelled** — assessment,
   goals and plan, repeated care and coordination, observation, review and adapt,
   transition and closure. `docs/care-delivery-lifecycle-contrast.md` has the table.
-- **No canonical record has a `researchTrace`.** 40 of 49 cite `author` with no
-  references; 9 cite a reviewer decision that exists only as prose in a Markdown
-  file, which the evidence audit itself flags as not durable.
+- **Five canonical records carry a `researchTrace`; the rest cite `author` or a
+  reviewer decision that exists only as prose in a Markdown file**, which the
+  evidence audit itself flags as not durable.
 - **All 7 Metrics say `dataStatus: unknown`**, and `time-to-first-session` still
   contradicts its own decision about which clock it runs.
 - **Both Claims are low-confidence author hypotheses.**
@@ -131,11 +137,11 @@ Not deliberately — these are the gaps:
 | Problems | 1 |
 | Bets | 1 |
 | Prototypes | 1 |
-| Research handoffs | 1, and it is the worked example |
-| Reviewer decisions | 0 |
-| `researchTrace` citations in `content/` | 0 |
-| Documentation | 307 KB |
-| …of which dated point-in-time reviews | 146 KB (48%) |
+| Research handoffs | 2 — one real, one worked example |
+| Reviewer decision files | 1, carrying 5 dispositions |
+| `researchTrace` citations in `content/` | 5 records |
+| Documentation | ~330 KB across 19 files |
+| …of which dated point-in-time reviews | 146 KB (~44%) |
 
 ## 6. Where this is overbuilt
 
@@ -143,10 +149,10 @@ Not "wrong" — disproportionate. Each of these is individually well-reasoned, a
 collectively they are a large fixed cost carried by a very small model.
 
 **The enforcement surface is larger than the thing it protects.** Six mechanisms
-guard the research path. They have processed one handoff, and that handoff is
-about the intake contract rather than about care. The machinery is
-well-specified against a workload it has not met, which means its real failure
-modes are still unknown.
+guard the research path, and until 2026-08-14 they had processed only the worked
+example. The first real run then passed through all of them cleanly — which is
+one data point that the gates are workable, and also the run that showed the
+ceremony around them costs four pull requests per question.
 
 **There are four places that tell a contributor how to contribute** — `AGENTS.md`
 (26 KB), `CONTRIBUTING.md`, `docs/authoring.md`, and `README.md`. This audit
@@ -154,7 +160,10 @@ found them disagreeing three separate ways: the loop diagram
 (`Question` vs `Problem`), the pre-PR check list (7, 10, or 11 commands), and the
 experiment-section count (five in three files, six in the schema). All three are
 now fixed, and all three will drift again, because four descriptions of one
-contract is three too many.
+contract is three too many. The research side now has the same shape: four
+documents (`research-workflow.md`, `research-routine.md`,
+`conversational-research.md`, `research-source-quality.md`) describe one
+workflow, and each new run so far has added one.
 
 **Nearly half the documentation is a snapshot rather than a contract.** Four
 dated reviews total 146 KB. They are good documents. But a reader cannot tell
@@ -236,11 +245,11 @@ map cannot draw it, `/review` cannot order it.
 
 Ordered by leverage, and the first two are far ahead of the rest.
 
-1. **Answer one queued question for real** — `define-onboarding-quality` is the
-   narrowest. It produces the first true handoff, the first decision, the first
-   `researchTrace`, and the first evidence about whether the review gate works
-   under any load at all. Everything about the left half of the loop is currently
-   theory.
+1. ~~**Answer one queued question for real.**~~ **Done, same day** —
+   `define-onboarding-quality` was answered, decided, and applied on 2026-08-14.
+   What the run cost and what it had no home for became the evidence for
+   [`context-intake-plan.md`](context-intake-plan.md), which now carries the
+   infrastructure consequences of this list.
 2. **Model the family side of matching.** Give `family-demand` Steps so
    something produces a Family in `match-ready`. This is the most-named gap in
    the repository, it closes the flow's one open end, and — more importantly —
@@ -272,6 +281,7 @@ Everything above is derived from files in this repository at this revision, and
 each is worth reading directly:
 
 - `AGENTS.md` — the rules, and the reasoning behind each one
+- `docs/context-intake-plan.md` — the planned answer to sections 6 and 7 of this document
 - `docs/context-flow-plan.md` — why the loop's joins are shaped as they are
 - `docs/adversarial-system-review-2026-08-14.md` — the model's boundary problems
 - `docs/adversarial-deep-dive-readiness-matching-2026-08-14.md` — the unconverted backlog
