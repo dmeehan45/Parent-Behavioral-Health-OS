@@ -1,0 +1,22 @@
+contractVersion: 1
+runId: 2026-08-14-what-makes-clinician-onboarding-high-quality
+reviewedHandoffHash: 3da8a8815b169a61b20540b675e399db3d174d66a7e3b3b9823da24b9beec30a
+reviewer: David Meehan
+decidedAt: 2026-08-14
+decisions:
+  - id: decide-2026-08-14-what-makes-clinician-onboarding-high-quality-finding-separate-readiness-from-downstream-outcomes
+    disposition: accept
+  - id: decide-2026-08-14-what-makes-clinician-onboarding-high-quality-finding-readiness-includes-operating-environment
+    disposition: accept
+  - id: decide-2026-08-14-what-makes-clinician-onboarding-high-quality-finding-demonstrate-critical-readiness
+    disposition: accept-with-edits
+    editedRecommendation: >
+      Treat three constructs separately: underlying clinical competence; longitudinal evidence of clinician quality from real care relationships and outcomes; and readiness for the platform-specific, technology-enabled workflows the clinician will encounter. Onboarding may assess the third where capability is consequential and observable, but should not claim to establish the first two or become a second clinician-selection score.
+  - id: decide-2026-08-14-what-makes-clinician-onboarding-high-quality-finding-patient-facing-conditions-constrain-readiness
+    disposition: accept-with-edits
+    editedRecommendation: >
+      Onboarding should prepare clinicians for patient-facing safety, privacy, communication, technology, and access constraints that can reasonably be handled before matching or first care. Problems created by a particular patient's needs or preferences, a specific match, or the later care relationship should not be assigned to onboarding by default.
+  - id: decide-2026-08-14-what-makes-clinician-onboarding-high-quality-finding-separate-burden-from-speed-and-self-report
+    disposition: accept-with-edits
+    editedRecommendation: >
+      Start with the simplest useful onboarding success measure. Treat burden and rework as separate balancing or diagnostic signals only when they are needed to explain or improve that measure; do not build a composite onboarding-quality score up front.
