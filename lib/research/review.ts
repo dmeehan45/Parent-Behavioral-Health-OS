@@ -32,6 +32,7 @@ function decisionSkeleton({ handoff, hash }: LoadedHandoff) {
     `runId: ${handoff.run.id}`,
     `reviewedHandoffHash: ${hash}`,
     "reviewer: TODO who is accountable for this decision",
+    "decidedAt: TODO today, as YYYY-MM-DD",
     "decisions:",
   ];
   for (const finding of handoff.findings) {

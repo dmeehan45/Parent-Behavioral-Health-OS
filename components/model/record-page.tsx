@@ -8,7 +8,9 @@ import {
   KindBadge,
   Provenance,
 } from "@/components/model/badges";
+import { OpenEnds } from "@/components/model/open-ends";
 import { ResearchAbout } from "@/components/research/research-about";
+import { openEnds } from "@/lib/model/open-ends";
 import { researchAboutRecord } from "@/lib/research/glance";
 import type { ModelGraph, ModelNode } from "@/lib/model/types";
 
@@ -88,6 +90,8 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
       <DetailBlocks blocks={node.blocks} />
 
       <ResearchAbout items={research} />
+
+      <OpenEnds ends={openEnds(graph, node)} />
 
       <Provenance
         provenance={node.provenance}

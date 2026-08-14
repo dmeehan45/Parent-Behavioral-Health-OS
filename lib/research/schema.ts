@@ -84,6 +84,10 @@ export const decisionFileSchema = z.object({
     .string()
     .min(1)
     .refine((value) => !/^todo\b/i.test(value.trim()), "name the accountable reviewer; the packet's placeholder is not one"),
+  // When the reviewer decided. Optional, so decisions written before this
+  // existed stay valid — but the composer fills it in, because "what has
+  // happened since I last looked" is unanswerable without it.
+  decidedAt: z.coerce.date().optional(),
   decisions: z.array(
     z.object({
       id: idSchema,

@@ -2682,6 +2682,112 @@ p:last-child {
   max-width: 68ch;
 }
 
+
+/* One line of standing, rather than a band of three big numbers saying what the
+   section headings below already say. */
+.review-standing {
+  margin: 0 0 32px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.review-standing strong {
+  color: var(--ink);
+}
+
+.since-last-look {
+  margin: 0 0 16px;
+  padding: 8px 14px;
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+}
+
+/* Settled work is worth keeping and is almost never why somebody opened the
+   page. Native disclosure: no JavaScript, and it is keyboard-operable already. */
+.disclosure {
+  margin: 0 0 32px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.disclosure > summary:hover {
+  color: var(--ink);
+}
+
+.disclosure[open] > summary {
+  margin-bottom: 12px;
+}
+
+.apply-step {
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.apply-step-head {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.apply-next {
+  margin: 24px 0 0;
+  padding: 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.apply-next .field-label {
+  margin-bottom: 4px;
+}
+
+/*
+ * The loose ends on a record. Coral is where the machine breaks and what we
+ * have not proven, which is exactly what this is — so it reads as the same
+ * category the map already teaches rather than as a new one.
+ */
+.open-ends {
+  margin: 40px 0 0;
+  padding: 20px;
+  border-left: 3px solid var(--kind-problem);
+  background: var(--surface-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.open-ends-list {
+  margin: 0;
+  padding: 0 0 0 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 68ch;
+}
+
+.open-ends-list li {
+  margin: 0 0 6px;
+}
+
+.open-ends-list a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
 /* ==========================================================================
    Review
 
