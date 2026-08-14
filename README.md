@@ -71,6 +71,7 @@ Press <kbd>⌘K</kbd> to search every primitive, including ones the current lens
 - `lib/model/` projects that content into the single typed graph the interface renders, and derives node positions from topology.
 - `app/` and `components/` render that projection. They contain no model IDs, counts, or relationships.
 - `app/prototypes/` contains small executable artifacts linked to Bets.
+- `docs/prototype-workflow.md` defines how one Bet becomes a scoped, human-accountable learning prototype.
 - `docs/` explains the model, authoring loop, and future semantic boundaries.
 
 ## What this is not

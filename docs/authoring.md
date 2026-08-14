@@ -133,6 +133,11 @@ Bet never declares targets of its own.
 
 ## Link a prototype
 
+Before building, follow [`docs/prototype-workflow.md`](prototype-workflow.md) to
+derive a focused learning decision, participant flow, assumptions, safeguards,
+and human scope checkpoint from the Bet and its system context. A prototype is
+an executable question, not an automatic next step for every Bet.
+
 Add a route under `app/prototypes/<id>/page.tsx` that renders only the interaction, wrapped in `PrototypeShell`:
 
 ```tsx
