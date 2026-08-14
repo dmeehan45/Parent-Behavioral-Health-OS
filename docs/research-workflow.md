@@ -61,8 +61,13 @@ letting a file drift away from the ID inside it.
 - `contractVersion` is exactly `1` until a migration is documented.
 - IDs are lowercase kebab case and stable across retries.
 - A source has a stable `id`, `identity` (for deduplication), kind, and structured
-  locator. Public web sources require an HTTPS URL; publication records require
-  a DOI; repository sources require a repository and path.
+  locator. Each kind requires the locator that makes it findable again, and this
+  is enforced rather than merely described: web sources require an HTTPS URL;
+  publications a DOI or URL; repository sources a repository and path; and a
+  `session` — a prototype review — the bet observed, the date, and a
+  non-identifying description of who took part. A session names people by their
+  relationship to the system, never by who they are, and cannot claim a URL.
+  `docs/prototype-workflow.md` covers writing one up.
 - Findings are atomic and name their sources, suggested existing targets,
   evidence stance, and review classification. Matching is advisory: `duplicate`
   or `qualifying` records name candidate Claims, but automation never merges,

@@ -34,6 +34,21 @@ The map is live. Open it in a browser and leave it there: it polls a fingerprint
 Map → Problem → Bet → Prototype → Learn → Update Map
 ```
 
+Two commands carry the context across the joins, and both compose rather than
+decide:
+
+```bash
+npm run research:brief   -- <question-id>   # what earlier runs established
+npm run prototype:brief  -- <bet-id>        # everything needed to build one bet
+```
+
+The prototype brief gathers the Bet and its approved experiment, the Problem it
+answers, the flow it lands on, the evidence and where it is weak, the honest
+unknowns, and this repository's build rules — enough to hand to a coding agent
+alongside [AGENTS.md](AGENTS.md). It refuses to clear a build whose experiment
+nobody has shaped, because a prototype tests a decision and inventing that
+decision is the one thing nothing here is allowed to do.
+
 ## Run locally
 
 ```bash

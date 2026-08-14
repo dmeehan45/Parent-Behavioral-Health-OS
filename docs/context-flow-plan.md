@@ -1,10 +1,18 @@
 # The context flow: research → problem → bet → prototype
 
-This is a plan, not a description of the system as it stands. It defines what an
-excellent version of the repository's learning loop looks like and sequences the
-changes that get there from the current machinery. When a change lands, its
-section here should be updated to say so; when all of them have, this document
-becomes a historical record like `v0-build-plan.md`.
+> **Landed, and kept for the reasoning.** All six changes below are in `main`.
+> This is no longer a plan; it is the record of why the loop is shaped as it is,
+> and of what was deliberately not built. For how any of it works today, read
+> [`authoring.md`](authoring.md), [`prototype-workflow.md`](prototype-workflow.md),
+> [`research-workflow.md`](research-workflow.md), and `AGENTS.md`.
+>
+> The one thing it describes that has not happened: **no Bet has had its
+> experiment sections written.** That is a person's judgement, not an omission
+> to fix by filling them in. Until somebody does, `npm run prototype:brief`
+> correctly refuses to clear a build.
+
+This document defines what an excellent version of the repository's learning
+loop looks like and sequences the changes that got there.
 
 ## The loop this is for
 
@@ -37,9 +45,11 @@ The design rule that governs everything below, stated once:
 This is the same rule `lib/research/apply.ts` and `AGENTS.md` already state for
 research intake. The plan extends it to the rest of the loop.
 
-## Where context leaks today
+## Where context leaked
 
-Walking the loop station by station against the current code:
+Walking the loop station by station, as it stood before these changes. Kept in
+the present tense it was written in, because the diagnosis is the part worth
+re-reading — each leak is why the corresponding change exists.
 
 **Research → problem space.** The routine works end to end: gaps
 (`lib/research/gaps.ts`) turn model thinness into suggested questions, the brief
@@ -118,12 +128,13 @@ loosening them:
 
 ## The sequence
 
-Six changes, ordered by the direction context flows. Each is independently
-valuable and lands as its own pull request from `main`; none is stacked on
-another. Changes 2 and 3 can proceed in parallel once 1 has landed; 4 needs 3;
-5 needs 4.
+Six changes, ordered by the direction context flows. Each was independently
+valuable and landed as its own pull request from `main`; none was stacked on
+another.
 
 ### 1. Let Problems and Bets hold their evidence in the graph
+
+*Landed in #32.*
 
 **Change.** In `lib/model/graph.ts`, derive `evidence` edges from a Problem's
 `claims` and `metrics` frontmatter and from a Bet's `claims` and `metrics`
@@ -147,6 +158,8 @@ does not list the Problems that cite it in its own file — the projection deriv
 the reverse direction, as it does everywhere else).
 
 ### 2. Give accepted research a hand into the problem space
+
+*Landed in #33.*
 
 **Change.** Extend the apply surface (`lib/research/apply.ts` and
 `/review/apply`) with a second composition alongside "create this Claim": **name
@@ -176,6 +189,8 @@ Problem generated from a finding would be invented content wearing the clothes
 of evidence. No auto-queued questions: a gap *suggests*; a person queues.
 
 ### 3. Let the Bet carry the shape of its experiment
+
+*Landed in #34.*
 
 **Change.** Give the working brief's judgement half a canonical home in the Bet
 file itself. Extend `RENDERED_SECTIONS.bets` in `lib/content/body.ts` (and the
@@ -216,6 +231,8 @@ section is an honest state, surfaced as an invitation and a closed gate, not an
 error.
 
 ### 4. Compose the build packet
+
+*Landed in #35.*
 
 **Change.** `npm run prototype:brief -- <bet-id>` — the exact analogue of
 `npm run research:brief`, for the station that today has nothing. A new
@@ -263,6 +280,8 @@ layer separation), no agent invocation machinery, no stored packets.
 
 ### 5. Give the pass teeth, and the learning a way home
 
+*Landed in #36.*
+
 **Change.** Three small pieces, one per gap in the loop's tail:
 
 1. **Shell check.** `validate:content` (or a sibling check) verifies that every
@@ -292,6 +311,8 @@ manual, as the workflow requires), no new review surface — `/review` already
 orders by what is owed, and session findings simply appear in it.
 
 ### 6. Keep the reading surface light — and say so
+
+*Landed in #37.*
 
 **Change.** Almost nothing, on purpose, and this section exists so "tighten the
 system" is never read as "add surfaces." After 1–5 land: the Bet page shows its

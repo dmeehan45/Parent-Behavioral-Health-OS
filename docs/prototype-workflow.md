@@ -41,57 +41,62 @@ choices, acceptable risk, and any change to canonical content.
    agent cannot promote research or prototype observations into `content/` on
    its own.
 
-## 1. Assemble a prototype brief
+## 1. Run the brief
 
-Start from repository state, not a chat summary. Read:
+```bash
+npm run prototype:brief -- <bet-id>
+```
 
-- the Bet record's **Where this is still open** invitations; these are derived
-  from the live projection and expose missing prototypes, weak evidence, and
-  unmeasured decisions without creating another source of truth;
-- the Bet's `# Bet` and `# Questions`, authority, confidence, linked Claims,
-  Metrics, and prototype status;
-- its linked Problem, including impact and open questions;
-- the Problem's targeted Stages and Steps, including roles, entities, rules,
-  transitions, exceptions, and incomplete fields;
-- linked Metric perspectives, decision owner, and decision informed;
-- accepted research traces and relevant prior research briefs;
-- the design system, current prototype shell, and any interaction patterns that
-  already exist.
+Everything that used to be a reading list is composed for you: the Bet and its
+approved experiment, the Problem it answers, every targeted Stage and Step with
+roles, entities, rules and exceptions, the Claims and Metrics with their
+confidence and data status, the research that names any of it, an honest
+known/assumed/unknown, and the build contract.
 
-Record the result as a short working brief in the implementation plan. It should
-contain these fields:
+It is **derived and printed, never committed.** A packet on disk would be a
+second description of a Bet, going stale the moment the model moved — the same
+reason `npm run research:brief` prints rather than writes.
 
-| Field | What it means |
+Hand its output to whoever is building, together with `AGENTS.md`. That is the
+whole handover; there is no chat summary to reconstruct.
+
+### The brief can refuse, and usually should at first
+
+The packet opens with a verdict, because a prototype tests a decision and a Bet
+that has not named one cannot be built against without somebody inventing the
+answer:
+
+```text
+## Is this ready to build?
+
+**Not yet — do not start building.**
+```
+
+What it needs is the shape of the experiment, written in the Bet itself as five
+optional sections. They are what the person accountable for the Bet approves,
+and they are a canonical part of it rather than a note in a plan:
+
+| Section | What it settles |
 | --- | --- |
-| Bet | The one proposed intervention being made concrete. |
-| Problem and system context | The failure and affected flow inherited through the model. |
-| Learning decision | What a reviewer should be better able to decide after using or observing the prototype. |
-| Participant and moment | Who encounters the interaction, and at what point in the flow. |
-| In-scope path | The thinnest end-to-end path needed to test the decision. |
-| Explicitly out of scope | Adjacent workflows and production behavior that will not be represented. |
-| Known / assumed / unknown | Three separate lists so assumptions cannot masquerade as canonical facts. |
-| Success and safeguards | Observable signals, linked Metrics where applicable, and harms or trade-offs to watch. |
-| Fidelity | The minimum realism needed in content, interaction, and system response. |
-| Review method | Who will try it, what they will do, and how observations will be captured without sensitive data. |
+| `# Learning decision` | What somebody should be better able to decide after trying this. If no decision changes, there is no reason to build it yet. |
+| `# Scope` | Who encounters it, at what moment, the thinnest path that tests the decision, and what is deliberately not represented. |
+| `# Assumptions` | What the prototype assumes in order to run, kept apart from what the model claims. |
+| `# Signals and safeguards` | The observable signal that would support or weaken the bet, and the harm to watch while looking for it. |
+| `# Fidelity` | How real this needs to be, dimension by dimension, so polish has a stated reason. |
 
-The brief is a derived planning artifact, not a new model primitive. Do not copy
-it into React components and do not add a second canonical description of the
-Bet.
+A Bet may also name `participant: <entity-id>` — the actor the experiment
+studies, in a form the projection can link. `# Scope` still says which moment
+and what path.
 
-### Readiness check
+The readiness check is therefore mechanical rather than a matter of memory: the
+brief names exactly which sections are missing and what each one is for, and a
+Bet with a prototype underway and no learning decision says so on its own page
+under **Where this is still open**.
 
-A Bet is ready to prototype when all of these are answerable:
-
-- Which decision will this prototype inform?
-- Who is the participant, and what are they trying to accomplish?
-- What is the smallest flow that makes the intervention and its consequence
-  understandable?
-- Which uncertainties are safe to represent as labelled prototype assumptions?
-- Which success signal and balancing risk will the review watch?
-
-If one is unanswered, either ask the person a focused question, narrow the
+If a section is unanswered, ask the person a focused question, narrow the
 prototype to the answerable part, or defer it. Do not compensate by inventing
-workflow, policy, clinical rules, or participant preferences.
+workflow, policy, clinical rules, or participant preferences — a guess written
+here becomes something the built artifact makes look real.
 
 ## 2. Ask only decision-shaping questions
 
@@ -116,13 +121,16 @@ when repository context supports one recommendation.
 
 ### Required human checkpoint
 
-Before implementation, the person approves or corrects:
+Before implementation, the person approves or corrects the same five things —
+the learning decision, the participant and in-scope flow, the consequential
+assumptions and exclusions, the observable signal and safeguards, and the
+planned fidelity.
 
-1. the learning decision;
-2. the participant and in-scope flow;
-3. consequential assumptions and exclusions;
-4. the observable success signal and safeguards; and
-5. the planned fidelity.
+**That approval is a pull request against the Bet**, not a message in a
+conversation. The five sections go into `content/bets/<id>.md` and are reviewed
+like any other change, so the approval has the same history, provenance and
+resistance to drift as everything else here — and the next person to open the
+Bet can read what was agreed without asking anybody.
 
 This is approval of the experiment's shape, not approval of every screen.
 Implementation can then proceed self-directed until repository reality exposes
@@ -178,14 +186,21 @@ review before it can be treated as more than a speculative interaction.
 ## 5. Build inside the repository contract
 
 - Put the interaction at `app/prototypes/<bet-id>/page.tsx` and wrap it in
-  `PrototypeShell`.
+  `PrototypeShell`. Validation checks this: a declared route that renders
+  without the shell is rejected, because it would show the interaction with
+  none of the bet, problem or provenance around it. The check reads the source,
+  so it proves the shell was invoked and no more.
 - Add the route and truthful status to the canonical Bet. The shell derives the
-  Bet, Problem, targets, Claims, Metrics, provenance, and return paths; prototype
-  components must not restate them.
+  Bet, Problem, targets, Claims, Metrics, the approved experiment sections,
+  provenance, and return paths; prototype components must not restate them.
+  A reviewer standing in front of the software can therefore see what it is
+  meant to settle without the builder narrating it.
 - Keep synthetic fixtures close to the prototype and visibly fictional. Avoid
   realistic identifiers or details that could be mistaken for real people.
 - Make every action operable with keyboard and touch, use the shared focus and
   motion rules, and test the narrowest supported phone and desktop views.
+  `npm run test:responsive` visits *every* declared prototype route at both
+  widths — record pages share a template, but each prototype is its own.
 - Provide a genuine end state. Never imply that data was saved, a match was
   made, care was delivered, or a production action occurred.
 - Add no analytics service. If the prototype needs observation aids, use visible
@@ -232,6 +247,7 @@ After review, classify each implication:
 | Scope clarification | Update the working plan; ask the person if it changes the approved learning decision or consequential assumptions. |
 | Bet weakened, strengthened, or changed | Propose a canonical Bet change for human review; do not silently rewrite it in prototype code. |
 | New or revised understanding of the failure | Propose a Problem change separately from any answer. |
+| Something the session taught | Write it up as a handoff with a `session` source — see below — and decide it at `/review` like any other research. |
 | Evidence needed | Add or use a research question with `npm run research:ask`, then follow the [research handoff workflow](research-workflow.md). |
 | Accepted research affects the model | After a person's decision, use `/review/apply` to compose the canonical file or frontmatter and its `researchTrace`; apply that output through a separate model-change pull request. |
 | Ready for production consideration | Record that conclusion outside this prototype workflow; it does not authorize production architecture or implementation. |
@@ -249,6 +265,40 @@ Update the prototype status only when it truthfully reflects the artifact:
 `tested` describes an activity, not proof that the Bet is correct. Record what
 was learned in a reviewable artifact appropriate to the implication; do not pack
 session conclusions into the status field.
+
+### Getting a session back into the model
+
+A review session enters the same way public research does: as a handoff under
+`research/`, decided by a person at `/review`. The source kind is `session`, and
+its locator names what was observed rather than a URL it does not have:
+
+```yaml
+run:
+  provenance:
+    method: prototype-review
+    context: Observations from a moderated session; no transcript.
+sources:
+  - id: source-session
+    identity: session-guided-first-caseload-2026-08-14
+    kind: session
+    title: Guided First Caseload review session
+    locator:
+      bet: guided-first-caseload
+      observedAt: 2026-08-14
+      participants: Three clinicians new to the platform
+    access: available
+```
+
+`participants` describes people **by their relationship to the system, never by
+who they are.** "Three clinicians new to the platform" is a locator; a name, an
+employer, or a contact detail is a leak, and this is a public repository.
+`npm run scan:safety` catches the shapes of identifiers, and cannot catch a name
+written as ordinary prose — that part is yours.
+
+The bar stays where it was: one participant's reaction is a `reported`
+observation at best. It can identify a usability defect, challenge an
+assumption, or motivate discovery. Whether it changes what the model claims is
+a reviewer's judgement, and the same gate applies to it as to everything else.
 
 ## Definition of done
 
