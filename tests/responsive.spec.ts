@@ -35,15 +35,19 @@ async function routesFromModel(page: Page): Promise<string[]> {
   const response = await page.request.get("/api/model");
   expect(response.ok()).toBeTruthy();
   const model = (await response.json()) as {
-    nodes: Array<{ kind: NodeKind; href: string }>;
+    nodes: Array<{ kind: NodeKind; href: string; contentId: string }>;
   };
 
   const seen = new Map<NodeKind, string>();
   const prototypes: string[] = [];
   for (const node of model.nodes) {
-    // A prototype node whose bet declares no route falls back to the bet's own
-    // page, which the bet template already covers.
-    if (node.kind === "prototype" && node.href.startsWith("/prototypes/")) prototypes.push(node.href);
+    // A prototype whose bet declares no route falls back to that bet's own page,
+    // which the bet template already covers. Recognised by where it falls back
+    // *to* rather than by a `/prototypes/` prefix: the route is whatever the bet
+    // declares, and assuming its shape here is the kind of convention that
+    // quietly stops being true.
+    const unbuilt = node.href === `/bets/${node.contentId}`;
+    if (node.kind === "prototype" && !unbuilt) prototypes.push(node.href);
     else if (!seen.has(node.kind)) seen.set(node.kind, node.href);
   }
   return [...new Set([...seen.values(), ...prototypes])];

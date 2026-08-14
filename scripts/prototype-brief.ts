@@ -1,5 +1,5 @@
 import { getRepository } from "../lib/content/repository";
-import { renderPrototypeBrief, type ResearchNote } from "../lib/prototype/brief";
+import { renderPrototypeBrief, researchIdsFor, type ResearchNote } from "../lib/prototype/brief";
 import { projectReview } from "../lib/research/projection";
 import { researchAbout } from "../lib/research/view";
 import { run } from "./report";
@@ -30,21 +30,10 @@ run(() => {
   let readable = true;
   try {
     const { runs } = projectReview();
-    const ids = [
-      `bet:${bet.id}`,
-      `problem:${bet.problem}`,
-      ...(repo.problems.find((problem) => problem.id === bet.problem)?.targets ?? []).flatMap((target) => [
-        `stage:${target}`,
-        `step:${target}`,
-        target,
-      ]),
-      ...(bet.claims ?? []).map((claim) => `claim:${claim}`),
-      ...(bet.metrics ?? []).map((metric) => `metric:${metric}`),
-    ];
     const seen = new Set<string>();
-    research = ids
-      .flatMap((nodeId) => researchAbout(runs, nodeId))
-      .filter(({ finding }) => (seen.has(finding.decisionId) ? false : seen.add(finding.decisionId)));
+    research = researchIdsFor(bet, repo)
+      .flatMap((id) => researchAbout(runs, id))
+      .filter(({ finding }) => (seen.has(finding.decisionId) ? false : Boolean(seen.add(finding.decisionId))));
   } catch {
     readable = false;
   }

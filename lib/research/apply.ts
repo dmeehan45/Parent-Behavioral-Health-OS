@@ -57,6 +57,33 @@ export function suggestedConfidence(evidenceQuality: string): ConfidenceLevel {
   return "low";
 }
 
+/**
+ * A YAML scalar that survives whatever somebody typed.
+ *
+ * Quoted only when it has to be, because every content file in the repository
+ * writes plain titles unquoted and a composer that fought that would read as
+ * foreign. Two characters force the issue: a colon turns the line into a nested
+ * mapping and the file stops parsing, and a leading `#` turns it into a comment
+ * — which is the dangerous one, because the file still parses and the value
+ * silently becomes null.
+ */
+function scalar(value: string) {
+  return /^[A-Za-z0-9][^:#\n"']*$/.test(value) ? value : JSON.stringify(value);
+}
+
+/**
+ * A folded block, with *every* line indented.
+ *
+ * Indenting only the first line works until a reviewer's edited recommendation
+ * runs to a second one — and the review page collects it in a textarea, so that
+ * is a normal thing to type rather than an edge case. The result was a file
+ * that would not parse at all.
+ */
+function folded(label: string, value: string, indent = "  ") {
+  const lines = value.trim().split(/\r?\n/).map((line) => `${indent}${line.trim()}`);
+  return [`${label}: >`, ...lines].join("\n");
+}
+
 function traceBlock(run: ReviewRun, finding: ReviewFinding, indent = "") {
   return [
     `${indent}researchTrace:`,
@@ -100,8 +127,7 @@ export function applySteps(run: ReviewRun, finding: ReviewFinding, choice: Apply
       body: [
         "---",
         `id: ${finding.proposedClaim.id}`,
-        "statement: >",
-        `  ${statement}`,
+        folded("statement", statement),
         `kind: ${choice.kind}`,
         `confidence: ${choice.confidence}`,
         `targets: [${targets.join(", ")}]`,
@@ -228,7 +254,11 @@ export function composeProblem(sources: ProblemSource[], title: string): ApplySt
     body: [
       "---",
       `id: ${id}`,
-      `title: ${named || "# the trouble, in one sentence"}`,
+      // An unnamed draft leaves `title` empty on purpose. It fails validation
+      // by name, which is the right outcome: a plausible placeholder would pass
+      // and put filler in the model, and that is the one thing nothing here is
+      // allowed to do.
+      named ? `title: ${scalar(named)}` : "title: # write the trouble here, in one sentence",
       `targets: [${targets.join(", ")}]`,
       "status: open",
       ...(claims.length ? [`claims: [${claims.join(", ")}]`] : []),

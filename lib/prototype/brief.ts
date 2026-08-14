@@ -134,6 +134,33 @@ export function readiness(bet: Bet) {
   return { ready: missing.length === 0, missing };
 }
 
+/**
+ * Every record this packet shows, as the ids research actually uses.
+ *
+ * Research names its targets by *content* id — `matching`, never
+ * `stage:matching` — and so does any record already carrying a trace. Building
+ * this list out of node ids matched nothing, which is worse than having no
+ * lookup at all: the packet printed "Research about any of this" over a list
+ * that was missing precisely the research about the bet and the claims it rests
+ * on, and looked complete while doing it.
+ *
+ * It lives here rather than in the script so that it is covered by a test. The
+ * bug survived review because the one id shape that happened to be right — the
+ * problem's targets — made the section look populated.
+ */
+export function researchIdsFor(bet: Bet, repo: Repository): string[] {
+  const problem = repo.problems.find((candidate) => candidate.id === bet.problem);
+  return [
+    ...new Set([
+      bet.id,
+      bet.problem,
+      ...(problem?.targets ?? []),
+      ...(bet.claims ?? []),
+      ...(bet.metrics ?? []),
+    ]),
+  ];
+}
+
 export function renderPrototypeBrief(
   bet: Bet,
   repo: Repository,

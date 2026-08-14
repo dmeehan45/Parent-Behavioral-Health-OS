@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import yaml from "js-yaml";
+import { claimSchema, problemSchema } from "../../lib/schemas";
 import {
   applySteps,
   composeProblem,
@@ -177,6 +179,50 @@ test("the problem id is derived from the title, and survives an unnamed draft", 
     "",
   );
   assert.equal(step?.path, "content/problems/the-problem-id.md");
+});
+
+/*
+ * The composed file is pasted straight into `content/`, so anything somebody
+ * can type has to survive the trip. A colon stops the file parsing; a leading
+ * '#' is worse, because it parses and the value silently becomes null.
+ */
+test("a title survives whatever somebody types, and an unnamed one is rejected by name", () => {
+  const source = {
+    run,
+    finding: finding({ suggestedTargets: [{ id: "matching", title: "Matching", href: "/stages/matching", kind: "stage" }] }),
+  };
+  const frontmatter = (title: string) => yaml.load(composeProblem([source], title)!.body.split("---")[1]) as Record<string, unknown>;
+
+  for (const title of ["Matching: nobody owns the wait", "#1 problem", 'It costs us "a lot"', "Nobody owns the wait"]) {
+    assert.equal(problemSchema.parse(frontmatter(title)).title, title);
+  }
+
+  // An empty draft must fail loudly. A plausible placeholder would pass, and
+  // filler in the model is the one thing nothing here may produce.
+  const unnamed = problemSchema.safeParse(frontmatter(""));
+  assert.equal(unnamed.success, false);
+  assert.deepEqual(unnamed.error?.issues[0].path, ["title"]);
+});
+
+// The review page collects an edited recommendation in a textarea, so a second
+// line is a normal thing to type. Indenting only the first broke the file.
+test("a claim statement survives a line break and a colon", () => {
+  const compose = (statement: string) =>
+    yaml.load(
+      applySteps(
+        run,
+        finding({
+          statement,
+          proposedClaim: { id: "claim-x", statement },
+          suggestedTargets: [{ id: "matching", title: "Matching", href: "/stages/matching", kind: "stage" }],
+        }),
+        choice,
+      )[0].body.split("---")[1],
+    ) as Record<string, unknown>;
+
+  assert.match(String(compose("Line one\nline two").statement), /Line one line two/);
+  assert.match(String(compose("Two things matter: speed and fit.").statement), /^Two things matter: speed and fit\./);
+  assert.ok(claimSchema.safeParse(compose("Line one\nline two")).success);
 });
 
 test("evidence quality suggests a default without deciding it", () => {
