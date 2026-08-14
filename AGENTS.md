@@ -131,6 +131,47 @@ encounter; it must not take down the navigation on every route and every record
 page along with it. The research page itself does not use those helpers — there,
 a parse failure is the most important thing on the screen.
 
+### Applying is composed, never generated
+
+`/review/apply` turns an accepted decision into the change that makes the model
+say it. `lib/research/apply.ts` composes what is **derivable** — the record's
+identity, where it lands, the `researchTrace` that proves it was reviewed — and
+refuses to compose what requires judgement.
+
+That line is the whole design. A Problem generated from a finding would be
+invented content wearing the clothes of evidence, which is the one thing this
+repository asks nobody to do. So the person chooses what kind of belief a Claim
+is and how confident they are, and naming a Problem stays an invitation. Do not
+"finish" this by having it write Problems and Bets.
+
+Choosing between `reported`, `observed`, `inference`, `assumption` and
+`hypothesis` is also the moment somebody actually learns what the model means by
+a Claim, which is why the interface explains each one at the point of choosing
+rather than assuming it is known.
+
+## Navigation should leave a reader knowing more
+
+A record page is good at saying what we currently think and was silent about the
+thing a reader is best placed to help with: the loose ends. `lib/model/open-ends.ts`
+derives them from the projection's own shape — a Problem with no Bet, a
+low-confidence Claim several things rest on, a Metric that would settle an
+argument and that nobody collects, a Bet with no prototype, a thin record.
+
+Two rules keep it from becoming another wall:
+
+- **Aggregate, never enumerate.** Six near-identical sentences about unmeasured
+  metrics is the problem this section exists to be an alternative to. One line
+  names the count and the first two.
+- **Cap it, and put it last.** Four at most, after everything the model does
+  say, because it is the question a reader leaves with rather than what they
+  arrived for.
+
+It reads edges, so it only sees relationships the projection actually derives. A
+Problem's own `claims` and `metrics` frontmatter has no edge today, so open ends
+on a Problem page come only from whether anything answers it. Adding those edges
+would also change what the map draws — worth doing deliberately, not as a
+side effect of extending this.
+
 ## The interface uses one design system
 
 The UI follows the **Family Health Provider** design system, vendored into

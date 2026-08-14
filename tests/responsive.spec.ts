@@ -15,7 +15,7 @@ import type { NodeKind } from "../lib/model/types";
  */
 
 /** Static routes that exist regardless of what is in `content/`. */
-const FIXED_ROUTES = ["/", "/map", "/prototypes", "/review"];
+const FIXED_ROUTES = ["/", "/map", "/prototypes", "/review", "/review/apply"];
 
 /** One record page per primitive, so every page template gets looked at once. */
 async function routesFromModel(page: Page): Promise<string[]> {

@@ -39,9 +39,11 @@ Running it on a schedule is described in `docs/research-routine.md`.
    way a partial review is valid: the validator reports what is still
    outstanding rather than failing.
 6. After this intake PR is reviewed, create a separate model-change PR from
-   `main`. Apply only accepted decisions and add `researchTrace` entries naming
-   the run, decision, finding, stance, and source IDs. Never copy the research
-   staging record into canonical prose wholesale.
+   `main`. **`/review/apply`** composes each accepted decision into the file to
+   create or the frontmatter to add, with the `researchTrace` already filled in.
+   It composes what is derivable and asks you for what is not: what kind of
+   belief this is, and how confident you are. Never copy the research staging
+   record into canonical prose wholesale.
 
 The run ID is the join between all four files, so each is named for it:
 `research/handoffs/<run-id>.yaml`, `research/reviews/<run-id>.md`,
