@@ -11,7 +11,7 @@ import type { Repository } from "@/lib/content/repository";
 import type { LoadedHandoff } from "./intake";
 import type { LoadedQuestion } from "./questions";
 
-export type GapKind = "unmeasured" | "unevidenced" | "unproven" | "thin" | "raised";
+export type GapKind = "unmeasured" | "unevidenced" | "unproven" | "unsupplied" | "thin" | "raised";
 
 export type Gap = {
   kind: GapKind;
@@ -24,7 +24,7 @@ export type Gap = {
   suggestedQuestion: string;
 };
 
-const GAP_ORDER: Record<GapKind, number> = { raised: 0, unevidenced: 1, unproven: 2, unmeasured: 3, thin: 4 };
+const GAP_ORDER: Record<GapKind, number> = { raised: 0, unevidenced: 1, unsupplied: 2, unproven: 3, unmeasured: 4, thin: 5 };
 
 /**
  * Where the model is thin enough to be worth researching.
@@ -73,6 +73,29 @@ export function findGaps(repo: Repository, handoffs: LoadedHandoff[], questions:
         subjectKind: "claim",
         why: `A low-confidence ${claim.kind} the model is currently reasoning from.`,
         suggestedQuestion: `What published evidence supports or contradicts: ${claim.statement}`,
+      });
+    }
+  }
+
+  // A Step that needs a state no Step produces. Validation deliberately allows
+  // this — it is a part of the system nobody has modelled, not a defect, and
+  // the answer is somebody describing what really happens rather than a
+  // plausible Step invented to satisfy a checker. Which is exactly why the
+  // queue has to carry it: an unmodelled dependency that only ever appears on
+  // its own record page is one nobody is looking at. `propose-match` needs a
+  // Family in `match-ready`, and `family-demand` has no Steps at all.
+  const entityTitle = new Map(repo.entities.map((entity) => [entity.id, entity.title]));
+  const produced = new Set(repo.steps.flatMap((step) => (step.outputs ?? []).map((io) => `${io.entity}:${io.state}`)));
+  for (const step of repo.steps) {
+    for (const input of step.inputs ?? []) {
+      if (produced.has(`${input.entity}:${input.state}`)) continue;
+      const entity = entityTitle.get(input.entity) ?? input.entity;
+      gaps.push({
+        kind: "unsupplied",
+        subject: step.id,
+        subjectKind: "step",
+        why: `Needs ${entity} in state '${input.state}', and no step in the model produces it.`,
+        suggestedQuestion: `What work actually brings a ${entity.toLowerCase()} to '${input.state}', and who does it?`,
       });
     }
   }
