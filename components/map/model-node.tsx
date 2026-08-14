@@ -33,11 +33,14 @@ export function ModelNodeCard({ data }: NodeProps<CanvasNode>) {
   const { node, tier, state, expanded, expandable, stepCount, insideParent, changed, onOpen, onToggleExpand } =
     data;
 
-  // At a glance only the signals that carry information, and only as many as
-  // fit; the detail sheet is where the full set is always shown.
-  const visibleSignals =
-    tier === "detailed" ? node.signals : node.signals.filter((signal) => signal.value > 0).slice(0, 4);
-  const nothingRecorded = node.signals.every((signal) => signal.value === 0);
+  // Signals are the only "is there anything here" cue on the canvas, so they
+  // scale with zoom instead of all arriving at once. A zero is never drawn:
+  // "0 bets" is ink spent saying nothing, and the empty case is said once below.
+  const recorded = node.signals.filter((signal) => signal.value > 0);
+  const visibleSignals = recorded.slice(0, tier === "detailed" ? 4 : 2);
+  // A primitive with nothing counted yet says so. One with nothing countable —
+  // a prototype — has no signals at all, and should stay quiet instead.
+  const nothingRecorded = node.signals.length > 0 && recorded.length === 0;
 
   return (
     <div
@@ -58,7 +61,10 @@ export function ModelNodeCard({ data }: NodeProps<CanvasNode>) {
             {node.order !== undefined ? `${String(node.order).padStart(2, "0")} · ` : ""}
             {KIND_LABELS[node.kind]}
           </span>
-          {node.status ? <span className="node-status">{node.status}</span> : null}
+          {/* Status is held back until the reader has zoomed in on something.
+              Most primitives share one value, so at map scale it repeats the
+              same word across every node without distinguishing any of them. */}
+          {node.status && tier === "detailed" ? <span className="node-status">{node.status}</span> : null}
         </span>
 
         <span className="node-title">{node.title}</span>

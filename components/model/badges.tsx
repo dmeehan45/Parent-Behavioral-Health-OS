@@ -87,14 +87,39 @@ export function CoverageGaps({ coverage }: { coverage: Coverage }) {
   );
 }
 
-export function Freshness({ lastReviewed, provenance }: { lastReviewed?: string; provenance?: string }) {
-  if (!lastReviewed && !provenance) return null;
+/**
+ * Everything about a primitive that is not the primitive itself.
+ *
+ * Provenance, freshness, how much has been described, and the file it came from
+ * all matter, and none of them are what the reader came for. Gathered here they
+ * sit after the substance instead of in front of it, in one place on every
+ * surface. Authority is deliberately *not* here: it separates a proposal from an
+ * approved rule, so it stays on the face of the record.
+ */
+export function Provenance({
+  provenance,
+  lastReviewed,
+  coverage,
+  file,
+  sourceUrl,
+}: {
+  provenance?: string;
+  lastReviewed?: string;
+  coverage: Coverage;
+  file: string;
+  sourceUrl?: string;
+}) {
   return (
-    <p className="freshness">
-      {provenance ? <>Believed from {provenance}</> : null}
-      {provenance && lastReviewed ? " · " : null}
-      {lastReviewed ? <>Reviewed {lastReviewed}</> : null}
-    </p>
+    <section className="provenance" aria-label="Where this comes from">
+      <span className="field-label">Where this comes from</span>
+      <div className="provenance-row">
+        <CoverageMeter coverage={coverage} />
+        {provenance ? <span className="small muted">believed from {provenance}</span> : null}
+        {lastReviewed ? <span className="small muted">reviewed {lastReviewed}</span> : null}
+      </div>
+      <CoverageGaps coverage={coverage} />
+      <SourceLink file={file} sourceUrl={sourceUrl} />
+    </section>
   );
 }
 

@@ -53,13 +53,16 @@ repository maps them onto its own primitives:
 | Hue | Meaning here | Kinds |
 | --- | --- | --- |
 | Blue | The machine as it is | `stage`, `step` |
+| Coral | Where it breaks, and what we have not proven | `problem`, `claim` |
 | Gold | What we propose to change | `bet`, `prototype` |
 | Green | What we can measure | `metric` |
-| Coral | What we assert but have not proven | `claim` |
 | Neutral | What moves through the machine | `entity` |
 
 Each pair shares a hue and separates by ramp step, because the two members are
-genuinely related — a step lives inside a stage, a prototype tests a bet.
+genuinely related — a step lives inside a stage, a prototype tests a bet, a
+claim is the belief underneath a problem. Four hues over eight kinds is the
+constraint the system imposes, and pairing is how it is met honestly rather
+than by inventing a fifth hue.
 
 **Colour is never the only signal.** Hue always arrives with an icon or a text
 label. Every node and badge names its kind in words as well as colouring it.

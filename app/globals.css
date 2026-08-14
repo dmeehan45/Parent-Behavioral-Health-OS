@@ -35,21 +35,21 @@
   --evidence: var(--ds-green-on-tint);
   --evidence-soft: var(--ds-green-lightest);
 
-  /* Hue means category (P2). Three kinds of thinking, three hue families, and
-     a neutral for the things the machine handles:
-       blue  — the machine as it is      (stage, and the step inside it)
-       gold  — what we propose to change (bet, and the prototype that tests it)
-       green — what we can measure       (metric)
-       coral — what we assert unproven   (claim)
-       grey  — what moves through it     (entity)
+  /* Hue means category (P2). Four hue families and a neutral:
+       blue  — the machine as it is       (stage, and the step inside it)
+       coral — where it breaks, unproven  (problem, and the claim underneath)
+       gold  — what we propose to change  (bet, and the prototype that tests it)
+       green — what we can measure        (metric)
+       grey  — what moves through it      (entity)
      Each pair shares a hue and separates by ramp step, because the two members
      are genuinely related. Colour is never the only signal — every node and
      badge carries its kind as a word as well. */
   --kind-stage: var(--ds-blue-on-tint);
   --kind-step: var(--ds-blue-darkest);
+  --kind-problem: var(--ds-coral-on-tint);
+  --kind-claim: var(--ds-coral-darkest);
   --kind-bet: var(--ds-gold-on-tint);
   --kind-prototype: var(--ds-gold-darkest);
-  --kind-claim: var(--ds-coral-on-tint);
   --kind-metric: var(--ds-green-on-tint);
   --kind-entity: var(--ds-gray-aa);
 
@@ -80,9 +80,10 @@
   :root {
     --kind-stage: var(--ds-blue-medium);
     --kind-step: var(--ds-blue-light);
+    --kind-problem: var(--ds-coral-light);
+    --kind-claim: var(--ds-coral-medium);
     --kind-bet: var(--ds-gold-medium);
     --kind-prototype: var(--ds-gold-light);
-    --kind-claim: var(--ds-coral-light);
     --kind-metric: var(--ds-green-medium);
     --kind-entity: var(--ds-gray);
 
@@ -430,6 +431,9 @@ p:last-child {
 .kind-step {
   background: var(--kind-step);
 }
+.kind-problem {
+  background: var(--kind-problem);
+}
 .kind-bet {
   background: var(--kind-bet);
 }
@@ -451,6 +455,9 @@ p:last-child {
 }
 .kind-badge.subtle.kind-step {
   color: var(--kind-step);
+}
+.kind-badge.subtle.kind-problem {
+  color: var(--kind-problem);
 }
 .kind-badge.subtle.kind-bet {
   color: var(--kind-bet);
@@ -508,9 +515,27 @@ p:last-child {
 }
 
 .coverage-gaps {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px dashed var(--line-strong);
+  margin-top: 16px;
+}
+
+/* Bookkeeping, after the reading rather than in front of it. */
+.provenance {
+  margin-top: 56px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.provenance-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin-bottom: 12px;
+}
+
+.provenance .source-path {
+  display: inline-block;
+  margin-top: 14px;
 }
 
 .source-path {
@@ -523,12 +548,6 @@ p:last-child {
 
 .source-path:hover {
   color: var(--accent);
-}
-
-.freshness {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: var(--ink-3);
 }
 
 /* ==========================================================================
@@ -721,24 +740,6 @@ p:last-child {
   border-color: transparent;
 }
 
-.lens-count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: var(--surface-2);
-  color: var(--ink-2);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.lens-tab.active .lens-count {
-  background: color-mix(in srgb, var(--ds-text-on-action) 22%, transparent);
-  color: var(--ds-text-on-action);
-}
-
 .bar-actions {
   display: flex;
   align-items: center;
@@ -847,35 +848,6 @@ p:last-child {
   color: var(--line-strong);
 }
 
-.canvas-orientation {
-  position: absolute;
-  z-index: 5;
-  top: 12px;
-  left: 12px;
-  max-width: 320px;
-  padding: 9px 12px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(6px);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  pointer-events: none;
-}
-
-.canvas-orientation strong {
-  display: block;
-  font-size: 12px;
-  letter-spacing: -0.01em;
-}
-
-.canvas-orientation span {
-  display: block;
-  margin-top: 2px;
-  font-size: 11px;
-  color: var(--ink-2);
-  line-height: 1.4;
-}
-
 .update-toast {
   position: absolute;
   z-index: 8;
@@ -979,6 +951,9 @@ p:last-child {
 }
 .node-step {
   --kind: var(--kind-step);
+}
+.node-problem {
+  --kind: var(--kind-problem);
 }
 .node-bet {
   --kind: var(--kind-bet);
@@ -1306,43 +1281,6 @@ p:last-child {
   -webkit-overflow-scrolling: touch;
 }
 
-.sheet-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
-}
-
-.sheet-signals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.sheet-signal {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--ink-3);
-}
-
-.sheet-signal b {
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.sheet-signal.tone-accent b {
-  color: var(--warn);
-}
-
-.sheet-signal.tone-evidence b {
-  color: var(--evidence);
-}
-
 .sheet-foot {
   display: flex;
   flex-wrap: wrap;
@@ -1353,8 +1291,10 @@ p:last-child {
   border-top: 1px solid var(--line);
 }
 
-.sheet-foot .source-path {
-  flex-basis: 100%;
+/* The panel is short and already ruled off by its footer, so the provenance
+   block does not need the breathing room a full page gives it. */
+.sheet-body .provenance {
+  margin-top: 24px;
 }
 
 /* ==========================================================================
@@ -1746,36 +1686,6 @@ p:last-child {
   max-width: 260px;
 }
 
-.page-signals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 22px;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.page-signal {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--ink-3);
-}
-
-.page-signal b {
-  font-size: 20px;
-  color: var(--ink);
-  letter-spacing: -0.03em;
-}
-
-.page-signal.tone-accent b {
-  color: var(--warn);
-}
-
-.page-signal.tone-evidence b {
-  color: var(--evidence);
-}
-
 .page-note {
   margin-top: 48px;
   padding-top: 18px;
@@ -1819,6 +1729,22 @@ p:last-child {
 
 .card h2 {
   font-size: 17px;
+}
+
+/* The problem sits above the title as a kicker: what it is for, then what it is
+   called. */
+.card-problem {
+  display: block;
+  margin-bottom: -6px;
+  color: var(--kind-problem);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.card-problem:hover {
+  text-decoration: underline;
 }
 
 .card-badges {
@@ -2192,11 +2118,8 @@ p:last-child {
     padding: 0;
   }
 
-  /* The active lens tab already names the view, so the orientation card is
-     redundant here and the canvas is the scarcer resource. */
-  .canvas-orientation {
-    display: none;
-  }
+  /* The canvas needs no sizing rule of its own here: `.workspace` stays a grid
+     at this width precisely so the row gives React Flow a definite height. */
 
   /* The map is pinned to the start of the flow on a phone rather than zoomed
      out to nothing, so the minimap carries the overview and stays. */
@@ -2306,10 +2229,6 @@ p:last-child {
   .lens-tab {
     padding: 7px 9px;
     font-size: 12px;
-  }
-
-  .page-signals {
-    gap: 16px;
   }
 }
 

@@ -49,7 +49,7 @@ export default function Home() {
 
       <section className="home-band">
         <span className="eyebrow">What you are looking at</span>
-        <p className="home-lead">Three words do most of the work here.</p>
+        <p className="home-lead">These words do most of the work here.</p>
         <dl className="define-list">
           {ORIENTATION_KINDS.map((kind) => (
             <div key={kind}>
@@ -76,11 +76,11 @@ export default function Home() {
       {firstRun ? (
         <section className="home-start">
           <span className="eyebrow">Start here</span>
-          <h2>{firstRun.title}</h2>
+          <h2>{firstRun.problemTitle ?? firstRun.title}</h2>
 
           {firstRun.problem ? (
             <div className="start-block">
-              <h3 className="field-label">The problem</h3>
+              <h3 className="field-label">What happens today</h3>
               <Markdown source={firstRun.problem} />
             </div>
           ) : null}
@@ -99,6 +99,11 @@ export default function Home() {
             <Link className="button secondary" href={firstRun.betHref}>
               Read the reasoning
             </Link>
+            {firstRun.problemHref ? (
+              <Link className="button secondary" href={firstRun.problemHref}>
+                Read the problem
+              </Link>
+            ) : null}
           </div>
           <p className="muted small">
             The prototype uses invented families and clinicians. Nothing you do in it is saved anywhere.

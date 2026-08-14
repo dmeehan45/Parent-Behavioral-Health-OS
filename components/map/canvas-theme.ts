@@ -13,9 +13,10 @@ import type { EdgeKind, NodeKind } from "@/lib/model/types";
 export const KIND_COLOR: Record<NodeKind, string> = {
   stage: "#0074ac", // blue — the machine as it is
   step: "#004a6b", // blue-darkest — a step inside a stage
+  problem: "#cf2038", // coral — where the machine breaks
+  claim: "#850009", // coral-darkest — the belief underneath it
   bet: "#9e6500", // gold — what we propose to change
   prototype: "#856600", // gold-darkest — the bet made concrete
-  claim: "#cf2038", // coral — asserted, not proven
   metric: "#00834e", // green — what we can measure
   entity: "#707879", // neutral — what moves through it
 };
@@ -34,6 +35,7 @@ export const EDGE_COLOR: Record<EdgeKind, string> = {
   flow: "#39a9dc", // blue-medium
   feedback: "#d69a00", // gold-dark
   process: "#0074ac", // blue
+  problem: "#f64c57", // coral-medium
   bet: "#9e6500", // gold
   prototype: "#856600", // gold-darkest
   evidence: "#00834e", // green

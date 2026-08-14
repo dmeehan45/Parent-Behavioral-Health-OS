@@ -11,11 +11,11 @@ before changing anything.
 
 **`content/` is canonical. The application is a projection of it.**
 
-Stages, steps, entities, claims, metrics, and bets live in `content/` as Markdown
-with YAML frontmatter. The React Flow graphs render that content; they are not a
-second source of truth.
+Stages, steps, entities, claims, metrics, problems, and bets live in `content/`
+as Markdown with YAML frontmatter. The React Flow graphs render that content;
+they are not a second source of truth.
 
-- Never hardcode a stage, step, claim, metric, or bet into a React component.
+- Never hardcode a stage, step, claim, metric, problem, or bet into a React component.
 - Never encode counts, positions, or relationships in application code that could
   be derived from `content/`.
 - Adding new system thinking must not require editing `app/` or `components/`.
@@ -31,10 +31,10 @@ typed nodes for every primitive, typed edges for every relationship, plus derive
 signals, detail blocks, coverage, and a per-node content hash. Components read
 that shape and nothing else.
 
-The practical consequence: **adding a stage, step, entity, claim, metric, or bet
-requires no code change at all.** It appears on the map, in search, in the detail
-panel, on its own page, and in the relevant lens because the projection already
-describes it.
+The practical consequence: **adding a stage, step, entity, claim, metric, problem,
+or bet requires no code change at all.** It appears on the map, in search, in the
+detail panel, on its own page, and in the relevant lens because the projection
+already describes it.
 
 Two rules keep this working:
 
@@ -63,6 +63,22 @@ Model-driven routes are therefore `dynamic = "force-dynamic"`. Do not prerender
 them: a statically built page would show a stale model until the next deploy,
 which defeats the point.
 
+## Problems are named separately from their answers
+
+The model does not let a Bet attach straight to a Stage. A Bet names the one
+Problem it answers, and the Problem names the Stages and Steps it bites. Where
+the Bet lands follows from the Problem.
+
+This is deliberate, and it is the rule most likely to feel like an extra step:
+
+- Naming a problem is a complete contribution. Do not invent a Bet to justify
+  writing one down.
+- Do not restate a problem inside a Bet. Bets render `# Bet` and `# Questions`;
+  a `# Problem` heading in a Bet is rejected by validation, because two copies
+  of the same trouble drift apart.
+- Do not give a Bet its own targets. If a Bet seems to land somewhere its
+  Problem does not, the Problem's `targets` are wrong, or it is a second problem.
+
 ## The interface uses one design system
 
 The UI follows the **Family Health Provider** design system, vendored into
@@ -82,10 +98,10 @@ layer. Do not reach past it into a primitive, and do not invent a colour.
 Two things the tokens cannot enforce on their own, and that a change most often
 breaks:
 
-- **Hue means category, never decoration.** Blue is the machine as it is, gold
-  is what we propose to change, green is what we can measure, coral is what we
-  assert but have not proven, neutral is what moves through it. Colour is never
-  the only signal — every node and badge names its kind in words too.
+- **Hue means category, never decoration.** Blue is the machine as it is, coral
+  is where it breaks and what we have not proven, gold is what we propose to
+  change, green is what we can measure, neutral is what moves through it. Colour
+  is never the only signal — every node and badge names its kind in words too.
 - **44px is the floor for anything you tap**, focus is the reference ring built
   from `:focus-visible`, and motion is 0.15s on the system's one easing curve.
 
@@ -147,6 +163,26 @@ npm run test:responsive    # phone and desktop smoke test; builds and serves the
 CI runs all six. Validation failures name the offending file and field.
 
 `test:responsive` needs a browser once: `npx playwright install chromium`.
+
+### Branch from `main`, and target `main`
+
+Enforced by the `Pull request shape` check, and the rule most likely to be
+broken by an agent asked for "sequential pull requests":
+
+**Never base a pull request on another feature branch.** Splitting work into a
+sequence does not mean stacking it. Branch each pull request from `main`, target
+`main`, and let the diffs overlap.
+
+A stacked pull request does not follow its base onto `main` when that base
+merges. It stays open, pointed at a branch nobody is developing, and merging it
+pushes the work *down* into that dead branch. Checks stay green, GitHub reports
+it merged, and `main` receives nothing. This has cost two hand-written recovery
+pull requests here — #9 for PRs #3–#7, and #15 for PRs #12–#14.
+
+If a change truly cannot be reviewed without an unmerged one, stack it, add the
+`stacked` label so the check passes, and say in the body that the stack must be
+**merged top down** — furthest from `main` first. Assume nobody reading the
+pull request knows that, because twice nobody did.
 
 ## Commit style
 

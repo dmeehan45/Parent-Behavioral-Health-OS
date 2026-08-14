@@ -23,7 +23,8 @@ renders a fixed set of section names per primitive:
 | --- | --- |
 | Stage | `# Current model`, `# Open questions` |
 | Step | `# Current model`, `# Open questions` |
-| Bet | `# Problem`, `# Bet`, `# Questions` |
+| Problem | `# What happens today`, `# Why it matters`, `# Open questions` |
+| Bet | `# Bet`, `# Questions` |
 | Entity, Claim, Metric | none — the body renders as a single block of prose |
 
 **Section names are a contract, not a convention.** A heading outside this table
@@ -54,7 +55,11 @@ change.
 
 ## Add a Step
 
-Create `content/steps/<id>.md` with `id`, `title`, and an existing `stage`. Add `next` references only when the sequence is known. Purpose, state references, roles, rules, exceptions, claims, metrics, and bets are optional.
+Create `content/steps/<id>.md` with `id`, `title`, and an existing `stage`. Add `next` references only when the sequence is known. Purpose, state references, roles, rules, exceptions, claims, and metrics are optional.
+
+A Step does not list the Bets aimed at it. Problems name the Steps they bite,
+and Bets name their Problem, so the link already exists in one direction and
+does not need repeating in the other.
 
 ## Add an Entity
 
@@ -83,13 +88,40 @@ Create `content/claims/<id>.md`. Choose a constrained `kind`, `confidence`, and 
 
 Create `content/metrics/<id>.md` with `id` and `title`. `dataStatus` explicitly distinguishes an important metric from one currently measured.
 
+## Name a Problem
+
+A Problem is somewhere the machine is thought to break. Naming one is a complete
+contribution: it does not need a proposed answer, and a Problem nobody has
+answered yet is the most useful thing on the map.
+
+1. Create `content/problems/<id>.md` with `id`, `title`, and `targets`.
+2. `targets` are existing Stage or Step IDs — wherever the problem actually
+   bites. At least one is required, because a problem that bites nowhere is not
+   a problem with this system.
+3. Optionally write `# What happens today`, `# Why it matters`, and
+   `# Open questions`.
+4. Leave `status` alone unless you know better; it defaults to `open`.
+
+Write the title as the trouble, not the fix. *"A clinician can finish onboarding
+and still have no work"* is a problem. *"Add caseload automation"* is a bet
+wearing a problem's clothes.
+
 ## Add a Bet in under five minutes
 
+A Bet is a proposed answer to one Problem, so the Problem comes first.
+
 1. Copy `content/bets/guided-first-caseload.md` to a kebab-case filename.
-2. Change `id`, `title`, and `targets`; all targets must already exist.
-3. Write `# Problem`, `# Bet`, and optionally `# Questions` in the Markdown body.
+2. Change `id` and `title`, and set `problem` to an existing Problem ID.
+3. Write `# Bet`, and optionally `# Questions`, in the Markdown body. Do not
+   restate the problem — it is already written down in the Problem file, and two
+   copies would drift apart.
 4. Link existing `claims` and `metrics` if appropriate.
-5. Run `npm run validate:content`. The map and target pages derive the new Bet automatically—no React edit is required.
+5. Run `npm run validate:content`. The map, the Problem, and every Stage and Step
+   the Problem targets pick the new Bet up automatically — no React edit is
+   required.
+
+Where the Bet lands in the machine is derived from its Problem's `targets`, so a
+Bet never declares targets of its own.
 
 ## Link a prototype
 
@@ -119,8 +151,8 @@ allowed to exist long before any software does.
 ## What you never have to edit
 
 Adding any primitive is a content-only change. A new stage, step, entity, claim,
-metric, or bet appears on the map, in search, in its lens, in the detail panel,
-and on its own page without a single line of React. If something you added does
+metric, problem, or bet appears on the map, in search, in its lens, in the detail
+panel, and on its own page without a single line of React. If something you added does
 not show up, the projection in `lib/model/graph.ts` is missing a relationship —
 fix it there, not in a component.
 

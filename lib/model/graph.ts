@@ -17,6 +17,7 @@ import {
   claimCoverage,
   entityCoverage,
   metricCoverage,
+  problemCoverage,
   stageCoverage,
   stepCoverage,
 } from "@/lib/model/coverage";
@@ -31,6 +32,7 @@ import type {
   ModelNode,
   NodeKind,
   Signal,
+  Tone,
 } from "@/lib/model/types";
 
 /* -------------------------------------------------------------------------- */
@@ -97,7 +99,7 @@ function proseBlock(label: string, value?: string): DetailBlock[] {
 
 export function projectModel(): ModelGraph {
   const repository = getRepository();
-  const { map, stages, steps, entities, claims, metrics, bets } = repository;
+  const { map, stages, steps, entities, claims, metrics, problems, bets } = repository;
 
   const stageById = new Map(stages.map((stage) => [stage.id, stage]));
   const stepById = new Map(steps.map((step) => [step.id, step]));
@@ -117,11 +119,28 @@ export function projectModel(): ModelGraph {
     bucket.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.title.localeCompare(b.title));
   }
 
+  const problemById = new Map(problems.map((problem) => [problem.id, problem]));
+
   /** Everything that points at a given stage or step id. */
-  const betsFor = (targetId: string) => bets.filter((bet) => bet.targets.includes(targetId));
+  const problemsFor = (targetId: string) => problems.filter((problem) => problem.targets.includes(targetId));
   const claimsFor = (targetId: string) => claims.filter((claim) => claim.targets.includes(targetId));
   const metricsFor = (targetId: string, declared?: string[]) =>
     metrics.filter((metric) => metric.targets?.includes(targetId) || declared?.includes(metric.id));
+  /** Bets are attached through the problem they answer, never directly. */
+  const betsForProblem = (problemId: string) => bets.filter((bet) => bet.problem === problemId);
+  const betsFor = (targetId: string) => problemsFor(targetId).flatMap((problem) => betsForProblem(problem.id));
+
+  /**
+   * How far a problem has got. Shown wherever a problem is listed, because a
+   * problem nobody has answered yet is the thing worth noticing.
+   */
+  const describeProblemStatus = (problemId: string) => {
+    const proposed = betsForProblem(problemId);
+    if (proposed.length === 0) return "no bet yet";
+    const built = proposed.filter((bet) => bet.prototype?.route).length;
+    const bets_ = `${proposed.length} bet${proposed.length === 1 ? "" : "s"}`;
+    return built > 0 ? `${bets_} · ${built} built` : bets_;
+  };
 
   const nodes: ModelNode[] = [];
   const edges: ModelEdge[] = [];
@@ -130,6 +149,7 @@ export function projectModel(): ModelGraph {
 
   for (const stage of orderedStages) {
     const stageSteps = stepsByStage.get(stage.id) ?? [];
+    const stageProblems = problemsFor(stage.id);
     const stageBets = betsFor(stage.id);
     const stageClaims = claimsFor(stage.id);
     const stageMetrics = metricsFor(stage.id, stage.metrics);
@@ -137,13 +157,14 @@ export function projectModel(): ModelGraph {
     const workingPrototypes = stageBets.filter((bet) => bet.prototype?.status === "working").length;
 
     const signals: Signal[] = [
-      { label: "steps", value: stageSteps.length, tone: "neutral" },
-      { label: "bets", value: stageBets.length, tone: "accent" },
-      { label: "questions", value: questions, tone: "warn" },
-      { label: "evidence", value: stageClaims.length + stageMetrics.length, tone: "evidence" },
+      signal(stageSteps.length, "neutral", "step"),
+      signal(stageProblems.length, "warn", "problem"),
+      signal(stageBets.length, "accent", "bet"),
+      signal(questions, "warn", "question"),
+      signal(stageClaims.length + stageMetrics.length, "evidence", "evidence", "evidence"),
     ];
     if (workingPrototypes > 0) {
-      signals.push({ label: "prototypes", value: workingPrototypes, tone: "accent" });
+      signals.push(signal(workingPrototypes, "accent", "prototype"));
     }
 
     const blocks: DetailBlock[] = [
@@ -154,7 +175,12 @@ export function projectModel(): ModelGraph {
         "Process steps",
         stageSteps.map((step) => link("step", step.id, step.title, step.purpose ? undefined : "not described")),
       ),
-      ...linksBlock("Bets", stageBets.map((bet) => link("bet", bet.id, bet.title, bet.confidence))),
+      // Problems come before bets: what breaks here, then what anyone has
+      // proposed about it. A problem with no bet under it is the useful signal.
+      ...linksBlock(
+        "Problems here",
+        stageProblems.map((problem) => link("problem", problem.id, problem.title, describeProblemStatus(problem.id))),
+      ),
       ...linksBlock("Claims", stageClaims.map((claim) => link("claim", claim.id, claim.statement, claim.kind))),
       ...linksBlock("Metrics", stageMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
     ];
@@ -185,7 +211,8 @@ export function projectModel(): ModelGraph {
   /* ---- Steps ----------------------------------------------------------- */
 
   for (const step of steps) {
-    const stepBets = bets.filter((bet) => bet.targets.includes(step.id) || step.bets?.includes(bet.id));
+    const stepProblems = problemsFor(step.id);
+    const stepBets = betsFor(step.id);
     const stepClaims = claims.filter((claim) => claim.targets.includes(step.id) || step.claims?.includes(claim.id));
     const stepMetrics = metricsFor(step.id, step.metrics);
     const stage = stageById.get(step.stage);
@@ -196,7 +223,9 @@ export function projectModel(): ModelGraph {
     ];
 
     const lenses: LensId[] = ["flow"];
-    if (stepBets.length > 0) lenses.push("bets");
+    // A step earns a place in the problem lens by having a problem pinned to it
+    // specifically, which is what its band on that canvas exists to anchor.
+    if (stepProblems.length > 0) lenses.push("bets");
     if (stepClaims.length > 0 || stepMetrics.length > 0) lenses.push("evidence");
     if (states.length > 0) lenses.push("entities");
 
@@ -226,7 +255,10 @@ export function projectModel(): ModelGraph {
           return target ? [link("step", target.id, target.title)] : [];
         }),
       ),
-      ...linksBlock("Bets", stepBets.map((bet) => link("bet", bet.id, bet.title, bet.confidence))),
+      ...linksBlock(
+        "Problems here",
+        stepProblems.map((problem) => link("problem", problem.id, problem.title, describeProblemStatus(problem.id))),
+      ),
       ...linksBlock("Claims", stepClaims.map((claim) => link("claim", claim.id, claim.statement, claim.kind))),
       ...linksBlock("Metrics", stepMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
     ];
@@ -247,10 +279,11 @@ export function projectModel(): ModelGraph {
         href: ROUTES.step(step.id),
         file: step.file,
         signals: [
-          { label: "rules", value: step.rules?.length ?? 0, tone: "neutral" },
-          { label: "states", value: states.length, tone: "quiet" },
-          { label: "bets", value: stepBets.length, tone: "accent" },
-          { label: "evidence", value: stepClaims.length + stepMetrics.length, tone: "evidence" },
+          signal(step.rules?.length ?? 0, "neutral", "rule"),
+          signal(states.length, "quiet", "state"),
+          signal(stepProblems.length, "warn", "problem"),
+          signal(stepBets.length, "accent", "bet"),
+          signal(stepClaims.length + stepMetrics.length, "evidence", "evidence", "evidence"),
         ],
         coverage: stepCoverage(step),
         blocks,
@@ -291,17 +324,87 @@ export function projectModel(): ModelGraph {
     }
   }
 
+  /* ---- Problems --------------------------------------------------------- */
+
+  for (const problem of problems) {
+    const where = resolveTargets(problem.targets, stageById, stepById);
+    const proposed = betsForProblem(problem.id);
+    const problemClaims = claims.filter(
+      (claim) => problem.claims?.includes(claim.id) || claim.targets.some((id) => problem.targets.includes(id)),
+    );
+    const problemMetrics = metrics.filter(
+      (metric) => problem.metrics?.includes(metric.id) || metric.targets?.some((id) => problem.targets.includes(id)),
+    );
+
+    nodes.push(
+      finalise({
+        id: nodeId("problem", problem.id),
+        kind: "problem",
+        contentId: problem.id,
+        title: problem.title,
+        summary: problem.summary ?? firstSentence(problem.sections[SECTION.whatHappensToday]),
+        status: problem.status,
+        authority: problem.authority,
+        lastReviewed: isoDate(problem.lastReviewed),
+        provenance: problem.provenance?.source,
+        href: ROUTES.problem(problem.id),
+        file: problem.file,
+        signals: [
+          signal(proposed.length, "accent", "bet"),
+          signal(proposed.filter((bet) => bet.prototype?.route).length, "accent", "built", "built"),
+          signal(openQuestionCount(problem.sections), "warn", "question"),
+          signal(problemClaims.length + problemMetrics.length, "evidence", "evidence", "evidence"),
+        ],
+        coverage: problemCoverage(problem),
+        blocks: [
+          ...proseBlock("What happens today", problem.sections[SECTION.whatHappensToday]),
+          ...proseBlock("Why it matters", problem.sections[SECTION.whyItMatters]),
+          ...markdownBlocks(problem.sections, [SECTION.whatHappensToday, SECTION.whyItMatters]),
+          ...linksBlock("Where it bites", where),
+          ...linksBlock(
+            "Proposed solutions",
+            proposed.map((bet) => link("bet", bet.id, bet.title, bet.prototype?.route ? "built" : bet.confidence)),
+          ),
+          ...linksBlock(
+            "Related claims",
+            problemClaims.map((claim) => link("claim", claim.id, claim.statement, claim.confidence)),
+          ),
+          ...linksBlock(
+            "What would tell us",
+            problemMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus)),
+          ),
+        ],
+        lenses: ["bets"],
+        searchText: [problem.title, problem.summary, problem.sections[SECTION.whatHappensToday], problem.id].join(" "),
+      }, problem.provenance?.references),
+    );
+
+    for (const target of problem.targets) {
+      const targetKind: NodeKind | undefined = stageById.has(target)
+        ? "stage"
+        : stepById.has(target)
+          ? "step"
+          : undefined;
+      if (!targetKind) continue;
+      edges.push({
+        id: `problem:${problem.id}->${target}`,
+        source: nodeId(targetKind, target),
+        target: nodeId("problem", problem.id),
+        kind: "problem",
+        lenses: ["bets"],
+      });
+    }
+  }
+
   /* ---- Bets and prototypes --------------------------------------------- */
 
   for (const bet of bets) {
     const betClaims = claims.filter((claim) => bet.claims?.includes(claim.id));
     const betMetrics = metrics.filter((metric) => bet.metrics?.includes(metric.id));
-    const targets = bet.targets.flatMap((id) => {
-      const stage = stageById.get(id);
-      if (stage) return [link("stage", stage.id, stage.title)];
-      const step = stepById.get(id);
-      return step ? [link("step", step.id, step.title, stageById.get(step.stage)?.title)] : [];
-    });
+    const problem = problemById.get(bet.problem);
+    // Where a bet lands in the machine follows from the problem it answers,
+    // so a bet never restates it and the two can never disagree.
+    const targets = problem ? resolveTargets(problem.targets, stageById, stepById) : [];
 
     nodes.push(
       finalise({
@@ -309,6 +412,7 @@ export function projectModel(): ModelGraph {
         kind: "bet",
         contentId: bet.id,
         title: bet.title,
+        subtitle: problem ? `Answers: ${problem.title}` : undefined,
         summary: firstSentence(bet.sections[SECTION.bet]),
         status: bet.status,
         confidence: bet.confidence,
@@ -318,35 +422,31 @@ export function projectModel(): ModelGraph {
         href: ROUTES.bet(bet.id),
         file: bet.file,
         signals: [
-          { label: "targets", value: bet.targets.length, tone: "neutral" },
-          { label: "claims", value: betClaims.length, tone: "evidence" },
-          { label: "metrics", value: betMetrics.length, tone: "evidence" },
-          { label: "questions", value: openQuestionCount(bet.sections), tone: "warn" },
+          signal(betClaims.length, "evidence", "claim"),
+          signal(betMetrics.length, "evidence", "metric"),
+          signal(openQuestionCount(bet.sections), "warn", "question"),
         ],
         coverage: betCoverage(bet),
         blocks: [
-          ...proseBlock("Problem", bet.sections[SECTION.problem]),
+          ...linksBlock(
+            "The problem this answers",
+            problem ? [link("problem", problem.id, problem.title, problem.status)] : [],
+          ),
           ...proseBlock("Intervention", bet.sections[SECTION.bet]),
-          ...markdownBlocks(bet.sections, [SECTION.problem, SECTION.bet]),
-          ...linksBlock("Against", targets),
+          ...markdownBlocks(bet.sections, [SECTION.bet]),
+          ...linksBlock("Where it lands", targets),
           ...linksBlock("Supporting claims", betClaims.map((claim) => link("claim", claim.id, claim.statement, claim.confidence))),
           ...linksBlock("Success would affect", betMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
         ],
         lenses: ["bets"],
-        searchText: [bet.title, bet.sections[SECTION.problem], bet.sections[SECTION.bet], bet.id].join(" "),
+        searchText: [bet.title, problem?.title, bet.sections[SECTION.bet], bet.id].join(" "),
       }, bet.provenance?.references),
     );
 
-    for (const target of bet.targets) {
-      const targetKind: NodeKind | undefined = stageById.has(target)
-        ? "stage"
-        : stepById.has(target)
-          ? "step"
-          : undefined;
-      if (!targetKind) continue;
+    if (problem) {
       edges.push({
-        id: `bet:${bet.id}->${target}`,
-        source: nodeId(targetKind, target),
+        id: `bet:${problem.id}->${bet.id}`,
+        source: nodeId("problem", problem.id),
         target: nodeId("bet", bet.id),
         kind: "bet",
         lenses: ["bets"],
@@ -369,11 +469,16 @@ export function projectModel(): ModelGraph {
         status: bet.prototype.status,
         href: bet.prototype.route ?? ROUTES.bet(bet.id),
         file: bet.file,
-        signals: [{ label: "status", value: launchable ? 1 : 0, tone: "accent" }],
+        // A prototype has nothing to count. Its status is already on its face.
+        signals: [],
         coverage: { filled: launchable ? 2 : 1, total: 2, missing: launchable ? [] : ["Route"] },
         blocks: [
           ...linksBlock("Tests the bet", [link("bet", bet.id, bet.title, bet.confidence)]),
-          ...linksBlock("Against", targets),
+          ...linksBlock(
+            "Against the problem",
+            problem ? [link("problem", problem.id, problem.title, problem.status)] : [],
+          ),
+          ...linksBlock("Where it lands", targets),
           ...linksBlock("Success would affect", betMetrics.map((metric) => link("metric", metric.id, metric.title))),
         ],
         lenses: ["bets"],
@@ -409,8 +514,8 @@ export function projectModel(): ModelGraph {
         href: ROUTES.claim(claim.id),
         file: claim.file,
         signals: [
-          { label: "targets", value: claim.targets.length, tone: "neutral" },
-          { label: "references", value: claim.provenance?.references?.length ?? 0, tone: "evidence" },
+          signal(claim.targets.length, "neutral", "target"),
+          signal(claim.provenance?.references?.length ?? 0, "evidence", "reference"),
         ],
         coverage: claimCoverage(claim),
         blocks: [
@@ -455,7 +560,7 @@ export function projectModel(): ModelGraph {
         provenance: metric.provenance?.source,
         href: ROUTES.metric(metric.id),
         file: metric.file,
-        signals: [{ label: "measures", value: targets.length, tone: "neutral" }],
+        signals: [signal(targets.length, "neutral", "measures", "measures")],
         coverage: metricCoverage(metric),
         blocks: [
           ...bodyBlock(metric.sections, "Definition"),
@@ -504,8 +609,8 @@ export function projectModel(): ModelGraph {
         href: ROUTES.entity(entity.id),
         file: entity.file,
         signals: [
-          { label: "states", value: declared.length || observed.size, tone: "quiet" },
-          { label: "touched by", value: new Set([...producedBy, ...consumedBy].map((s) => s.id)).size, tone: "neutral" },
+          signal(declared.length || observed.size, "quiet", "state"),
+          signal(new Set([...producedBy, ...consumedBy].map((s) => s.id)).size, "neutral", "step touches", "steps touch"),
         ],
         coverage: entityCoverage(entity),
         blocks: [
@@ -548,29 +653,28 @@ export function projectModel(): ModelGraph {
   const countByKind = (kind: NodeKind) => nodes.filter((node) => node.kind === kind).length;
   const lensCount = (lens: LensId) => nodes.filter((node) => node.lenses.includes(lens)).length;
 
-  const openQuestions = [...stages, ...steps, ...bets].reduce(
-    (total, record) => total + openQuestionCount(record.sections),
-    0,
-  );
-
   // A Bet with a route has software behind it; the loader has already checked
-  // the route resolves, so anything listed here is genuinely runnable.
-  const entryPoints: EntryPoint[] = bets.flatMap((bet) =>
-    bet.prototype?.route
-      ? [
-          {
-            id: bet.id,
-            title: bet.title,
-            problem: bet.sections[SECTION.problem]?.trim() || undefined,
-            intervention: bet.sections[SECTION.bet]?.trim() || undefined,
-            href: bet.prototype.route,
-            betHref: ROUTES.bet(bet.id),
-            status: bet.prototype.status,
-            confidence: bet.confidence,
-          },
-        ]
-      : [],
-  );
+  // the route resolves, so anything listed here is genuinely runnable. The
+  // problem comes from the Problem it answers, which is the only place that
+  // trouble is written down.
+  const entryPoints: EntryPoint[] = bets.flatMap((bet) => {
+    if (!bet.prototype?.route) return [];
+    const problem = problemById.get(bet.problem);
+    return [
+      {
+        id: bet.id,
+        title: bet.title,
+        problemTitle: problem?.title,
+        problemHref: problem ? ROUTES.problem(problem.id) : undefined,
+        problem: problem?.sections[SECTION.whatHappensToday]?.trim() || problem?.summary?.trim() || undefined,
+        intervention: bet.sections[SECTION.bet]?.trim() || undefined,
+        href: bet.prototype.route,
+        betHref: ROUTES.bet(bet.id),
+        status: bet.prototype.status,
+        confidence: bet.confidence,
+      },
+    ];
+  });
 
   return {
     revision: contentRevision(),
@@ -586,8 +690,8 @@ export function projectModel(): ModelGraph {
       },
       {
         id: "bets",
-        label: "Bets & prototypes",
-        description: "What we propose to change, and what has been built.",
+        label: "Problems & solutions",
+        description: "Where the machine breaks, what we propose about it, and what has been built.",
         nodeCount: lensCount("bets"),
       },
       {
@@ -607,7 +711,7 @@ export function projectModel(): ModelGraph {
     // requiring the reader to already know the vocabulary.
     stats: [
       stat(countByKind("stage"), "stage of the machine", "stages of the machine"),
-      stat(openQuestions, "open question", "open questions"),
+      stat(countByKind("problem"), "problem named", "problems named"),
       stat(countByKind("bet"), "bet on the table", "bets on the table"),
       stat(entryPoints.length, "prototype you can try", "prototypes you can try"),
     ],
@@ -625,6 +729,16 @@ export function projectModel(): ModelGraph {
 /** A count with its label already agreeing with it. */
 function stat(value: number, singular: string, plural: string) {
   return { value, label: value === 1 ? singular : plural };
+}
+
+/**
+ * A node signal whose label agrees with its own number.
+ *
+ * Every surface renders signals verbatim, so "1 questions" would have to be
+ * fixed in three components or not at all. Mass nouns pass the same word twice.
+ */
+function signal(value: number, tone: Tone, singular: string, plural?: string): Signal {
+  return { value, tone, label: value === 1 ? singular : (plural ?? `${singular}s`) };
 }
 
 /**

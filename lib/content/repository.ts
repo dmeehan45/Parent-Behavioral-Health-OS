@@ -10,6 +10,7 @@ import {
   entitySchema,
   claimSchema,
   metricSchema,
+  problemSchema,
   betSchema,
   type SystemMap,
   type Stage,
@@ -17,6 +18,7 @@ import {
   type Entity,
   type Claim,
   type Metric,
+  type Problem,
   type Bet,
 } from "@/lib/schemas";
 import { parseBody, RENDERED_SECTIONS } from "./body";
@@ -80,6 +82,22 @@ function unique<T extends { id: string; file: string }>(items: T[], kind: string
 
 function requireRef(value: string, allowed: Set<string>, file: string, field: string) {
   if (!allowed.has(value)) throw new Error(`Invalid reference in ${file}: ${field} '${value}' does not exist`);
+}
+
+/**
+ * A Bet is a proposed solution, so it has to say what it is solving.
+ *
+ * This is the link that stops the model collapsing back into a list of things
+ * we felt like building: the Problem states where the machine breaks, and the
+ * Bet answers it. Where the work lands follows from the Problem's targets, so
+ * there is only ever one statement of where the trouble is.
+ */
+function requireProblem(problemId: string, allowed: Set<string>, file: string) {
+  if (allowed.has(problemId)) return;
+  throw new Error(
+    `Invalid reference in ${file}: problem '${problemId}' does not exist. ` +
+      `Every Bet answers a Problem — create content/problems/${problemId}.md, or point at an existing Problem.`,
+  );
 }
 
 /**
@@ -151,6 +169,7 @@ export function getRepository() {
   const entities = loadMarkdown("entities", entitySchema) as Entity[];
   const claims = loadMarkdown("claims", claimSchema) as Claim[];
   const metrics = loadMarkdown("metrics", metricSchema) as Metric[];
+  const problems = loadMarkdown("problems", problemSchema) as Problem[];
   const bets = loadMarkdown("bets", betSchema) as Bet[];
 
   let map: SystemMap;
@@ -166,6 +185,7 @@ export function getRepository() {
   unique(entities, "entity");
   unique(claims, "claim");
   unique(metrics, "metric");
+  unique(problems, "problem");
   unique(bets, "bet");
 
   const stageIds = new Set(stages.map((x) => x.id));
@@ -174,7 +194,7 @@ export function getRepository() {
   const entityIds = new Set(entities.map((x) => x.id));
   const claimIds = new Set(claims.map((x) => x.id));
   const metricIds = new Set(metrics.map((x) => x.id));
-  const betIds = new Set(bets.map((x) => x.id));
+  const problemIds = new Set(problems.map((x) => x.id));
 
   map.stages.forEach((id, i) => requireRef(id, stageIds, MAP_FILE, `stages.${i}`));
   map.edges.forEach((edge, i) => {
@@ -190,14 +210,18 @@ export function getRepository() {
     );
     step.claims?.forEach((id) => requireRef(id, claimIds, step.file, "claims"));
     step.metrics?.forEach((id) => requireRef(id, metricIds, step.file, "metrics"));
-    step.bets?.forEach((id) => requireRef(id, betIds, step.file, "bets"));
   });
 
   stages.forEach((stage) => stage.metrics?.forEach((id) => requireRef(id, metricIds, stage.file, "metrics")));
   claims.forEach((claim) => claim.targets.forEach((id) => requireRef(id, targetIds, claim.file, "targets")));
   metrics.forEach((metric) => metric.targets?.forEach((id) => requireRef(id, targetIds, metric.file, "targets")));
+  problems.forEach((problem) => {
+    problem.targets.forEach((id) => requireRef(id, targetIds, problem.file, "targets"));
+    problem.claims?.forEach((id) => requireRef(id, claimIds, problem.file, "claims"));
+    problem.metrics?.forEach((id) => requireRef(id, metricIds, problem.file, "metrics"));
+  });
   bets.forEach((bet) => {
-    bet.targets.forEach((id) => requireRef(id, targetIds, bet.file, "targets"));
+    requireProblem(bet.problem, problemIds, bet.file);
     bet.claims?.forEach((id) => requireRef(id, claimIds, bet.file, "claims"));
     bet.metrics?.forEach((id) => requireRef(id, metricIds, bet.file, "metrics"));
     if (bet.prototype?.route) requirePrototypeRoute(bet.prototype.route, bet.file);
@@ -206,7 +230,7 @@ export function getRepository() {
   requireMapMembership(stages, map.stages);
   checkEntityStates(steps, entities);
 
-  return { map, stages, steps, entities, claims, metrics, bets };
+  return { map, stages, steps, entities, claims, metrics, problems, bets };
 }
 
 export type Repository = ReturnType<typeof getRepository>;
