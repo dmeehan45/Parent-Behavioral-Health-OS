@@ -91,7 +91,10 @@ export function renderReview({ handoff, file, hash }: LoadedHandoff) {
   if (!handoff.questions.length) lines.push("None.", "");
   handoff.questions.forEach((question) => lines.push(`- **${question.id}:** ${question.question}`));
   lines.push("", "## Sources", "");
-  handoff.sources.forEach((source) => lines.push(`- **${source.id}** (${source.access}, ${source.kind}): ${source.title}; identity \`${source.identity}\`.`));
+  handoff.sources.forEach((source) => {
+    const publication = source.publishedAt ? `; published ${source.publishedAt.toISOString().slice(0, 10)}` : "; publication date not recorded";
+    lines.push(`- **${source.id}** (${source.access}, ${source.kind}): ${source.title}${publication}; identity \`${source.identity}\`.`);
+  });
   lines.push("", ...decisionSkeleton({ handoff, file, hash }));
   lines.push("## Canonical change gate", "", "No canonical change is authorized by this packet. Create a decision file, validate it, and apply accepted decisions in a separate model-change pull request referencing the run and decision IDs.", "");
   return `${lines.join("\n").trimEnd()}\n`;

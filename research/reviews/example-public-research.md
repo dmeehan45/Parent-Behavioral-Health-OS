@@ -35,7 +35,7 @@ Allowed response: accept | reject | defer | needs-research | accept-with-edits.
 
 ## Sources
 
-- **source-project-readme** (available, repository): Parent Behavioral Health OS README; identity `github-parent-health-os-readme`.
+- **source-project-readme** (available, repository): Parent Behavioral Health OS README; publication date not recorded; identity `github-parent-health-os-readme`.
 
 ## Recording decisions
 

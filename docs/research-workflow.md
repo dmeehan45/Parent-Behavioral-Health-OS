@@ -4,6 +4,8 @@ This workflow turns research from Claude, ChatGPT, or another agent into a small
 reviewable proposal without making chat history or unreviewed research canonical.
 
 Running it on a schedule is described in `docs/research-routine.md`.
+Source selection and evidence appraisal are governed by
+`docs/research-source-quality.md`; agents should read it before researching.
 
 ## Happy path
 
@@ -17,7 +19,12 @@ Running it on a schedule is described in `docs/research-routine.md`.
 
    The brief is not optional housekeeping. A run that skips it will restate
    something an earlier run already found, and validation rejects that.
-1. Research a question in chat using public, non-sensitive material.
+1. Research a question in chat using public, non-sensitive material. Prefer
+   recent evidence when the claim depends on current technology, workflow,
+   regulation, or care-delivery practice; use older evidence deliberately rather
+   than treating old and new sources as interchangeable. Record publication
+   dates when known and make material age, directness, design, or transferability
+   limitations explicit in the handoff.
 2. Ask the agent to synthesize `research/handoffs/<run-id>.yaml` using
    `research/contract/v1.example.yaml` as the contract example. Do not include a
    raw transcript; quote no more than 25 words from one source across extracts.
@@ -80,10 +87,16 @@ letting a file drift away from the ID inside it.
   non-identifying description of who took part. A session names people by their
   relationship to the system, never by who they are, and cannot claim a URL.
   `docs/prototype-workflow.md` covers writing one up.
+- Record `publishedAt` when it is known. It is review context, not an automatic
+  pass/fail rule; source age matters in proportion to how quickly the subject
+  changes.
 - Findings are atomic and name their sources, suggested existing targets,
   evidence stance, and review classification. Matching is advisory: `duplicate`
   or `qualifying` records name candidate Claims, but automation never merges,
   discards, or promotes them.
+- `evidenceQuality` is deliberately coarse and must not be read as a truth score:
+  primary evidence can be weak or indirect, and a strong recent synthesis can
+  be more decision-relevant than one primary study.
 - `generalizedApplicability: false` marks company-specific or otherwise
   out-of-scope material; such a finding cannot propose a new canonical Claim.
 - Each unresolved question remains visible in the packet rather than being
