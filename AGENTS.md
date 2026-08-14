@@ -130,6 +130,26 @@ npm run build
 
 CI runs all four. Validation failures name the offending file and field.
 
+### Branch from `main`, and target `main`
+
+Enforced by the `Pull request shape` check, and the rule most likely to be
+broken by an agent asked for "sequential pull requests":
+
+**Never base a pull request on another feature branch.** Splitting work into a
+sequence does not mean stacking it. Branch each pull request from `main`, target
+`main`, and let the diffs overlap.
+
+A stacked pull request does not follow its base onto `main` when that base
+merges. It stays open, pointed at a branch nobody is developing, and merging it
+pushes the work *down* into that dead branch. Checks stay green, GitHub reports
+it merged, and `main` receives nothing. This has cost two hand-written recovery
+pull requests here — #9 for PRs #3–#7, and #15 for PRs #12–#14.
+
+If a change truly cannot be reviewed without an unmerged one, stack it, add the
+`stacked` label so the check passes, and say in the body that the stack must be
+**merged top down** — furthest from `main` first. Assume nobody reading the
+pull request knows that, because twice nobody did.
+
 ## Commit style
 
 Commits record the evolution of understanding, not just of code. Prefer:
