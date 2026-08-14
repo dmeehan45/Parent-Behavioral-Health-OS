@@ -1,0 +1,135 @@
+contractVersion: 1
+run:
+  id: matching-quality-2026-08-14-a
+  question: "What makes a patient matching experience high quality for families, patients, clinicians, and the practice-management platform, and how can it be measured without hiding constrained access?"
+  synthesis: >-
+    Initial primary evidence argues against a single match-quality score. Matching quality appears to combine clinician-specific clinical effectiveness, verified access feasibility, stakeholder-specific fit and decision agency, and downstream confirmation after care begins. Youth and caregiver perspectives should not be collapsed, and demographic concordance alone should not be treated as a proxy for cultural or relational fit. This run does not establish the weighting of these dimensions or a final composite metric.
+  createdAt: 2026-08-14
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: GPT-5.6 Sol
+  provenance:
+    method: public-research
+    context: Bounded first-pass search of five primary empirical studies chosen to test whether matching quality can be reduced to speed, acceptance, demographic similarity, or nominal provider eligibility. Raw transcript excluded.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+  answers: [define-matching-quality]
+sources:
+  - id: source-constantino-2021
+    identity: doi-10-1001-jamapsychiatry-2021-1221
+    kind: publication
+    title: "Effect of Matching Therapists to Patients vs Assignment as Usual on Adult Psychotherapy Outcomes: A Randomized Clinical Trial"
+    locator:
+      doi: 10.1001/jamapsychiatry.2021.1221
+    access: available
+  - id: source-yeh-2023
+    identity: doi-10-3390-adolescents3040048
+    kind: publication
+    title: "Youth-Therapist and Parent-Therapist Match and Mismatch on Internalizing and Externalizing Treatment Goals as Predictors of Treatment Engagement"
+    locator:
+      doi: 10.3390/adolescents3040048
+    access: available
+  - id: source-langer-2021
+    identity: doi-10-1037-ccp0000702
+    kind: publication
+    title: "Shared Decision-Making for Youth Psychotherapy: A Preliminary Randomized Clinical Trial on Facilitating Personalized Treatment"
+    locator:
+      doi: 10.1037/ccp0000702
+    access: available
+  - id: source-chu-2023
+    identity: doi-10-1080-10503307-2022-2150582
+    kind: publication
+    title: "Race, racial matching, and cultural understanding as predictors of treatment engagement in youth mental health services"
+    locator:
+      doi: 10.1080/10503307.2022.2150582
+    access: available
+  - id: source-haeder-2025
+    identity: doi-10-37765-ajmc-2025-89791
+    kind: publication
+    title: "ACA network regulatory filings are inaccurate, poorly match provider directories"
+    locator:
+      doi: 10.37765/ajmc.2025.89791
+    access: available
+findings:
+  - id: finding-clinician-specific-effectiveness
+    statement: >-
+      In an adult outpatient randomized trial, assigning patients using therapists' empirically measured strengths for the patients' presenting problem domains produced better 16-week symptom and functioning outcomes than assignment as usual, indicating that clinician-specific effectiveness can be a meaningful matching signal.
+    sourceIds: [source-constantino-2021]
+    suggestedTargets: [matching, propose-match, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    proposedClaim:
+      id: claim-clinician-specific-effectiveness-can-inform-matching
+      statement: Clinician-specific effectiveness for relevant problem domains can be a meaningful input to behavioral-health matching when reliable performance evidence exists.
+    uncertainty: >-
+      The trial involved adults in six community clinics and used a specific measurement system; it does not establish how to generalize the signal to youth, family care, new clinicians, or sparse-data settings.
+  - id: finding-youth-care-is-multi-perspective
+    statement: >-
+      In a longitudinal youth outpatient study, youth-therapist and parent-therapist treatment-goal agreement related differently to later engagement, supporting separate measurement of youth and caregiver perspectives rather than one undifferentiated family-fit score.
+    sourceIds: [source-yeh-2023]
+    suggestedTargets: [matching, review-match, care-initiation, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    proposedClaim:
+      id: claim-youth-care-match-quality-requires-separate-stakeholder-perspectives
+      statement: In youth behavioral health, match quality should preserve youth and caregiver perspectives separately because their alignment with a clinician can differ and relate differently to engagement.
+    uncertainty: >-
+      This was observational and examined broad treatment-goal agreement after service entry, not prospective therapist selection or causal effects on clinical outcomes.
+  - id: finding-decision-agency-is-distinct
+    statement: >-
+      A preliminary randomized trial of youth psychotherapy planning found that shared decision-making increased youth and caregiver involvement and reduced caregiver decisional conflict and regret without improving symptoms or engagement, indicating that decision-process quality is distinct from downstream clinical outcomes.
+    sourceIds: [source-langer-2021]
+    suggestedTargets: [matching, review-match, care-initiation, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    proposedClaim:
+      id: claim-match-quality-includes-decision-agency
+      statement: A high-quality matching experience should measure whether patients and caregivers can participate meaningfully in the decision, separately from whether the eventual treatment produces good outcomes.
+    uncertainty: >-
+      The trial was small and studied treatment planning rather than provider matching, so this supports a decision-quality dimension but not a specific matching workflow.
+  - id: finding-demographic-concordance-is-not-sufficient
+    statement: >-
+      In a large youth mental-health sample, youth-therapist racial matching did not predict early treatment engagement while youth-reported therapist cultural understanding did, cautioning against using demographic concordance alone as a proxy for relational or cultural fit.
+    sourceIds: [source-chu-2023]
+    suggestedTargets: [matching, review-match, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    proposedClaim:
+      id: claim-demographic-concordance-is-not-a-sufficient-fit-proxy
+      statement: Demographic concordance alone should not be treated as sufficient evidence of cultural or relational fit in youth behavioral-health matching.
+    uncertainty: >-
+      Cultural understanding was reported after treatment began, so the study does not show that it can be predicted accurately before a match or that demographic concordance is never valuable for individual patients.
+  - id: finding-verified-access-feasibility
+    statement: >-
+      A 2024 secret-shopper audit of Pennsylvania ACA mental-health networks found that nominal provider listings substantially overstated real access: among fully verified listings, appointments were available for only a minority and waits averaged about a month, showing that directory or network eligibility is not equivalent to feasible care access.
+    sourceIds: [source-haeder-2025]
+    suggestedTargets: [matching, propose-match, care-initiation]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    proposedClaim:
+      id: claim-match-quality-requires-verified-access-feasibility
+      statement: Match quality should include current, verified feasibility of starting care rather than treating directory membership or nominal network eligibility as evidence that a clinician is actually accessible.
+    uncertainty: >-
+      This audit studied insurer directories rather than an integrated practice platform with first-party clinician availability, so the size of the access gap may not transfer.
+questions:
+  - id: question-hard-vs-soft-match-constraints
+    question: "Which matching-quality dimensions should be hard eligibility constraints, which should rank otherwise viable matches, and which should only be monitored after care begins?"
+  - id: question-match-quality-denominator
+    question: "What denominator should matching-quality metrics use so never-proposed, declined, expired, unmatched, and rematched demand remains visible?"
+  - id: question-match-quality-confirmation-window
+    question: "At what point should the system treat a match as provisionally or retrospectively high quality: proposal, acceptance, first encounter, early engagement, or later outcome?"
+  - id: question-stakeholder-disagreement
+    question: "How should the matching process represent disagreement among youth, caregivers, and clinicians without collapsing their preferences or assuming equal decision authority?"
