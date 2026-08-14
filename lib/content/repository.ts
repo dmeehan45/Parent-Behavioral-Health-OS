@@ -314,6 +314,10 @@ export function getRepository() {
   stages.forEach((stage) => stage.metrics?.forEach((id) => requireRef(id, metricIds, stage.file, "metrics")));
   claims.forEach((claim) => claim.targets.forEach((id) => requireRef(id, targetIds, claim.file, "targets")));
   metrics.forEach((metric) => metric.targets?.forEach((id) => requireRef(id, targetIds, metric.file, "targets")));
+  metrics.forEach((metric) => {
+    metric.perspectives?.forEach(({ actor }) => requireRef(actor, entityIds, metric.file, "perspectives.actor"));
+    if (metric.decisionOwner) requireRef(metric.decisionOwner, entityIds, metric.file, "decisionOwner");
+  });
   problems.forEach((problem) => {
     problem.targets.forEach((id) => requireRef(id, targetIds, problem.file, "targets"));
     problem.claims?.forEach((id) => requireRef(id, claimIds, problem.file, "claims"));

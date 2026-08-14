@@ -76,6 +76,7 @@ run(() => {
       "    # proposedClaim: { id: claim-todo, statement: TODO }",
       "    # extract: at most 25 words quoted from the source",
       "    # uncertainty: what would change this",
+      "    # Keep the challenge proportionate: name the material counterexample or evidence gap, not every imaginable caveat.",
       "questions: []",
       "",
     ].join("\n"),

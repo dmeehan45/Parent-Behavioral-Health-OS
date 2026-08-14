@@ -576,6 +576,12 @@ export function projectModel(): ModelGraph {
         coverage: metricCoverage(metric),
         blocks: [
           ...bodyBlock(metric.sections, "Definition"),
+          ...listBlock("Who this serves", (metric.perspectives ?? []).map(({ actor, role }) => {
+            const title = entityById.get(actor)?.title ?? actor;
+            return `${title} — ${role}`;
+          })),
+          ...proseBlock("Decision informed", metric.decision),
+          ...proseBlock("Decision owner", metric.decisionOwner && (entityById.get(metric.decisionOwner)?.title ?? metric.decisionOwner)),
           ...linksBlock("Measures", targets),
           ...linksBlock(
             "Bets aimed at this",
@@ -583,7 +589,7 @@ export function projectModel(): ModelGraph {
           ),
         ],
         lenses: ["evidence"],
-        searchText: [metric.title, metric.unit, metric.id].join(" "),
+        searchText: [metric.title, metric.unit, metric.id, metric.decision, ...(metric.perspectives ?? []).map(({ actor }) => actor)].join(" "),
       }, researchReferences(metric)),
     );
 
@@ -846,4 +852,3 @@ function resolveTargets(
   }
   return resolved;
 }
-

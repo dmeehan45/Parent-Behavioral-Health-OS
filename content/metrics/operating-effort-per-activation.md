@@ -4,6 +4,12 @@ title: Operating Effort per Activation
 unit: hours
 direction: lower
 targets: [clinician-supply, clinician-onboarding, matching]
+perspectives:
+  - { actor: practice-management-platform, role: primary }
+  - { actor: clinician, role: balancing }
+decisionOwner: practice-management-platform
+decision: >
+  Decide where the platform should simplify, support, or automate activation work.
 dataStatus: unknown
 provenance: { source: author, references: [] }
 ---

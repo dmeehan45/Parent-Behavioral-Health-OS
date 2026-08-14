@@ -4,6 +4,12 @@ title: Clinician Effort to Activate
 unit: hours
 direction: lower
 targets: [clinician-supply, clinician-onboarding, practice-operations]
+perspectives:
+  - { actor: clinician, role: primary }
+  - { actor: practice-management-platform, role: operator }
+decisionOwner: practice-management-platform
+decision: >
+  Decide which onboarding requirements or support should change to reduce clinician burden without weakening readiness.
 dataStatus: unknown
 provenance: { source: author, references: [] }
 ---

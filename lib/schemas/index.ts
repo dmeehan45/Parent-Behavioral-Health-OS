@@ -40,7 +40,13 @@ export const claimSchema = z.object({
 });
 export const metricSchema = z.object({
   id: idSchema, title: z.string().min(1), unit: z.string().optional(), direction: z.enum(["lower", "higher", "target"]).optional(),
-  targets: z.array(idSchema).optional(), dataStatus: z.enum(["unknown", "available", "partially-available", "not-measured"]).optional(), ...common
+  targets: z.array(idSchema).optional(),
+  perspectives: z.array(z.object({
+    actor: idSchema,
+    role: z.enum(["primary", "balancing", "operator"]),
+  })).optional(),
+  decisionOwner: idSchema.optional(), decision: z.string().min(1).optional(),
+  dataStatus: z.enum(["unknown", "available", "partially-available", "not-measured"]).optional(), ...common
 });
 // A Problem is where the machine is thought to break. `targets` is required
 // because a problem that bites nowhere is not a problem with this system, and

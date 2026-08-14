@@ -611,6 +611,24 @@ alone.
 Metrics.  
 **Required input:** operational data feasibility and evidence-methods review.
 
+## Accountable response and implementation disposition
+
+**Response date:** 2026-08-14<br>
+**Scope:** decisions supplied directly by the accountable reviewer after reading this queue. These dispositions are product direction, not stakeholder research evidence.
+
+| Decision | Disposition now implemented | Still open |
+| --- | --- | --- |
+| D1 | The artifact models the whole productizable care-delivery operating system: care, participants, and surrounding practice-platform work needed to improve quality, access/coverage and affordability, measurement, personalization, and continuous improvement. Prototypeable product behavior is in scope; non-demonstrable organizational or company actions are context. | Test the boundary with parents, clinicians, clinical leaders, and operators; classify future ambiguous domains as product behavior or context. |
+| D2 | Metrics now name actor perspectives, the decision owner, and the decision informed. `practice-management-platform` is an explicit builder/operator actor distinct from Practice, clinician, family, and patient. | Add family/patient, care-quality, access, coverage/affordability, equity, and continuity measures only when their constructs are understood. Resolve real value conflicts through discovery rather than schema defaults. |
+| D3 | `docs/care-delivery-lifecycle-contrast.md` reconstructs a scratch lifecycle independently of current Stages and contrasts each transformation with current coverage. | Validate and revise it through direct journey/workflow evidence before promoting missing domains into canonical topology. |
+| D4 | Administrative onboarding now ends at `match-ready`. Matching separately proposes and mutually accepts a Match; Care Initiation separately plans and completes a first encounter and confirms mutual continuation before initiating a Care Relationship. | Validate event definitions, prerequisites, actor decisions, state names, and recovery routes against real journeys. |
+| D5 | Family/patient/authority questions are explicit in the lifecycle contrast and relevant Stage questions; no production permission model was invented. | Parent/caregiver lived experience, family-systems inquiry, and qualified privacy/records review remain required. |
+| D6 | Quality definition is explicitly prioritized for clinician onboarding and patient matching. The contrast names candidate perspectives, balancing outcomes, units, missingness, and attribution questions; the selection-quality feedback remains hypothetical. | Clinical quality/safety, measurement, equity, and operational feasibility work must define valid constructs and permitted uses. |
+| D7 | The authoring method now prompts for common failure/recovery classes without requiring invented exceptions. The newly separated matching/initiation Steps show known decline, expiry, cancellation, rematching, and closure branches. | Add evidence-based deterioration, safety escalation, longitudinal dropout/re-entry, correction, transfer, and closure mechanisms as those domains are investigated. |
+| D8 | Metric records now identify actor perspective, owner, and decision. Research guidance establishes a proportionate evidence bar and supports iterative ChatGPT/Claude-style GitHub-connected conversations while preserving named-person promotion. | Define denominators, horizons, missingness, confounders, balancing risks, and falsification approaches for the two current Claims and any consequential metric before operational use. |
+
+The remaining items are deliberately logged as open work rather than completed with plausible prose. This implementation improves what the model can distinguish; it does not claim that the care lifecycle, quality system, authority relationships, or evidence strategy are validated.
+
 ## Recommended research sequence
 
 1. **Boundary interviews/workshop:** ask product, clinical, parent, and operator
