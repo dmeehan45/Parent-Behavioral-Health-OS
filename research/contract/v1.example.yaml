@@ -1,0 +1,40 @@
+contractVersion: 1
+run:
+  id: example-public-research
+  question: How should public research enter the generalized model?
+  synthesis: Public research should remain a proposal until a reviewer makes explicit decisions.
+  createdAt: 2026-08-14
+  preparedBy:
+    kind: conversational-agent
+    provider: example-provider
+  provenance:
+    method: public-research
+    context: Synthesized from a bounded research conversation; raw transcript excluded.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+sources:
+  - id: source-project-readme
+    identity: github-parent-health-os-readme
+    kind: repository
+    title: Parent Behavioral Health OS README
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: README.md
+    access: available
+findings:
+  - id: finding-review-first
+    statement: Unreviewed research should not change the canonical system map.
+    sourceIds: [source-project-readme]
+    suggestedTargets: [clinician-onboarding]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: true
+    proposedClaim:
+      id: claim-review-first-research
+      statement: Research intake needs human review before it changes the generalized operating model.
+questions:
+  - id: question-review-owner
+    question: Who is the accountable reviewer for a given intake pull request?
