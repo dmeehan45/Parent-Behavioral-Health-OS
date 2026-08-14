@@ -39,6 +39,18 @@ function reachable(start: string, next: Map<string, string[]>) {
  * checker is the one thing this repository asks nobody to do. Only the
  * contradiction fails: both ends written down, and no path between them.
  *
+ * The question is asked once per consumer, and one supplier is enough. Asking
+ * it of every producer/consumer pair would be the Cartesian product of a shared
+ * state, and `docs/care-delivery-lifecycle-contrast.md` is explicit that this
+ * flow will not stay linear: once a rematch path and a first-match path both
+ * carry an accepted Match to their own next Step, demanding that each producer
+ * reach every consumer would refuse a correct model for handoffs nobody wrote
+ * down. This check runs inside `getRepository()`, so that mistake would not
+ * merely fail a script — it would take the live map down.
+ *
+ * A Step's own output never supplies its own input, either. What a Step
+ * produces exists once it has run, and an input has to exist before it does.
+ *
  * Worth stating why it exists. Splitting `first-successful-family` into
  * separate matching and care-initiation Steps was a real improvement, and it
  * removed the one `next` that carried a clinician out of onboarding without
@@ -50,41 +62,49 @@ function reachable(start: string, next: Map<string, string[]>) {
  */
 export function checkFlowContinuity(steps: FlowStep[]) {
   const next = new Map(steps.map((step) => [step.id, step.next ?? []]));
-  const byId = new Map(steps.map((step) => [step.id, step]));
-  const consumers = new Map<string, string[]>();
+  const producers = new Map<string, FlowStep[]>();
   for (const step of steps) {
-    for (const input of step.inputs ?? []) {
-      consumers.set(key(input), [...(consumers.get(key(input)) ?? []), step.id]);
+    for (const output of step.outputs ?? []) {
+      producers.set(key(output), [...(producers.get(key(output)) ?? []), step]);
     }
   }
 
+  const walked = new Map<string, Set<string>>();
+  const downstream = (id: string) => {
+    const known = walked.get(id);
+    if (known) return known;
+    const found = reachable(id, next);
+    walked.set(id, found);
+    return found;
+  };
+
   const breaks: string[] = [];
-  for (const producer of steps) {
-    let downstream: Set<string> | undefined;
-    for (const output of producer.outputs ?? []) {
-      for (const consumerId of consumers.get(key(output)) ?? []) {
-        if (consumerId === producer.id) continue;
-        downstream ??= reachable(producer.id, next);
-        if (downstream.has(consumerId)) continue;
-        breaks.push(
-          `${producer.file} produces '${output.entity}' in state '${output.state}', which ` +
-            `${byId.get(consumerId)?.file ?? consumerId} takes as an input`,
-        );
-      }
+  for (const consumer of steps) {
+    for (const input of consumer.inputs ?? []) {
+      const supply = (producers.get(key(input)) ?? []).filter((step) => step.id !== consumer.id);
+      if (!supply.length) continue;
+      if (supply.some((step) => downstream(step.id).has(consumer.id))) continue;
+      breaks.push(
+        `${consumer.file} takes '${input.entity}' in state '${input.state}' as an input, and no chain of 'next' ` +
+          `reaches it from ${supply
+            .map((step) => step.file)
+            .sort()
+            .join(" or ")}`,
+      );
     }
   }
 
   if (!breaks.length) return;
 
   // Every break, not the first one. A missing link usually strands more than
-  // one handoff, and the nearest break is rarely the one that sorts first — a
+  // one input, and the nearest break is rarely the one that sorts first — a
   // single failure would send an author to add the link it happened to name,
   // which is how a flow acquires a shortcut that skips the steps between.
   // Sorted so the same content always reports the same list, whatever order
   // the directory happened to be read in.
   throw new Error(
-    `Broken flow: the model claims ${breaks.length} handoff${breaks.length === 1 ? "" : "s"} that no chain of ` +
-      `'next' carries.\n${breaks
+    `Broken flow: ${breaks.length} input${breaks.length === 1 ? "" : "s"} the model says something supplies, and ` +
+      `no chain of 'next' carries.\n${breaks
         .sort()
         .map((line) => `  - ${line}`)
         .join("\n")}\nAdd the missing links, or correct the states so the model does not claim a handoff its ` +

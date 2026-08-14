@@ -140,8 +140,14 @@ export function openEnds(graph: ModelGraph, node: ModelNode): OpenEnd[] {
   if (node.kind === "step") {
     const byId = new Map(graph.nodes.map((candidate) => [candidate.id, candidate]));
     const states = graph.edges.filter((edge) => edge.kind === "state" && edge.label);
+    // A step's own output cannot supply its own input: what it produces exists
+    // once it has run, and an input has to exist before it does. Counting it
+    // would hide the gap on exactly the steps that confirm a state rather than
+    // change it — the ones whose input is most obviously somebody else's work.
     const produced = new Set(
-      states.filter((edge) => byId.get(edge.source)?.kind === "step").map((edge) => `${edge.target}:${edge.label}`),
+      states
+        .filter((edge) => edge.source !== node.id && byId.get(edge.source)?.kind === "step")
+        .map((edge) => `${edge.target}:${edge.label}`),
     );
     const unsupplied = states
       .filter((edge) => edge.target === node.id && !produced.has(`${edge.source}:${edge.label}`))

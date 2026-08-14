@@ -19,7 +19,7 @@ test("a handoff the states assert and no `next` carries is refused", () => {
         step("become-match-ready", { outputs: [{ entity: "clinician", state: "match-ready" }] }),
         step("propose-match", { inputs: [{ entity: "clinician", state: "match-ready" }] }),
       ]),
-    /Broken flow: the model claims 1 handoff[\s\S]*become-match-ready\.md[\s\S]*propose-match/,
+    /Broken flow: 1 input[\s\S]*propose-match\.md[\s\S]*become-match-ready\.md/,
   );
 });
 
@@ -40,7 +40,7 @@ test("every stranded handoff is reported, not just the first", () => {
         step("reach-sustainable-caseload", { inputs: [{ entity: "caseload", state: "open" }] }),
       ]),
     (error: Error) =>
-      /claims 2 handoffs/.test(error.message) &&
+      /Broken flow: 2 inputs/.test(error.message) &&
       error.message.includes("propose-match.md") &&
       error.message.includes("reach-sustainable-caseload.md"),
   );
@@ -67,6 +67,63 @@ test("incompleteness stays valid", () => {
   assert.doesNotThrow(
     () => checkFlowContinuity([step("propose-match", { inputs: [{ entity: "family", state: "match-ready" }] })]),
     "a step needs a state no step produces yet",
+  );
+});
+
+// The flow will not stay linear. Once two paths both carry an accepted Match to
+// their own next Step, asking every producer to reach every consumer refuses a
+// correct model for handoffs nobody wrote down — and because this runs inside
+// `getRepository()`, that refusal would take the live map down rather than fail
+// a script. One supplier is enough.
+test("branches that share a state are not treated as all-to-all handoffs", () => {
+  assert.doesNotThrow(() =>
+    checkFlowContinuity([
+      step("first-match", { next: ["plan-first-encounter"], outputs: [{ entity: "match", state: "accepted" }] }),
+      step("rematch", { next: ["plan-rematched-encounter"], outputs: [{ entity: "match", state: "accepted" }] }),
+      step("plan-first-encounter", { inputs: [{ entity: "match", state: "accepted" }] }),
+      step("plan-rematched-encounter", { inputs: [{ entity: "match", state: "accepted" }] }),
+    ]),
+  );
+});
+
+test("a consumer no producer of its input reaches is still refused", () => {
+  assert.throws(
+    () =>
+      checkFlowContinuity([
+        step("first-match", { next: ["plan-first-encounter"], outputs: [{ entity: "match", state: "accepted" }] }),
+        step("rematch", { outputs: [{ entity: "match", state: "accepted" }] }),
+        step("plan-first-encounter", { inputs: [{ entity: "match", state: "accepted" }] }),
+        step("stranded", { inputs: [{ entity: "match", state: "accepted" }] }),
+      ]),
+    /Broken flow: 1 input[\s\S]*stranded\.md/,
+  );
+});
+
+// A step that confirms a state rather than changing it carries the same state
+// in and out. Letting its own output answer its own input would hide the gap on
+// exactly the steps whose input is most obviously somebody else's work.
+test("a step's own output does not supply its own input", () => {
+  assert.doesNotThrow(
+    () =>
+      checkFlowContinuity([
+        step("selection-complete", {
+          inputs: [{ entity: "clinician", state: "selected" }],
+          outputs: [{ entity: "clinician", state: "selected" }],
+        }),
+      ]),
+    "nobody else produces it, so this is unmodelled work rather than a break",
+  );
+
+  assert.throws(
+    () =>
+      checkFlowContinuity([
+        step("select-clinician", { outputs: [{ entity: "clinician", state: "selected" }] }),
+        step("selection-complete", {
+          inputs: [{ entity: "clinician", state: "selected" }],
+          outputs: [{ entity: "clinician", state: "selected" }],
+        }),
+      ]),
+    /selection-complete\.md/,
   );
 });
 

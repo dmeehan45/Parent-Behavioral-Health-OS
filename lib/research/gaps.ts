@@ -85,10 +85,17 @@ export function findGaps(repo: Repository, handoffs: LoadedHandoff[], questions:
   // its own record page is one nobody is looking at. `propose-match` needs a
   // Family in `match-ready`, and `family-demand` has no Steps at all.
   const entityTitle = new Map(repo.entities.map((entity) => [entity.id, entity.title]));
-  const produced = new Set(repo.steps.flatMap((step) => (step.outputs ?? []).map((io) => `${io.entity}:${io.state}`)));
+  const producedBy = new Map<string, string[]>();
+  for (const step of repo.steps) {
+    for (const io of step.outputs ?? []) {
+      const state = `${io.entity}:${io.state}`;
+      producedBy.set(state, [...(producedBy.get(state) ?? []), step.id]);
+    }
+  }
   for (const step of repo.steps) {
     for (const input of step.inputs ?? []) {
-      if (produced.has(`${input.entity}:${input.state}`)) continue;
+      // Its own output does not count: an input has to exist before the step runs.
+      if ((producedBy.get(`${input.entity}:${input.state}`) ?? []).some((id) => id !== step.id)) continue;
       const entity = entityTitle.get(input.entity) ?? input.entity;
       gaps.push({
         kind: "unsupplied",

@@ -72,8 +72,16 @@ Clinician in `match-ready` as an input, the model is asserting a handoff — and
 missing `next` makes it a handoff nothing carries. `checkFlowContinuity` in
 `lib/content/flow.ts` refuses that. It runs inside `getRepository()`, so it holds
 for the live map and not only for `npm run validate:content`, and it reports
-every stranded handoff rather than the first: one missing link usually strands
+every stranded input rather than the first: one missing link usually strands
 several, and the nearest is rarely the one that sorts first.
+
+The question is asked once per input, and **one supplier is enough**. This flow
+will not stay linear — `docs/care-delivery-lifecycle-contrast.md` is explicit
+about rematching, transfer and closure routes — so once two paths both carry an
+accepted Match to their own next Step, demanding that each producer reach every
+consumer would refuse a correct model for handoffs nobody wrote down. A Step's
+own output does not supply its own input either: what a Step produces exists
+once it has run, and an input has to exist before it does.
 
 This is not a completeness rule, and it must not become one:
 
