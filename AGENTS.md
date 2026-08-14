@@ -79,6 +79,36 @@ This is deliberate, and it is the rule most likely to feel like an extra step:
 - Do not give a Bet its own targets. If a Bet seems to land somewhere its
   Problem does not, the Problem's `targets` are wrong, or it is a second problem.
 
+## The interface uses one design system
+
+The UI follows the **Family Health Provider** design system, vendored into
+`app/design-system.css` from
+[`dmeehan45/design_systems`](https://github.com/dmeehan45/design_systems/tree/main/family-health-provider).
+Read `docs/design-system.md` before changing anything visual.
+
+The rule that matters: **brand values live in `app/design-system.css` and
+nowhere else.** `app/globals.css` opens with a block aliasing this application's
+vocabulary onto that file's semantic layer; everything else reads the aliases. A
+literal colour in `app/` or `components/` is a bug, and `npm run lint:design`
+fails on one.
+
+If no semantic role fits what you are building, add a role to the semantic
+layer. Do not reach past it into a primitive, and do not invent a colour.
+
+Two things the tokens cannot enforce on their own, and that a change most often
+breaks:
+
+- **Hue means category, never decoration.** Blue is the machine as it is, coral
+  is where it breaks and what we have not proven, gold is what we propose to
+  change, green is what we can measure, neutral is what moves through it. Colour
+  is never the only signal — every node and badge names its kind in words too.
+- **44px is the floor for anything you tap**, focus is the reference ring built
+  from `:focus-visible`, and motion is 0.15s on the system's one easing curve.
+
+`npm run test:responsive` is a thin Playwright smoke test at phone and desktop
+widths. Keep it thin — it exists to stop a push from silently breaking the phone,
+not to pin the design down. Add a case when a responsive bug gets past it.
+
 ## Incompleteness is valid
 
 The schemas are deliberately permissive. Only `id` and `title` are required on
@@ -124,11 +154,15 @@ future layer. See `docs/future-agent-model.md`.
 ```bash
 npm run validate:content   # schema + cross-reference errors, names the file and field
 npm run lint
+npm run lint:design        # brand values outside the token layer
 npm run typecheck
 npm run build
+npm run test:responsive    # phone and desktop smoke test; builds and serves the app
 ```
 
-CI runs all four. Validation failures name the offending file and field.
+CI runs all six. Validation failures name the offending file and field.
+
+`test:responsive` needs a browser once: `npx playwright install chromium`.
 
 ### Branch from `main`, and target `main`
 

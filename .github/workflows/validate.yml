@@ -31,8 +31,22 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Brand values belong in `app/design-system.css` and nowhere else. This
+      # is what keeps the design system true of work added later.
+      - name: Lint design system
+        run: npm run lint:design
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Build
         run: npm run build
+
+      # A thin responsive smoke test at two viewports. It builds and serves the
+      # app itself, so it runs last and covers what the earlier steps cannot:
+      # whether the thing still fits on a phone.
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Responsive tests
+        run: npm run test:responsive
