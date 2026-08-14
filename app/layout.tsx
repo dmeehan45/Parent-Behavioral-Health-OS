@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Caveat, Manrope } from "next/font/google";
 import Link from "next/link";
+import { reviewDebt } from "@/lib/research/glance";
 import "./globals.css";
 
 /**
@@ -43,11 +44,19 @@ export const metadata: Metadata = {
 const NAV = [
   { href: "/map", label: "System map" },
   { href: "/prototypes", label: "Prototypes" },
-  { href: "/review", label: "Review" },
+  { href: "/review", label: "Research" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const source = process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL;
+  /*
+   * Research arrives from conversations held elsewhere and from scheduled runs
+   * nobody watched. Without a count on the one surface that is on every page,
+   * the only way to discover that four findings are waiting is to remember to
+   * go and look — and the thing this model is worst at surviving is a reviewer
+   * who stops noticing.
+   */
+  const waiting = reviewDebt();
 
   return (
     <html lang="en" className={`${sans.variable} ${script.variable}`}>
@@ -71,6 +80,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {NAV.map((item) => (
               <Link key={item.href} href={item.href}>
                 {item.label}
+                {item.href === "/review" && waiting > 0 ? (
+                  <span className="nav-count" aria-label={`${waiting} waiting on you`}>
+                    {waiting}
+                  </span>
+                ) : null}
               </Link>
             ))}
             {source ? (

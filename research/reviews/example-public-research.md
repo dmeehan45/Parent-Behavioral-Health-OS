@@ -46,6 +46,7 @@ contractVersion: 1
 runId: example-public-research
 reviewedHandoffHash: 94073564b95b46415a0433f5b0d2e34c1099e0ca1070a730ba81f580feb72f66
 reviewer: TODO who is accountable for this decision
+decidedAt: TODO today, as YYYY-MM-DD
 decisions:
   - id: decide-example-public-research-finding-review-first
     disposition: TODO accept | reject | defer | needs-research | accept-with-edits

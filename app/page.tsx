@@ -126,6 +126,32 @@ export default function Home() {
         </div>
       </section>
 
+      {/*
+        The front door described the model, the map and the prototypes, and said
+        nothing about where new thinking comes from — so the loop that actually
+        keeps the model current was discoverable only by noticing a word in the
+        navigation. It is the part a reader is most likely to want to join.
+      */}
+      <section className="home-band">
+        <span className="eyebrow">Keeping it current</span>
+        <h2>Research arrives as a proposal, and a person decides</h2>
+        <p className="muted">
+          Reading about this practice in ChatGPT or Claude produces things worth writing down. Those arrive here as a
+          bounded handoff in the repository — sources, findings, and what the run was unsure about — never as an edit to
+          the model. A scheduled run adds more twice a day, working from questions people asked and from gaps the model
+          has in itself.
+        </p>
+        <p className="muted">
+          Nothing becomes part of the model until somebody reads it and decides. That decision is the point: it is where
+          you work out what is actually true, what it changes, and what is worth building against. No agent can skip it.
+        </p>
+        <div className="home-actions">
+          <Link className="button secondary" href="/review">
+            See what research is proposing <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </section>
+
       <section className="home-band">
         <span className="eyebrow">Working on this</span>
         <h2>Point your coding agent at it</h2>
