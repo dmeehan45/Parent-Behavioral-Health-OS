@@ -1,18 +1,48 @@
 import { z } from "zod";
 const idSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "expected a lowercase kebab-case ID");
 
-const sourceLocatorSchema = z
-  .object({
-    url: z.string().url().startsWith("https://").optional(),
-    doi: z.string().min(3).optional(),
-    repository: z.string().min(3).optional(),
-    path: z.string().min(1).optional(),
-  })
-  .superRefine((locator, context) => {
-    if (!locator.url && !locator.doi && !(locator.repository && locator.path)) {
-      context.addIssue({ code: "custom", message: "expected an HTTPS URL, DOI, or repository and path" });
-    }
-  });
+const sourceLocatorSchema = z.object({
+  url: z.string().url().startsWith("https://").optional(),
+  doi: z.string().min(3).optional(),
+  repository: z.string().min(3).optional(),
+  path: z.string().min(1).optional(),
+  /* A prototype review session. Nothing here points outside the repository. */
+  bet: idSchema.optional(),
+  observedAt: z.coerce.date().optional(),
+  /**
+   * Who was in the room, described by their relationship to the system and
+   * never by who they are. "Two clinicians new to the platform" is a locator;
+   * a name, an employer, or a contact detail is a leak, and this is a public
+   * repository.
+   */
+  participants: z.string().min(1).max(200).optional(),
+});
+
+/**
+ * A source has to be findable again by whoever reads the finding later.
+ *
+ * What "findable" means depends on the kind, and until now the check was a
+ * single "one of url, doi, or repository+path" that the documented per-kind
+ * rules only described. Stating them here makes the documentation true and
+ * keeps the session kind from quietly becoming an escape hatch: a web source
+ * cannot satisfy its locator with session fields, and a session cannot claim a
+ * URL it does not have.
+ */
+const SOURCE_LOCATOR_RULE: Record<string, { ok: (l: Locator) => boolean; expected: string }> = {
+  web: { ok: (l) => Boolean(l.url), expected: "an HTTPS URL" },
+  publication: { ok: (l) => Boolean(l.doi || l.url), expected: "a DOI, or an HTTPS URL" },
+  repository: { ok: (l) => Boolean(l.repository && l.path), expected: "a repository and path" },
+  session: {
+    ok: (l) => Boolean(l.bet && l.observedAt && l.participants),
+    expected: "the bet observed, the date, and a non-identifying description of who took part",
+  },
+  other: {
+    ok: (l) => Boolean(l.url || l.doi || (l.repository && l.path)),
+    expected: "an HTTPS URL, DOI, or repository and path",
+  },
+};
+
+type Locator = z.infer<typeof sourceLocatorSchema>;
 
 export const handoffSchema = z.object({
   contractVersion: z.literal(1),
@@ -39,15 +69,46 @@ export const handoffSchema = z.object({
   }),
   sources: z
     .array(
-      z.object({
-        id: idSchema,
-        identity: idSchema,
-        kind: z.enum(["web", "publication", "repository", "other"]),
-        title: z.string().min(1),
-        locator: sourceLocatorSchema,
-        access: z.enum(["available", "paywalled", "unreachable"]),
-        publishedAt: z.coerce.date().optional(),
-      }),
+      z
+        .object({
+          id: idSchema,
+          identity: idSchema,
+          // `session` is a prototype review: somebody used the software and
+          // something was observed. It is the way what a prototype taught gets
+          // back into the model, and it goes through the same gate as anything
+          // else — packet, /review, decision — because one participant's
+          // reaction is not a validated claim, and nothing here may decide that
+          // it is.
+          kind: z.enum(["web", "publication", "repository", "session", "other"]),
+          title: z.string().min(1),
+          locator: sourceLocatorSchema,
+          access: z.enum(["available", "paywalled", "unreachable"]),
+          publishedAt: z.coerce.date().optional(),
+        })
+        .superRefine((source, context) => {
+          const rule = SOURCE_LOCATOR_RULE[source.kind];
+          if (rule && !rule.ok(source.locator)) {
+            context.addIssue({
+              code: "custom",
+              path: ["locator"],
+              message: `a '${source.kind}' source needs ${rule.expected}`,
+            });
+          }
+          if (source.kind !== "session" && (source.locator.bet || source.locator.participants)) {
+            context.addIssue({
+              code: "custom",
+              path: ["locator"],
+              message: "bet and participants describe a review session; set kind to 'session'",
+            });
+          }
+          if (source.kind === "session" && (source.locator.url || source.locator.doi)) {
+            context.addIssue({
+              code: "custom",
+              path: ["locator"],
+              message: "a session happened here, not at a URL — remove url and doi",
+            });
+          }
+        }),
     )
     .min(1),
   findings: z

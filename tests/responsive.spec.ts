@@ -17,7 +17,20 @@ import type { NodeKind } from "../lib/model/types";
 /** Static routes that exist regardless of what is in `content/`. */
 const FIXED_ROUTES = ["/", "/map", "/prototypes", "/review", "/review/apply"];
 
-/** One record page per primitive, so every page template gets looked at once. */
+/**
+ * One record page per primitive, so every page template gets looked at once —
+ * plus *every* prototype.
+ *
+ * Record pages all render through one template, so a second stage would test
+ * nothing a first did not. A prototype is the opposite: each one is bespoke
+ * interaction code, and it is the most likely thing in the repository to be
+ * written by somebody who has not read the design system. Sampling one of them
+ * would leave the rest unchecked, which is the same "the empty state cannot
+ * fail" trap this file already exists to avoid.
+ *
+ * Derived from the model, so adding a prototype adds its test with no change
+ * here — the same way adding a stage adds its node.
+ */
 async function routesFromModel(page: Page): Promise<string[]> {
   const response = await page.request.get("/api/model");
   expect(response.ok()).toBeTruthy();
@@ -26,10 +39,14 @@ async function routesFromModel(page: Page): Promise<string[]> {
   };
 
   const seen = new Map<NodeKind, string>();
+  const prototypes: string[] = [];
   for (const node of model.nodes) {
-    if (!seen.has(node.kind)) seen.set(node.kind, node.href);
+    // A prototype node whose bet declares no route falls back to the bet's own
+    // page, which the bet template already covers.
+    if (node.kind === "prototype" && node.href.startsWith("/prototypes/")) prototypes.push(node.href);
+    else if (!seen.has(node.kind)) seen.set(node.kind, node.href);
   }
-  return [...seen.values()];
+  return [...new Set([...seen.values(), ...prototypes])];
 }
 
 /**
