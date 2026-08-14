@@ -73,8 +73,16 @@ read from both ends, which is why the feature landed on them.
 | `step.claims` | step → claim | `evidence` | evidence |
 | `metric.targets` | metric → stage/step | `evidence` | evidence |
 | `stage.metrics` / `step.metrics` | stage/step → metric | `evidence` | evidence |
-| `problem.claims` / `problem.metrics` | problem → claim/metric | — block only | — |
-| `bet.claims` / `bet.metrics` | bet → claim/metric | — block only | — |
+| `problem.claims` / `problem.metrics` | problem → claim/metric | `evidence` | evidence |
+| `bet.claims` / `bet.metrics` | bet → claim/metric | `evidence` | — (bets lens owns that spine) |
+| `metric.perspectives.actor` | metric → entity | — block only | — |
+| `metric.decisionOwner` | metric → entity | — block only | — |
+| `bet.participant` | bet → entity | — block only | — |
+
+`lib/model/conformance.ts` holds this table in a form the build checks. Every
+row is either an edge the projection must derive or a deliberate block-only
+decision with its reason, and a reference that is in neither fails
+`npm run validate:projection`.
 
 ## A relationship counts once, from whichever end wrote it down
 
@@ -95,34 +103,38 @@ relationship the projection happens to read.
 
 ## What we deliberately do not edge
 
-`problem.claims`, `problem.metrics`, `bet.claims` and `bet.metrics` stay as
-blocks. Three reasons, and they are worth keeping:
+Three references stay as blocks: `metric.perspectives.actor`,
+`metric.decisionOwner`, and `bet.participant`. All three name an **Entity**, and
+the reasoning is the same for each — an edge would put entities on the evidence
+or bets lens, which answer *what we believe* and *what we are trying*. Who is
+involved is the entities lens's question, and it already answers it.
 
-**The question is already answered one hop away.** A Problem names the Stages
-and Steps it bites, and those already carry edges to their claims and metrics.
-"Is the evidence under this problem shaky?" is a question the Stage page answers
-with the edges that exist. Adding a second path to the same answer buys nothing
-and doubles what has to stay consistent.
+That is the test worth applying: not "is this relationship real" — they all are,
+or they would not be in the file — but **which canvas would draw it, and is that
+the question that canvas answers**.
 
-**It would mix two questions on one canvas.** The bets lens answers *where does
-this break and what are we doing about it*. Problem → Claim lines would put the
-evidence question on the same picture, and the reason there are four lenses is
-that one canvas showing everything shows nothing.
+An earlier draft of this document argued that `problem.claims` and `bet.claims`
+should stay blocks too, because a Problem's evidence is reachable through the
+Stages it bites. That was wrong, and the model is better for the correction:
+`problem.claims` is the problem file saying *this is what my case rests on*,
+while a claim that merely targets the same stage is a coincidence of location.
+Treating those as the same thing was the error. Only the explicit reference
+became an edge, which is the distinction the earlier reasoning missed.
 
-**An edge is a commitment.** Every edge is drawn somewhere, counted in a signal,
-and traversable by anything that reads the graph later. Adding one to serve a
-single feature is how a projection turns into a second, worse copy of the
-content.
+## What an edge costs
 
-So the honest answer to "should this be an edge" is usually **no**. Ask instead:
+Every edge is drawn somewhere, counted in a signal, and traversable by anything
+that reads the graph later. Adding one to serve a single feature is how a
+projection turns into a second, worse copy of the content. So the questions are:
 
 1. Does some surface need to answer this from the end that did not write it?
 2. Is that surface the right place for the answer, or is it one click away on a
    record that already has the edge?
 3. Which lens would draw it, and does it belong on that picture?
 
-An edge earns its place when the answer to (1) is yes and to (2) is "here" — and
-when (3) has a real answer rather than a shrug.
+A "no" to (3) does not always mean no edge. A Bet's claims and metrics are
+edges that the bets lens deliberately does not draw — the projection is read for
+more than the canvas, and open ends read it too.
 
 ## The simpler thing, when an edge is not it
 
@@ -135,6 +147,21 @@ Two alternatives that are usually better than a new edge kind:
   reader to the Stage it bites is one click and no new structure, and the reader
   ends up somewhere with more context than a badge could have carried.
 
-Both were available here. The first was right for claims because two surfaces
-genuinely disagreed. The second is right for problems, and that is why the table
-above still has blanks in it.
+The first was right for `step.claims`, because two surfaces genuinely disagreed
+about the same content. The second is right for the three Entity references,
+which is why the table still has blanks in it.
+
+## What the build now checks, and what it still cannot
+
+`npm run validate:projection` walks every reference the content actually
+authors — `lib/content/repository.ts` collects them while validating, since it
+is the one place that already visits them all — and checks the projection
+represents each one as its registry entry promises.
+
+It catches the two failures that have happened here: a reference the projection
+silently drops, and a reference nobody has classified. It reports the file and
+the field, not just that something is wrong.
+
+It cannot catch a field added to a schema that no content uses yet. That is a
+real gap and an acceptable one: the check fires the moment somebody authors the
+first reference, which is the moment it starts mattering.

@@ -47,6 +47,12 @@ Two rules keep this working:
   and `step.claims` are the same link from two sides, and the projection resolves
   both into one edge. When both ends may legitimately author a link, resolve both
   and deduplicate; do not make contributors learn which side is read.
+- **Every reference must be classified.** `lib/model/conformance.ts` declares,
+  for each reference field, either the edge the projection derives or a
+  deliberate block-only decision and its reason. `npm run validate:projection`
+  fails on a reference that is neither — which is what stops a schema field from
+  being validated, rendered, and still invisible to every surface that reads
+  edges. Adding a reference field means adding a row.
 - **Respect the server boundary.** `lib/model/graph.ts` reads the filesystem and
   is server-only. Anything a client component needs — kind labels, routes, lens
   bands — lives in `lib/model/kinds.ts`. Importing `graph.ts` from a `"use client"`
@@ -342,6 +348,7 @@ future layer. See `docs/future-agent-model.md`.
 
 ```bash
 npm run validate:content   # schema + cross-reference errors, names the file and field
+npm run validate:projection # references the projection would silently ignore
 npm run validate:research  # research handoffs, decisions, and generated packets
 npm run test:research      # the intake contract itself
 npm run test:prototype     # the build packet, and what it refuses to compose
@@ -353,7 +360,7 @@ npm run build
 npm run test:responsive    # phone and desktop smoke test; builds and serves the app
 ```
 
-CI runs all ten. Validation failures name the offending file and field.
+CI runs all of them. Validation failures name the offending file and field.
 
 `test:responsive` needs a browser once: `npx playwright install chromium`.
 
