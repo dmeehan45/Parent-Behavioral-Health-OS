@@ -7,6 +7,19 @@ public GitHub API at this revision.
 **Question:** where does the repository present speculation as evidence, imply
 data it does not have, carry weak seed material, or leave consequential gaps?
 
+> **Status: guardrails landed, findings still open.** The checks this audit
+> proposed are in `lib/content/quality.ts` and run in `validate:content` — see
+> [Guardrails added by this audit](#guardrails-added-by-this-audit). The
+> *findings* are a different matter: of the six items in
+> [Recommended review order](#recommended-review-order), **none has been
+> actioned**. The `time-to-first-session` clock still contradicts its own
+> decision, no canonical record carries a `researchTrace`, and the three
+> high-priority questions are still queued.
+>
+> Two inventory rows have since drifted: the Bet now carries **six** experiment
+> sections rather than five (`# Out of scope` was split out of `# Scope`), and
+> `builtAgainst` carries six positional digests to match.
+
 ## Bottom line
 
 The canonical files are more honest than the merged rationale that introduced

@@ -2,8 +2,11 @@
 
 There are three kinds of contribution here, and they are equally welcome:
 
-1. **Model contributions** — a stage, step, entity, claim, metric, or bet in
-   `content/`. This is systems thinking, and it requires no application code.
+1. **Model contributions** — a stage, step, entity, claim, metric, problem, or
+   bet in `content/`. This is systems thinking, and it requires no application
+   code. Naming a Problem is a complete contribution: it does not need a
+   proposed answer, and a Problem nobody has answered yet is the most useful
+   thing on the map.
 2. **Software contributions** — the projection in `app/`, `components/`, `lib/`,
    or a prototype under `app/prototypes/`.
 3. **Research intake** — an untrusted, reviewable handoff under `research/` that
@@ -33,8 +36,12 @@ Open <http://localhost:3000/map>.
 ## The loop
 
 ```text
-Map → Question → Bet → Prototype → Learn → Update Map
+Map → Problem → Bet → Prototype → Learn → Update Map
 ```
+
+A Bet answers exactly one Problem, and a Problem names the Stages and Steps it
+bites. Where a Bet lands in the machine is derived from its Problem, so nothing
+states the same trouble twice.
 
 Edit one small file in `content/`, save, and the application reflects it. If a
 change to `content/` requires editing a React component to show up, that is a
@@ -44,16 +51,21 @@ bug in the projection — please open an issue.
 
 ```bash
 npm run validate:content
+npm run validate:projection
 npm run validate:research
 npm run test:research
+npm run test:prototype
+npm run test:model
 npm run scan:safety
 npm run lint
+npm run lint:design
 npm run typecheck
 npm run build
+npm run test:responsive
 ```
 
-CI runs all of these on every pull request, plus `npm run lint:design` and
-`npm run test:responsive`.
+CI runs every one of these on every pull request. `test:responsive` needs a
+browser once: `npx playwright install chromium`.
 
 ## Branch from `main`, and target `main`
 

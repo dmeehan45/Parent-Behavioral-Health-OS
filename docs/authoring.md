@@ -24,7 +24,7 @@ renders a fixed set of section names per primitive:
 | Stage | `# Current model`, `# Open questions` |
 | Step | `# Current model`, `# Open questions` |
 | Problem | `# What happens today`, `# Why it matters`, `# Open questions` |
-| Bet | `# Bet`, `# Questions`, and the five experiment sections below |
+| Bet | `# Bet`, `# Questions`, and the six experiment sections below |
 | Entity, Claim, Metric | none — the body renders as a single block of prose |
 
 **Section names are a contract, not a convention.** A heading outside this table
@@ -133,7 +133,7 @@ Bet never declares targets of its own.
 
 ## Shape the experiment before building anything
 
-A Bet says what we would try. Five further optional sections say what *trying it*
+A Bet says what we would try. Six further optional sections say what *trying it*
 would settle, and they are what somebody accountable approves before a prototype
 is built:
 
@@ -166,7 +166,7 @@ waiting on the answer.
 Optionally add `participant: <entity-id>` to name the actor the experiment
 studies; `# Scope` still says which moment and what path.
 
-All five are optional, and a Bet is allowed to exist long before an experiment
+All six are optional, and a Bet is allowed to exist long before an experiment
 does. But `npm run prototype:brief` will not clear a build without them, and a
 Bet with a prototype underway and no learning decision says so on its own page.
 That is deliberate: a prototype tests a decision, and if no decision changes,
@@ -215,7 +215,7 @@ a reader to a 404. Validation also checks the route actually goes through
 problem and the provenance. A Bet without a prototype omits `route` entirely — a
 Bet is allowed to exist long before any software does.
 
-Once the prototype is built and you have checked it against the five experiment
+Once the prototype is built and you have checked it against the six experiment
 sections, record which experiment that was:
 
 ```yaml

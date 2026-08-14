@@ -175,18 +175,21 @@ A note on that label, because the number reads harsher than the artifact deserve
 
 ## 5. Acceptance Checks
 
-- [ ] All Critical findings resolved and retested (A-001, V-001)
-- [ ] All High findings resolved or risk-accepted with documented rationale
-- [ ] Category scores re-evaluated — target: all categories ≥ 3.0
-- [ ] No new dead-end states introduced by fixes
-- [ ] Mobile workflow parity confirmed — legend, full model, and zoom controls all reachable at 320px
-- [ ] Layout tested at 320px, 768px, 1024px and 1440px — `document.documentElement.scrollWidth === clientWidth` on every route
-- [ ] All primary workflow actions use styled buttons, not text links
-- [ ] Complex sections include contextual descriptions reachable without hover
-- [ ] Focus is visible on every interactive element on `/map`, and returns to its trigger after each overlay closes
-- [ ] Every text/background pair measured against its **composited** background clears 4.5:1 (3:1 for large text) — not against white
-- [ ] Node text paints at ≥12px at the map's default zoom on every lens at every breakpoint
-- [ ] Overall status is "Acceptable with gaps" (3.0+) or "Strong" (4.0+)
+Ticked against the measurements in [What changed](#what-changed), not against
+intent. Three remain open, and each says why.
+
+- [x] All Critical findings resolved and retested (A-001, V-001)
+- [x] All High findings resolved or risk-accepted with documented rationale — M-002 is the one risk-accepted item, and its rationale is in the caveats
+- [ ] Category scores re-evaluated — target: all categories ≥ 3.0. **Open:** every finding was fixed and measured individually, but no second scoring pass has been run, so the 2.8/5 above is still the only score this document carries
+- [x] No new dead-end states introduced by fixes — F-003 and F-005 each added a terminal state and an action, and F-006 turned a silent no-op into an explanation
+- [x] Mobile workflow parity confirmed — legend, full model, and zoom controls all reachable at 320px
+- [x] Layout tested at 320px, 768px, 1024px and 1440px — 0 of 11 routes scroll sideways at any of the four widths
+- [ ] All primary workflow actions use styled buttons, not text links. **Open:** never measured as a sweep; individual controls were raised to `--ds-touch-target` under A-005/M-004, which is a different property
+- [x] Complex sections include contextual descriptions reachable without hover — A-007 and B-003
+- [x] Focus is visible on every interactive element on `/map`, and returns to its trigger after each overlay closes — A-001, A-003, A-006, B-001
+- [x] Every text/background pair measured against its **composited** background clears 4.5:1 (3:1 for large text) — not against white. Zero failures across 11 routes; measured at 2 widths rather than 4
+- [x] Node text paints at ≥12px at the map's default zoom on every lens at every breakpoint
+- [ ] Overall status is "Acceptable with gaps" (3.0+) or "Strong" (4.0+). **Open:** follows the re-score above, and is unclaimed until somebody runs it
 
 ---
 

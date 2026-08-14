@@ -87,6 +87,7 @@ Press <kbd>⌘K</kbd> to search every primitive, including ones the current lens
 - `app/` and `components/` render that projection. They contain no model IDs, counts, or relationships.
 - `app/prototypes/` contains small executable artifacts linked to Bets.
 - `docs/prototype-workflow.md` defines how one Bet becomes a scoped, human-accountable learning prototype.
+- `docs/system-state.md` says where the whole thing currently stands — what is built, what has actually been used, and what is thin.
 - `docs/` explains the model, authoring loop, and future semantic boundaries.
 
 ## What this is not
