@@ -19,6 +19,21 @@ run(() => {
 
   const queue = buildQueue(questions, handoffs);
   const open = nextUp(queue);
+  const gaps = findGaps(getRepository(), handoffs, questions);
+
+  // `--top` prints the one identifier a run should brief on, and nothing else.
+  //
+  // The scheduled routine needs this because the agent it publishes to cannot
+  // run these commands itself. Scraping the human-readable listing below for an
+  // ID would break the first time a line is reworded, so the identifier is
+  // asked for directly. A queued question answers with its ID; a gap has no ID,
+  // so it answers with the question it suggests — which `research:brief` also
+  // accepts, quoted.
+  if (process.argv.includes("--top")) {
+    const top = open[0]?.id ?? gaps[0]?.suggestedQuestion;
+    if (top) console.log(top);
+    return;
+  }
 
   console.log("\n# Queued questions\n");
   if (!open.length) {
@@ -38,7 +53,6 @@ run(() => {
     console.log("");
   }
 
-  const gaps = findGaps(getRepository(), handoffs, questions);
   console.log("# Gaps in the model itself\n");
   if (!gaps.length) console.log("  None found.\n");
   for (const gap of gaps.slice(0, 12)) {

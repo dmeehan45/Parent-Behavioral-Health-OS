@@ -6,7 +6,7 @@ import test from "node:test";
 import yaml from "js-yaml";
 import { handoffSchema } from "../../lib/research/schema";
 import { decisionId, handoffHash, loadDecisions, loadHandoffs, reviewCoverage, validateDecisions } from "../../lib/research/intake";
-import { packetIsCurrent, renderReview, writeReviews } from "../../lib/research/review";
+import { checkCommittedPackets, packetIsCurrent, renderReview, writeReviews } from "../../lib/research/review";
 
 const CONTRACT = "research/contract/v1.example.yaml";
 const SHIPPED = "research/handoffs/example-public-research.yaml";
@@ -134,6 +134,34 @@ test("a packet carries a decision skeleton that fails validation until it is ans
     "research/decisions/example-public-research.yaml": packet.split("```yaml")[1].split("```")[0],
   });
   assert.match(message(() => loadDecisions(root)), /reviewer|disposition/);
+});
+
+// The bug this pins: intake required the generated packet to be committed, and
+// the actor intake is written for cannot run a generator. Every pull request a
+// GitHub connector opened failed on a file it had no way to produce. A handoff
+// arriving alone is the normal case, not an incomplete one.
+test("a handoff with no committed packet validates", () => {
+  const root = scratch({ "research/handoffs/example-public-research.yaml": handoffText });
+  assert.equal(fs.existsSync(path.join(root, "research/reviews")), false);
+  assert.doesNotThrow(() => checkCommittedPackets(loadHandoffs(root), root));
+});
+
+// The other half of the same rule: nothing requires a packet, but a packet that
+// is there carries the hash a reviewer copies, so it must still be true.
+test("a committed packet that no longer matches its handoff is an error", () => {
+  const current = scratch({
+    "research/handoffs/example-public-research.yaml": handoffText,
+    "research/reviews/example-public-research.md": renderReview(loaded),
+  });
+  assert.doesNotThrow(() => checkCommittedPackets(loadHandoffs(current), current));
+
+  const drifted = scratch({
+    "research/handoffs/example-public-research.yaml": handoffText,
+    "research/reviews/example-public-research.md": renderReview(loaded).replace("## Synthesis", "## Summary"),
+  });
+  const reported = message(() => checkCommittedPackets(loadHandoffs(drifted), drifted));
+  assert.match(reported, /research\/reviews\/example-public-research\.md: stale/);
+  assert.match(reported, /delete the packet/);
 });
 
 test("regenerating packets removes stale ones and keeps anything hand-written", () => {

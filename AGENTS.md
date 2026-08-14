@@ -146,10 +146,22 @@ enforced in `checkResearchTrace` at content validation *and* inside
 `projectModel()`, so it holds for the live map too. An agent with full write
 access to this repository still cannot promote its own research.
 
-Three consequences worth knowing before you touch any of it:
+Four consequences worth knowing before you touch any of it:
 
 - **`research/` never moves the map's revision.** `contentRevision()` hashes
   `content/` only. Staging churn must not make every open map re-fetch.
+- **An intake commits the handoff and nothing else.** Everything a reviewer
+  reads is derived from that one file, and the actor this workflow is written
+  for — a conversational agent on a GitHub connector — writes files through the
+  contents API and cannot execute anything. Requiring it to commit a generated
+  packet made the one step it could not perform the one step it could not skip,
+  and every connector intake failed on it. So CI renders the packet onto the
+  pull request instead (`.github/workflows/research-packet.yml`), and the
+  scheduled routine folds the brief into its issue for the same reason.
+
+  The general form, and the thing to check before adding any intake step:
+  **never require an artifact from an actor that cannot produce it.** If a step
+  needs a shell, it belongs in CI.
 - **Read the brief before researching.** `npm run research:brief -- <id>` prints
   what earlier runs established. Restating an earlier finding exactly is a
   validation error, because a routine running twice a day would otherwise

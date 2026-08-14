@@ -305,8 +305,8 @@ function checkResearchTrace(items: Array<Stage | Step | Entity | Claim | Metric 
     if (!decisionFile) {
       throw new Error(
         `Invalid researchTrace in ${item.file}: no reviewer decisions exist for run '${trace.run}'. ` +
-          `The accountable reviewer records them in research/decisions/${trace.run}.yaml — the packet at ` +
-          `research/reviews/${trace.run}.md carries a skeleton to fill in — and only then can a canonical record cite the run.`,
+          `The accountable reviewer records them in research/decisions/${trace.run}.yaml — /review/${trace.run} ` +
+          `carries a skeleton to fill in — and only then can a canonical record cite the run.`,
       );
     }
     const decision = decisionFile.decisions.find((candidate) => candidate.id === trace.decision);

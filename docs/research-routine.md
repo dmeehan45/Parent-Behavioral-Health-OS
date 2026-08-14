@@ -13,15 +13,19 @@ a provider API, an agent framework, or a runner that holds a model key.
 ## What runs twice a day
 
 A scheduled workflow, `.github/workflows/research-routine.yml`, runs
-`npm run research:queue` and keeps one issue up to date with the result. It
-calls no model and holds no secret — it publishes the queue so that a person or
-an agent has something to open.
+`npm run research:queue`, briefs the top of that queue, and keeps one issue up
+to date with both. It calls no model and holds no secret — it publishes the
+queue so that a person or an agent has something to open.
+
+The brief is in the issue rather than named as a command because the agent that
+reads the issue cannot run one. That is the same reason the intake asks for a
+handoff and nothing else.
 
 Everything else is a conversation. Twice a day, in Claude, ChatGPT, or anything
 else wired to this repository:
 
-> Read the research routine issue. Pick the top item. Run
-> `npm run research:brief -- <question-id>` and follow it.
+> Read the research routine issue. Take the top item, read the brief folded
+> underneath it, and follow it.
 
 ## The loop
 
@@ -42,16 +46,27 @@ ask ──▶ queue ──▶ brief ──▶ research ──▶ handoff ──�
    accepted or rejected. **This is the step that makes each run separate from
    the last.** A run that skips it will rediscover things and be rejected.
 
-4. **Research and hand off.** `npm run research:new -- <question-id>` scaffolds
-   the handoff with a dated, collision-resistant run ID. Fill it in, then:
+   The scheduled workflow runs it for the top of the queue and folds the output
+   into the routine issue, so a run that starts from that issue has already had
+   it. Run it directly when researching something else.
+
+4. **Research and hand off.** Write `research/handoffs/<run-id>.yaml` following
+   `research/contract/v1.example.yaml`. Branch from `main`, commit that one
+   file, open a pull request. Never edit `content/`.
+
+   **One file is the whole intake.** A conversational agent on a GitHub
+   connector writes files and cannot run anything, so nothing derived is asked
+   of it: CI renders the review packet onto the pull request and validates the
+   handoff.
+
+   With a shell, `npm run research:new -- <question-id>` scaffolds the file with
+   a dated, collision-resistant run ID, and these say the same thing sooner:
 
    ```bash
-   npm run generate:research-review
    npm run validate:research
    npm run scan:safety
+   npm run generate:research-review   # optional; writes the packet for local reading
    ```
-
-   Branch from `main`, commit, open a pull request. Never edit `content/`.
 
    The chat before that handoff can take as many short turns as useful. A person
    may redirect the question, supply generalized non-confidential context, or

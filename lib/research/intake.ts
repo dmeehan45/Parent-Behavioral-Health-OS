@@ -266,8 +266,8 @@ export function validateDecisions(handoffs: LoadedHandoff[], loaded: LoadedDecis
     if (record.reviewedHandoffHash !== handoff.hash) {
       throw new Error(
         `${file}: reviewedHandoffHash is stale. The handoff has changed since it was reviewed. ` +
-          `Run npm run generate:research-review, re-read ${path.join("research", "reviews", `${record.runId}.md`)}, ` +
-          `and copy the new hash (${handoff.hash}) once the decisions below still hold.`,
+          `Re-read the run at /review/${record.runId} and copy the new hash (${handoff.hash}) ` +
+          `once the decisions below still hold.`,
       );
     }
     const expected = new Set(handoff.handoff.findings.map((finding) => decisionId(record.runId, finding.id)));

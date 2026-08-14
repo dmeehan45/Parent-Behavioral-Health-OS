@@ -84,5 +84,7 @@ run(() => {
 
   console.log(`Scaffolded ${file}`);
   console.log(`\nRead the prior art first:\n  npm run research:brief -- ${item?.id ?? `"${question}"`}`);
-  console.log(`\nThen fill in the TODOs and run:\n  npm run generate:research-review\n  npm run validate:research\n  npm run scan:safety\n`);
+  console.log(`\nThen fill in the TODOs and run:\n  npm run validate:research\n  npm run scan:safety\n`);
+  console.log(`Commit that one file. The review packet is derived — CI renders it onto the pull request,`);
+  console.log(`and npm run generate:research-review writes it locally if you want to read it first.\n`);
 });
