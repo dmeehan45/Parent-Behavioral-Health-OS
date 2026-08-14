@@ -91,6 +91,10 @@ export function ReviewWorkspace({
       `runId: ${run.id}`,
       `reviewedHandoffHash: ${run.hash}`,
       `reviewer: ${scalar(reviewer.trim() || "TODO who is accountable for this decision")}`,
+      // Dated so "what has happened since I last looked" is answerable at all.
+      // Without it a decision has no position in time and the research surface
+      // can only ever show a set, never a sequence.
+      `decidedAt: ${new Date().toISOString().slice(0, 10)}`,
       "decisions:",
     ];
     for (const finding of run.findings) {

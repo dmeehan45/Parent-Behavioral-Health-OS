@@ -45,6 +45,9 @@ choices, acceptable risk, and any change to canonical content.
 
 Start from repository state, not a chat summary. Read:
 
+- the Bet record's **Where this is still open** invitations; these are derived
+  from the live projection and expose missing prototypes, weak evidence, and
+  unmeasured decisions without creating another source of truth;
 - the Bet's `# Bet` and `# Questions`, authority, confidence, linked Claims,
   Metrics, and prototype status;
 - its linked Problem, including impact and open questions;
@@ -229,8 +232,8 @@ After review, classify each implication:
 | Scope clarification | Update the working plan; ask the person if it changes the approved learning decision or consequential assumptions. |
 | Bet weakened, strengthened, or changed | Propose a canonical Bet change for human review; do not silently rewrite it in prototype code. |
 | New or revised understanding of the failure | Propose a Problem change separately from any answer. |
-| Evidence needed | Add or use a research question and follow the research handoff workflow. |
-| Accepted research affects the model | Apply it only through a separate human-authorized model change with `researchTrace`. |
+| Evidence needed | Add or use a research question with `npm run research:ask`, then follow the [research handoff workflow](research-workflow.md). |
+| Accepted research affects the model | After a person's decision, use `/review/apply` to compose the canonical file or frontmatter and its `researchTrace`; apply that output through a separate model-change pull request. |
 | Ready for production consideration | Record that conclusion outside this prototype workflow; it does not authorize production architecture or implementation. |
 
 Update the prototype status only when it truthfully reflects the artifact:

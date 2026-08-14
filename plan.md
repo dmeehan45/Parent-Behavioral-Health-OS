@@ -20,6 +20,7 @@ Define a repeatable, human-accountable workflow for turning one canonical Bet in
 - [x] Review the guidance against the current Bet, prototype shell, research workflow, and system boundaries.
 - [x] Run relevant validation and documentation checks. All non-build checks pass; build and responsive remain limited by blocked Google-font retrieval.
 - [x] Update this plan and commit the change. Pull-request creation was attempted but GitHub CLI has no authentication in this environment.
+- [x] Rebase onto current `origin/main` and align the workflow with the new record-page open ends and `/review/apply` learning path.
 
 # Relevant contracts
 
