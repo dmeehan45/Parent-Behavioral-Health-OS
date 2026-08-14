@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { researchTraceSchema } from "@/lib/research/schema";
 
 export const idSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "expected a lowercase kebab-case ID");
 export const authoritySchema = z.enum(["reference", "proposed", "validated", "policy"]);
@@ -7,7 +8,11 @@ export const provenanceSchema = z.object({ source: z.string().optional(), refere
 export const stateRefSchema = z.object({ entity: idSchema, state: z.string().min(1) });
 export const ruleSchema = z.object({ id: idSchema, statement: z.string().min(1), authority: authoritySchema.optional() });
 export const exceptionSchema = z.union([z.string(), z.object({ condition: z.string(), outcome: z.string().optional(), route: z.string().optional() })]);
-const common = { provenance: provenanceSchema.optional(), lastReviewed: z.coerce.date().optional() };
+const common = {
+  provenance: provenanceSchema.optional(),
+  lastReviewed: z.coerce.date().optional(),
+  researchTrace: z.array(researchTraceSchema).optional(),
+};
 
 export const stageSchema = z.object({
   id: idSchema, title: z.string().min(1), order: z.number().int().optional(), summary: z.string().optional(),

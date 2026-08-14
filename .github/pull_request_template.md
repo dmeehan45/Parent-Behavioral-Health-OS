@@ -6,6 +6,7 @@
 - [ ] Application (`app/`, `components/`, `lib/`) — how the model is projected changed
 - [ ] Prototype (`app/prototypes/`) — a bet became executable
 - [ ] Documentation (`docs/`, `README.md`)
+- [ ] Research intake (`research/`) — unreviewed staging only; canonical content is unchanged
 
 ## Summary
 
@@ -36,6 +37,23 @@
 
 - [ ] Based on `main` — or stacked deliberately, labelled `stacked`, and the merge order stated above
 - [ ] `npm run validate:content` passes
+- [ ] `npm run validate:research` and `npm run test:research` pass when research files change
 - [ ] `npm run lint` and `npm run typecheck` pass
 - [ ] No PHI, real patient data, real clinician data, or company-confidential material
 - [ ] Prototypes use synthetic data only
+
+## If this is a research intake
+
+**Handoff run ID and review packet**
+
+<!-- Link the committed handoff and generated packet. Do not paste a transcript. -->
+
+**Connector capability notes**
+
+<!-- Note any inability to update the PR or read CI. A coding-agent fallback may continue the same workflow. -->
+
+## If this applies accepted research
+
+**Originating run and decision IDs**
+
+<!-- Canonical changes require accepted decisions in a separate model-change PR. -->

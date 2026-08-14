@@ -28,6 +28,12 @@ jobs:
       - name: Validate content
         run: npm run validate:content
 
+      - name: Validate research intake
+        run: npm run validate:research
+
+      - name: Test research intake
+        run: npm run test:research
+
       - name: Lint
         run: npm run lint
 

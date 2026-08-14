@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import yaml from "js-yaml";
+import crypto from "node:crypto";
 import { ZodType, ZodError } from "zod";
 import {
   mapSchema,
@@ -22,6 +23,7 @@ import {
   type Bet,
 } from "@/lib/schemas";
 import { parseBody, RENDERED_SECTIONS } from "./body";
+import { decisionFileSchema, handoffSchema } from "@/lib/research/schema";
 
 const ROOT = process.cwd();
 const MAP_FILE = "content/map.yaml";
@@ -163,6 +165,35 @@ function checkEntityStates(steps: Step[], entities: Entity[]) {
   }
 }
 
+function checkResearchTrace(items: Array<Stage | Step | Entity | Claim | Metric | Problem | Bet>) {
+  const traced = items.filter((item) => item.researchTrace?.length);
+  if (!traced.length) return;
+  const handoffDirectory = path.join(ROOT, "research", "handoffs");
+  const decisionDirectory = path.join(ROOT, "research", "decisions");
+  const handoffs = new Map<string, ReturnType<typeof handoffSchema.parse>>();
+  const decisions = new Map<string, ReturnType<typeof decisionFileSchema.parse>>();
+  for (const name of fs.readdirSync(handoffDirectory).filter((entry) => /\.ya?ml$/.test(entry))) {
+    const parsed = handoffSchema.parse(yaml.load(fs.readFileSync(path.join(handoffDirectory, name), "utf8")));
+    handoffs.set(parsed.run.id, parsed);
+  }
+  for (const name of fs.readdirSync(decisionDirectory).filter((entry) => /\.ya?ml$/.test(entry))) {
+    const parsed = decisionFileSchema.parse(yaml.load(fs.readFileSync(path.join(decisionDirectory, name), "utf8")));
+    decisions.set(parsed.runId, parsed);
+  }
+  for (const item of traced) for (const trace of item.researchTrace ?? []) {
+    const handoff = handoffs.get(trace.run);
+    if (!handoff) throw new Error(`Invalid researchTrace in ${item.file}: run '${trace.run}' does not exist`);
+    const finding = handoff.findings.find((candidate) => candidate.id === trace.finding);
+    if (!finding) throw new Error(`Invalid researchTrace in ${item.file}: finding '${trace.finding}' does not exist`);
+    trace.sources.forEach((source) => { if (!finding.sourceIds.includes(source)) throw new Error(`Invalid researchTrace in ${item.file}: source '${source}' is not evidence for '${trace.finding}'`); });
+    const decisionFile = decisions.get(trace.run);
+    const decision = decisionFile?.decisions.find((candidate) => candidate.id === trace.decision);
+    if (!decision || !["accept", "accept-with-edits"].includes(decision.disposition)) throw new Error(`Invalid researchTrace in ${item.file}: decision '${trace.decision}' is not accepted`);
+    const hash = crypto.createHash("sha256").update(JSON.stringify(handoff)).digest("hex");
+    if (decisionFile?.reviewedHandoffHash !== hash) throw new Error(`Invalid researchTrace in ${item.file}: decision '${trace.decision}' reviewed a stale handoff`);
+  }
+}
+
 export function getRepository() {
   const stages = loadMarkdown("stages", stageSchema) as Stage[];
   const steps = loadMarkdown("steps", stepSchema) as Step[];
@@ -229,6 +260,7 @@ export function getRepository() {
 
   requireMapMembership(stages, map.stages);
   checkEntityStates(steps, entities);
+  checkResearchTrace([...stages, ...steps, ...entities, ...claims, ...metrics, ...problems, ...bets]);
 
   return { map, stages, steps, entities, claims, metrics, problems, bets };
 }

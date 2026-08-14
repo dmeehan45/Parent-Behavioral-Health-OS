@@ -216,7 +216,7 @@ export function projectModel(): ModelGraph {
         blocks,
         lenses: ["flow", "bets", "evidence"],
         searchText: [stage.title, stage.summary, stage.id, stage.status].join(" "),
-      }, stage.provenance?.references),
+      }, researchReferences(stage)),
     );
   }
 
@@ -301,7 +301,7 @@ export function projectModel(): ModelGraph {
         blocks,
         lenses,
         searchText: [step.title, step.purpose, step.id, stage?.title].join(" "),
-      }, step.provenance?.references),
+      }, researchReferences(step)),
     );
 
     for (const next of step.next ?? []) {
@@ -388,7 +388,7 @@ export function projectModel(): ModelGraph {
         ],
         lenses: ["bets"],
         searchText: [problem.title, problem.summary, problem.sections[SECTION.whatHappensToday], problem.id].join(" "),
-      }, problem.provenance?.references),
+      }, researchReferences(problem)),
     );
 
     for (const target of problem.targets) {
@@ -452,7 +452,7 @@ export function projectModel(): ModelGraph {
         ],
         lenses: ["bets"],
         searchText: [bet.title, problem?.title, bet.sections[SECTION.bet], bet.id].join(" "),
-      }, bet.provenance?.references),
+      }, researchReferences(bet)),
     );
 
     if (problem) {
@@ -540,7 +540,7 @@ export function projectModel(): ModelGraph {
         ],
         lenses: ["evidence"],
         searchText: [claim.statement, claim.kind, claim.id].join(" "),
-      }, claim.provenance?.references),
+      }, researchReferences(claim)),
     );
 
     for (const target of targets) {
@@ -584,7 +584,7 @@ export function projectModel(): ModelGraph {
         ],
         lenses: ["evidence"],
         searchText: [metric.title, metric.unit, metric.id].join(" "),
-      }, metric.provenance?.references),
+      }, researchReferences(metric)),
     );
 
     for (const target of targets) {
@@ -642,7 +642,7 @@ export function projectModel(): ModelGraph {
         ],
         lenses: ["entities"],
         searchText: [entity.title, entity.body, entity.id, ...declared].join(" "),
-      }, entity.provenance?.references),
+      }, researchReferences(entity)),
     );
   }
 
@@ -772,6 +772,15 @@ function repositoryUrl(sourceUrl?: string): string | undefined {
  * `provenance.references` is where the evidence behind a belief is recorded, so
  * it is shown on every primitive that has any rather than only on claims.
  */
+
+function researchReferences(record: { provenance?: { references?: string[] }; researchTrace?: Array<{ run: string; decision: string; finding: string; stance: string; sources: string[] }> }): string[] | undefined {
+  const references = [...(record.provenance?.references ?? [])];
+  for (const trace of record.researchTrace ?? []) {
+    references.push(`Research ${trace.run} / ${trace.decision} / ${trace.finding} (${trace.stance}; sources: ${trace.sources.join(", ")})`);
+  }
+  return references.length > 0 ? references : undefined;
+}
+
 function finalise(node: Omit<ModelNode, "hash">, references?: string[]): ModelNode {
   const blocks = references && references.length > 0
     ? [...node.blocks, { type: "list" as const, label: "References", items: references }]

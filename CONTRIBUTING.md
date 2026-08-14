@@ -1,14 +1,20 @@
 # Contributing
 
-There are two kinds of contribution here, and they are equally welcome:
+There are three kinds of contribution here, and they are equally welcome:
 
 1. **Model contributions** — a stage, step, entity, claim, metric, or bet in
    `content/`. This is systems thinking, and it requires no application code.
 2. **Software contributions** — the projection in `app/`, `components/`, `lib/`,
    or a prototype under `app/prototypes/`.
+3. **Research intake** — an untrusted, reviewable handoff under `research/` that
+   may inform a later model contribution but never changes the map by itself.
 
 `docs/authoring.md` is the practical guide for the first kind. This file covers
 the process around both.
+
+For provider-neutral research intake, follow `docs/research-workflow.md`. Both a
+conversational GitHub connector and a coding agent use the same files and npm
+commands; no transcript, provider credential, or private material belongs here.
 
 ## Setup
 
@@ -34,6 +40,8 @@ bug in the projection — please open an issue.
 
 ```bash
 npm run validate:content
+npm run validate:research
+npm run test:research
 npm run lint
 npm run typecheck
 npm run build

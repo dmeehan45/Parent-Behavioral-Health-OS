@@ -158,3 +158,26 @@ fix it there, not in a component.
 
 Anyone with the map open sees your change within seconds of it landing, without
 reloading.
+
+## Apply accepted research
+
+Research handoffs are staging material and never enter this directory directly.
+After the intake review is complete, create a fresh model-change branch from
+`main`, apply only accepted decisions, and add traceability to each affected
+canonical record:
+
+```yaml
+researchTrace:
+  - run: example-public-research
+    decision: decide-example-public-research-finding-review-first
+    finding: finding-review-first
+    stance: contextualizes
+    sources: [source-project-readme]
+```
+
+The IDs must resolve to a current handoff, its finding and sources, and an
+`accept` or `accept-with-edits` decision over the current handoff hash. Content
+validation rejects missing, rejected, deferred, or stale decisions. The
+projection derives a readable evidence reference from this metadata; do not
+duplicate research prose in a component. Rejected, deferred, superseded, and
+needs-research decisions remain in `research/` as history.
