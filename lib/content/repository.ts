@@ -118,6 +118,39 @@ function requirePrototypeRoute(route: string, file: string) {
         `Build the route, or remove 'route' until the prototype exists.`,
     );
   }
+  requirePrototypeShell(base, route, file);
+}
+
+/**
+ * Check that a prototype route actually goes through `PrototypeShell`.
+ *
+ * The shell is what connects a prototype back to its Bet: the problem, the
+ * targets, the claims, the metrics, the synthetic-data badge, and the way back
+ * to the model. A page that renders its interaction without it is a page that
+ * silently drops all of that, and the existing route check passes happily —
+ * it only ever asked whether a file was there.
+ *
+ * It reads the source rather than the render, so it proves the contract was
+ * invoked and nothing more. That is the honest limit of a static check, and it
+ * still catches the failure that actually happens: nobody wired the shell at
+ * all. The whole directory is searched so a page may compose the shell through
+ * a local component instead of naming it directly.
+ */
+function requirePrototypeShell(directory: string, route: string, file: string) {
+  const mentions = (dir: string): boolean =>
+    fs.readdirSync(dir, { withFileTypes: true }).some((entry) => {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) return mentions(full);
+      if (!/\.[jt]sx?$/.test(entry.name)) return false;
+      return fs.readFileSync(full, "utf8").includes("PrototypeShell");
+    });
+
+  if (mentions(directory)) return;
+  throw new Error(
+    `Unwrapped prototype in ${file}: route '${route}' renders without PrototypeShell, so it would show the ` +
+      `interaction with none of the bet, problem, or provenance around it. Wrap the page:\n\n` +
+      `  <PrototypeShell route="${route}">…</PrototypeShell>\n`,
+  );
 }
 
 /**
