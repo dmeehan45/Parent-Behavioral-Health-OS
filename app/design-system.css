@@ -55,12 +55,24 @@
   --ds-green-aa: #008853; /* 4.52:1 */
   --ds-gold-aa: #a56900; /* 4.54:1 */
   --ds-coral-aa: #de3344; /* 4.50:1 */
-  --ds-gray-aa: #707879; /* 4.51:1 */
-  /* On the hue's own lightest tint, rather than on white. */
-  --ds-blue-on-tint: #0074ac;
-  --ds-green-on-tint: #00834e;
-  --ds-gold-on-tint: #9e6500;
-  --ds-coral-on-tint: #cf2038;
+  --ds-gray-aa: #676f70; /* 5.14 white · 4.82 wash · 4.51 subtle */
+
+  /* Text colours for the grounds this application actually has.
+   *
+   * Nothing here sits on white. `--ds-surface-wash` (#e8fcf6) is the body
+   * ground and `--ds-surface-subtle` (#f0f0f0) backs every list row, chip and
+   * quiet badge, and both are darker than white — so a value calibrated to
+   * 4.5:1 on white lands below AA the moment it is used. The previous grey
+   * measured 3.96:1 on the subtle grey in situ.
+   *
+   * Each value below clears 4.5:1 on all three grounds, derived by lowering
+   * OKLCH lightness only, so hue and chroma are untouched. Blue and coral
+   * already cleared and are unchanged. Re-derive with the same method if a
+   * surface token moves. */
+  --ds-blue-on-tint: #0074ac; /* 5.13 white · 4.81 wash · 4.50 subtle */
+  --ds-green-on-tint: #007e4a; /* 5.14 · 4.82 · 4.51 */
+  --ds-gold-on-tint: #9a6100; /* 5.14 · 4.82 · 4.51 */
+  --ds-coral-on-tint: #cf2038; /* 5.36 · 5.03 · 4.70 */
 
   /* Spacing runs on a 4px rhythm with 2/6/10 available for tight work. */
   --ds-space-1: 2px;

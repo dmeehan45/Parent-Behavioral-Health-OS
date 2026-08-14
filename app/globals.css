@@ -181,6 +181,26 @@ code {
   left: 12px;
 }
 
+/*
+ * Hidden from the page, still in the accessibility tree.
+ *
+ * The narrow-screen bar used `display: none` to drop the words beside its
+ * icons, which also drops them from the accessible name — the search control
+ * was left with nothing but an `aria-hidden` glyph to be called by. Anything
+ * that is the *name* of a control has to hide this way instead.
+ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 h1,
 h2,
 h3,
@@ -812,6 +832,9 @@ p:last-child {
 }
 
 .legend-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   min-height: 36px;
   padding: 7px 12px;
   background: transparent;
@@ -820,6 +843,13 @@ p:last-child {
   color: var(--ink-2);
   font-size: 13px;
   font-weight: 600;
+}
+
+/* Carries the button on its own at the width where the word is hidden. */
+.legend-icon {
+  display: none;
+  font-size: 15px;
+  line-height: 1;
 }
 
 .legend-toggle.active,
@@ -872,6 +902,29 @@ p:last-child {
     opacity: 0;
     transform: translate(-50%, -8px);
   }
+}
+
+/*
+ * The "there is more than this" cue.
+ *
+ * Holding a legible zoom means the whole lens often will not fit, so the view
+ * has to say so — a phone was opening on two of seventeen nodes with nothing to
+ * suggest the other fifteen existed.
+ */
+.canvas-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0 12px;
+  padding: 8px 13px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  max-width: calc(100% - 24px);
 }
 
 /* Canvas controls -------------------------------------------------------- */
@@ -981,6 +1034,26 @@ p:last-child {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--kind) 35%, transparent), var(--shadow-md);
 }
 
+/*
+ * Focus is drawn on the card, not on the button inside it.
+ *
+ * `.node` clips its children, and `.node-main` fills it to within two pixels,
+ * so a ring painted outside the button's own box — which is what the reference
+ * treatment is — was clipped away entirely and the map had no visible focus at
+ * all. An element's own box-shadow is not clipped by its own `overflow`, so
+ * moving the ring one level out is the whole fix.
+ */
+/* One `:has()`, not a list of them: a comma-separated list of `:has()`
+   selectors is emitted with an unbalanced paren by the CSS pipeline and the
+   whole rule is dropped, which is a silent way to have no focus state at all. */
+.node:has(:focus-visible) {
+  box-shadow: var(--ds-focus-ring), var(--shadow-md);
+}
+
+.node :focus-visible {
+  box-shadow: none;
+}
+
 .node-dimmed {
   opacity: 0.3;
 }
@@ -1029,7 +1102,7 @@ p:last-child {
 }
 
 .node-expandable .node-head {
-  padding-right: 46px;
+  padding-right: 54px;
 }
 
 .node-head {
@@ -1150,9 +1223,10 @@ p:last-child {
   right: 8px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  min-width: 34px;
-  height: 26px;
+  min-width: 40px;
+  height: 32px;
   padding: 0 8px;
   background: var(--surface-2);
   border: 1px solid var(--line-strong);
@@ -1699,10 +1773,13 @@ p:last-child {
   color: var(--ink-2);
 }
 
+/* `min()` on the track floor is what stops the grid forcing the page wider than
+   the phone: a bare `minmax(300px, …)` plus the shell's padding measured 332px
+   inside a 320px viewport, and the whole page scrolled sideways. */
 .card-grid {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 16px;
   margin: 28px 0 0;
   padding: 0;
@@ -2099,23 +2176,51 @@ p:last-child {
     padding: 6px 10px;
   }
 
-  .search-label,
-  .search-trigger kbd,
-  .live-label,
-  .legend-toggle {
+  /* The words go, the icons stay, and the words stay *named* — see
+     `.visually-hidden`. The keyboard hint is the one thing that genuinely does
+     not apply here, so it is the one thing actually removed. */
+  .search-trigger kbd {
     display: none;
   }
 
-  .search-trigger {
-    width: 40px;
-    justify-content: center;
-    font-size: 17px;
+  .search-label,
+  .live-label,
+  .legend-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
-  .live-pill {
+  /*
+   * The legend is not optional on a phone.
+   *
+   * It is where the vocabulary is defined — what a Stage is, what an edge
+   * means, what `proposed` is worth — and hiding the only button that opens it
+   * left a phone reader with a map they had no key to. The panel itself has
+   * had a mobile layout all along; only its trigger was missing.
+   */
+  .search-trigger,
+  .live-pill,
+  .legend-toggle {
     width: 40px;
     justify-content: center;
     padding: 0;
+    font-size: 17px;
+  }
+
+  .search-trigger,
+  .legend-toggle {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .legend-icon {
+    display: block;
   }
 
   /* The canvas needs no sizing rule of its own here: `.workspace` stays a grid
@@ -2238,9 +2343,16 @@ p:last-child {
     cursor: pointer;
   }
 
+  /*
+   * Sized in CSS pixels, but drawn at canvas scale — so this is not the size a
+   * thumb meets. At the old zoom floor of 0.5 the control painted 22x16. The
+   * zoom floor in `graph-canvas.tsx` is what makes this number mean anything;
+   * the two have to move together.
+   */
   .node-expand {
     min-width: 44px;
-    height: 32px;
+    height: 40px;
+    border-radius: 20px;
   }
 }
 

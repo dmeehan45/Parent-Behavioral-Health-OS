@@ -183,13 +183,19 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
             </span>
           </button>
 
+          {/* The glyph carries it on a phone and the word carries it everywhere
+              else, but the word stays in the accessibility tree either way —
+              hiding it with `display: none` would leave the control unnamed. */}
           <button
             type="button"
             className={`legend-toggle${legendOpen ? " active" : ""}`}
             aria-pressed={legendOpen}
             onClick={() => setLegendOpen((value) => !value)}
           >
-            Legend
+            <span className="legend-icon" aria-hidden="true">
+              ?
+            </span>
+            <span className="legend-label">Legend</span>
           </button>
         </div>
       </div>

@@ -15,10 +15,10 @@ export const KIND_COLOR: Record<NodeKind, string> = {
   step: "#004a6b", // blue-darkest — a step inside a stage
   problem: "#cf2038", // coral — where the machine breaks
   claim: "#850009", // coral-darkest — the belief underneath it
-  bet: "#9e6500", // gold — what we propose to change
+  bet: "#9a6100", // gold — what we propose to change
   prototype: "#856600", // gold-darkest — the bet made concrete
-  metric: "#00834e", // green — what we can measure
-  entity: "#707879", // neutral — what moves through it
+  metric: "#007e4a", // green — what we can measure
+  entity: "#676f70", // neutral — what moves through it
 };
 
 /** What the minimap paints for a node the projection no longer knows about. */
@@ -36,8 +36,8 @@ export const EDGE_COLOR: Record<EdgeKind, string> = {
   feedback: "#d69a00", // gold-dark
   process: "#0074ac", // blue
   problem: "#f64c57", // coral-medium
-  bet: "#9e6500", // gold
+  bet: "#9a6100", // gold
   prototype: "#856600", // gold-darkest
-  evidence: "#00834e", // green
+  evidence: "#007e4a", // green
   state: "#959e9f", // neutral
 };

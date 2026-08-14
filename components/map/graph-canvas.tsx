@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -38,13 +38,43 @@ type Props = {
   onToggleExpand: (nodeId: string) => void;
 };
 
-/** Zoom thresholds for level of detail. Below the first, nodes are titles only. */
-const COMPACT_BELOW = 0.5;
-const DETAILED_ABOVE = 0.78;
-const LABELS_ABOVE = 0.7;
+/**
+ * Level of detail, derived from the size text is actually painted at.
+ *
+ * Node type is drawn inside the canvas transform, so its CSS size is not what
+ * the reader sees: at zoom 0.5 an 11.5px summary paints at 5.8px. The previous
+ * thresholds were written in raw zoom and let every lens open somewhere between
+ * 0.5 and 0.62 — which put 5–9px type on the screen at every breakpoint while
+ * the tier still reported itself as `standard`.
+ *
+ * So the thresholds are stated the other way round: floors in painted pixels,
+ * and the CSS size of the smallest text each tier is willing to draw. A tier is
+ * only offered once the smallest thing in it clears its floor, which means the
+ * canvas can no longer promise detail it will not render legibly. A title gets
+ * the higher floor because it is the last thing standing when everything else
+ * is dropped, and it is what the reader navigates by.
+ *
+ * `SMALLEST_TEXT` mirrors `globals.css` — `.node-title` in compact, and
+ * `.node-summary` once the summary appears. The uppercase kind label is smaller
+ * still, but it is short, tracked and all-caps, and holding the whole canvas to
+ * it would keep the map permanently zoomed into two nodes.
+ */
+const MIN_TITLE_PX = 12;
+const MIN_BODY_PX = 11;
+const SMALLEST_TEXT = { compact: 15, standard: 11.5 };
 
-/** The map never zooms out past this on its own; below it, nothing is readable. */
-const READABLE_ZOOM = 0.5;
+const COMPACT_BELOW = MIN_BODY_PX / SMALLEST_TEXT.standard;
+const DETAILED_ABOVE = COMPACT_BELOW * 1.25;
+const LABELS_ABOVE = COMPACT_BELOW;
+
+/**
+ * The map never zooms out past this on its own.
+ *
+ * Set so the largest text on a node — its title, the one thing compact tier
+ * still draws — stays above the floor at the most zoomed-out view the canvas
+ * will choose for itself.
+ */
+const READABLE_ZOOM = MIN_TITLE_PX / SMALLEST_TEXT.compact;
 const MAX_FIT_ZOOM = 1;
 
 function tierForZoom(zoom: number): DetailTier {
@@ -70,6 +100,8 @@ export function GraphCanvas({
   const height = useStore((state) => state.height);
   const tier = tierForZoom(zoom);
   const showLabels = zoom > LABELS_ABOVE;
+  /** True when the framed view cannot hold the whole lens. See `fitEverything`. */
+  const [clipped, setClipped] = useState(false);
 
   const { overrides, merge: mergeOverrides, reset: resetOverrides, hasOverrides } = useLayoutOverrides(lens);
 
@@ -258,6 +290,12 @@ export function GraphCanvas({
       },
       { duration: 420 },
     );
+
+    // Holding the legible floor means the view now often cannot hold the whole
+    // lens, which is the right trade — but only if the reader is told. Silence
+    // reads as "this is all there is", and on a phone that was two nodes out of
+    // seventeen.
+    setClipped(!fitsAcross || !fitsDown);
   }, [bounds, width, height, obscuredBottom, setViewport]);
 
   useEffect(() => {
@@ -358,6 +396,13 @@ export function GraphCanvas({
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
       onPaneClick={() => onSelect(undefined)}
+      // The hint has done its job the moment the reader moves the map. Only a
+      // real gesture counts: React Flow reports its own animated `setViewport`
+      // through here too, with a null event, and framing the view was cleared
+      // by the very pan that decided the hint was needed.
+      onMoveStart={(event) => {
+        if (event) setClipped(false);
+      }}
       onNodeDoubleClick={(_, node) => {
         const model = byId.get(node.id);
         if (model?.kind === "stage" && (stepCounts.get(node.id) ?? 0) > 0) onToggleExpand(node.id);
@@ -374,6 +419,18 @@ export function GraphCanvas({
       defaultEdgeOptions={{ interactionWidth: 16 }}
     >
       <Background variant={BackgroundVariant.Dots} gap={26} size={1} className="canvas-background" />
+
+      {/* Says what is off-screen, in the reader's own units, and gets out of the
+          way on first touch. The count is the lens's own, not a written-down
+          number: nothing here knows what is in the model. */}
+      {clipped ? (
+        <Panel position="top-left" className="canvas-hint" key={lens}>
+          <span aria-hidden="true">⇔</span>
+          <span>
+            Showing part of {layout.nodes.filter((placement) => !placement.parentId).length} — drag to see the rest
+          </span>
+        </Panel>
+      ) : null}
 
       <Panel position="bottom-right" className="canvas-controls">
         <button type="button" onClick={() => zoomIn({ duration: 200 })} aria-label="Zoom in">

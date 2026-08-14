@@ -26,11 +26,54 @@ export function CommandPalette({
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const paletteRef = useRef<HTMLDivElement>(null);
 
   // Mounted only while open, so opening always starts from an empty query.
+  // Where focus came from is captured on the same pass, because closing has to
+  // put it back: this is `aria-modal`, and a modal that drops the reader at the
+  // top of the document on every search is not one.
   useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
     const timer = setTimeout(() => inputRef.current?.focus(), 20);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
+
+  /**
+   * Keeps Tab inside the dialog.
+   *
+   * `aria-modal` is a claim about behaviour, not a behaviour: without this,
+   * tabbing past the last result walked out through the backdrop into the page
+   * underneath — visually obscured, still announced as behind a modal, and with
+   * no way back but Shift+Tab.
+   */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const palette = paletteRef.current;
+      if (!palette) return;
+
+      const focusable = [...palette.querySelectorAll<HTMLElement>("input, button, [href], [tabindex]:not([tabindex='-1'])")]
+        .filter((element) => element.offsetParent !== null || element === document.activeElement);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const current = document.activeElement;
+
+      if (event.shiftKey && (current === first || !palette.contains(current))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && current === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
   const results = useMemo(() => {
@@ -70,6 +113,7 @@ export function CommandPalette({
   return (
     <div className="palette-backdrop" role="presentation" onClick={onClose}>
       <div
+        ref={paletteRef}
         className="palette"
         role="dialog"
         aria-modal="true"
