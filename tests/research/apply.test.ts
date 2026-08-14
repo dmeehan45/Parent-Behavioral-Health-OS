@@ -329,3 +329,21 @@ test("a well-described record with nothing loose says nothing", () => {
   const stage = node("stage:tidy", "stage");
   assert.deepEqual(openEnds(graphOf([stage], []), stage), []);
 });
+
+// `claim.targets` and `step.claims` are the same link from two sides. The
+// projection resolved only one of them, so a step that named a claim showed it
+// in a block while the evidence lens drew no line — and the step's open ends
+// could not see it was resting on a low-confidence hypothesis.
+test("a step that names a claim is connected to it, not just told about it", async () => {
+  const { projectModel } = await import("../../lib/model/graph");
+  const graph = projectModel();
+
+  const named = graph.nodes.filter((node) => node.kind === "step" && node.contentId === "become-match-ready");
+  assert.equal(named.length, 1);
+
+  const evidence = graph.edges.filter((edge) => edge.kind === "evidence" && edge.source === named[0].id);
+  assert.ok(
+    evidence.some((edge) => edge.target.includes("claim-first-caseload-retention")),
+    "the step declares this claim in its frontmatter, so the projection must resolve the edge",
+  );
+});

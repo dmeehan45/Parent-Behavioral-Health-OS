@@ -82,8 +82,28 @@ function unique<T extends { id: string; file: string }>(items: T[], kind: string
   }
 }
 
-function requireRef(value: string, allowed: Set<string>, file: string, field: string) {
+/**
+ * One reference, as authored: a record naming another record's ID.
+ *
+ * Collected while validating, because this is the only place that already
+ * visits every reference in the model. `lib/model/conformance.ts` reads them
+ * back to check the projection did something with each one.
+ */
+export type AuthoredReference = { from: string; fromKind: string; field: string; to: string; file: string };
+
+function requireRef(
+  value: string,
+  allowed: Set<string>,
+  file: string,
+  field: string,
+  collected?: { list: AuthoredReference[]; from: string; fromKind: string },
+) {
   if (!allowed.has(value)) throw new Error(`Invalid reference in ${file}: ${field} '${value}' does not exist`);
+  // `edges.2.from` and `edges.7.from` are the same relationship, so the index
+  // is dropped: the registry keys on what kind of link this is, not on which
+  // one it happened to be.
+  const canonical = `${collected?.fromKind}.${field}`.replace(/\.\d+(?=\.)/g, "");
+  collected?.list.push({ from: collected.from, fromKind: collected.fromKind, field: canonical, to: value, file });
 }
 
 /**
@@ -328,39 +348,43 @@ export function getRepository() {
   const metricIds = new Set(metrics.map((x) => x.id));
   const problemIds = new Set(problems.map((x) => x.id));
 
+  const references: AuthoredReference[] = [];
+  const at = (from: string, fromKind: string) => ({ list: references, from, fromKind });
+
   map.stages.forEach((id, i) => requireRef(id, stageIds, MAP_FILE, `stages.${i}`));
   map.edges.forEach((edge, i) => {
-    requireRef(edge.from, stageIds, MAP_FILE, `edges.${i}.from`);
+    requireRef(edge.from, stageIds, MAP_FILE, `edges.${i}.from`, at(edge.from, "map"));
     requireRef(edge.to, stageIds, MAP_FILE, `edges.${i}.to`);
   });
 
   steps.forEach((step) => {
-    requireRef(step.stage, stageIds, step.file, "stage");
-    step.next?.forEach((id) => requireRef(id, stepIds, step.file, "next"));
+    requireRef(step.stage, stageIds, step.file, "stage", at(step.id, "step"));
+    step.next?.forEach((id) => requireRef(id, stepIds, step.file, "next", at(step.id, "step")));
     [...(step.inputs ?? []), ...(step.outputs ?? [])].forEach((ref) =>
-      requireRef(ref.entity, entityIds, step.file, "entity"),
+      requireRef(ref.entity, entityIds, step.file, "entity", at(step.id, "step")),
     );
-    step.claims?.forEach((id) => requireRef(id, claimIds, step.file, "claims"));
-    step.metrics?.forEach((id) => requireRef(id, metricIds, step.file, "metrics"));
+    step.claims?.forEach((id) => requireRef(id, claimIds, step.file, "claims", at(step.id, "step")));
+    step.metrics?.forEach((id) => requireRef(id, metricIds, step.file, "metrics", at(step.id, "step")));
   });
 
-  stages.forEach((stage) => stage.metrics?.forEach((id) => requireRef(id, metricIds, stage.file, "metrics")));
-  claims.forEach((claim) => claim.targets.forEach((id) => requireRef(id, targetIds, claim.file, "targets")));
-  metrics.forEach((metric) => metric.targets?.forEach((id) => requireRef(id, targetIds, metric.file, "targets")));
+  stages.forEach((stage) => stage.metrics?.forEach((id) => requireRef(id, metricIds, stage.file, "metrics", at(stage.id, "stage"))));
+  claims.forEach((claim) => claim.targets.forEach((id) => requireRef(id, targetIds, claim.file, "targets", at(claim.id, "claim"))));
+  metrics.forEach((metric) => metric.targets?.forEach((id) => requireRef(id, targetIds, metric.file, "targets", at(metric.id, "metric"))));
   metrics.forEach((metric) => {
-    metric.perspectives?.forEach(({ actor }) => requireRef(actor, entityIds, metric.file, "perspectives.actor"));
-    if (metric.decisionOwner) requireRef(metric.decisionOwner, entityIds, metric.file, "decisionOwner");
+    metric.perspectives?.forEach(({ actor }) => requireRef(actor, entityIds, metric.file, "perspectives.actor", at(metric.id, "metric")));
+    if (metric.decisionOwner) requireRef(metric.decisionOwner, entityIds, metric.file, "decisionOwner", at(metric.id, "metric"));
   });
   problems.forEach((problem) => {
-    problem.targets.forEach((id) => requireRef(id, targetIds, problem.file, "targets"));
-    problem.claims?.forEach((id) => requireRef(id, claimIds, problem.file, "claims"));
-    problem.metrics?.forEach((id) => requireRef(id, metricIds, problem.file, "metrics"));
+    problem.targets.forEach((id) => requireRef(id, targetIds, problem.file, "targets", at(problem.id, "problem")));
+    problem.claims?.forEach((id) => requireRef(id, claimIds, problem.file, "claims", at(problem.id, "problem")));
+    problem.metrics?.forEach((id) => requireRef(id, metricIds, problem.file, "metrics", at(problem.id, "problem")));
   });
   bets.forEach((bet) => {
     requireProblem(bet.problem, problemIds, bet.file);
-    bet.claims?.forEach((id) => requireRef(id, claimIds, bet.file, "claims"));
-    bet.metrics?.forEach((id) => requireRef(id, metricIds, bet.file, "metrics"));
-    if (bet.participant) requireRef(bet.participant, entityIds, bet.file, "participant");
+    references.push({ from: bet.id, fromKind: "bet", field: "bet.problem", to: bet.problem, file: bet.file });
+    bet.claims?.forEach((id) => requireRef(id, claimIds, bet.file, "claims", at(bet.id, "bet")));
+    bet.metrics?.forEach((id) => requireRef(id, metricIds, bet.file, "metrics", at(bet.id, "bet")));
+    if (bet.participant) requireRef(bet.participant, entityIds, bet.file, "participant", at(bet.id, "bet"));
     if (bet.prototype?.route) requirePrototypeRoute(bet.prototype.route, bet.file);
   });
 
@@ -368,7 +392,7 @@ export function getRepository() {
   checkEntityStates(steps, entities);
   checkResearchTrace([...stages, ...steps, ...entities, ...claims, ...metrics, ...problems, ...bets]);
 
-  return { map, stages, steps, entities, claims, metrics, problems, bets };
+  return { map, stages, steps, entities, claims, metrics, problems, bets, references };
 }
 
 export type Repository = ReturnType<typeof getRepository>;
