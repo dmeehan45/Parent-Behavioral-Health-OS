@@ -5,6 +5,9 @@ order: 4
 summary: >
   Allocate appropriate care demand to appropriate clinicians.
 status: exploring
+exitConditions:
+  - an appropriate clinician and family have been proposed to each other
+  - both sides have accepted the proposed match
 authority: proposed
 provenance:
   source: author

@@ -5,6 +5,9 @@ order: 2
 summary: >
   Find, attract, qualify, and select clinicians appropriate to the populations served.
 status: exploring
+exitConditions:
+  - required clinician capacity is stated as a need, with a population, a place, and a date
+  - a clinician has been assessed against that need and selected
 authority: proposed
 provenance:
   source: author

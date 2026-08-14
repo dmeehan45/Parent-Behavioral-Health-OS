@@ -5,6 +5,9 @@ order: 8
 summary: >
   Retain strong clinicians and families while extending successful care delivery.
 status: exploring
+exitConditions:
+  - a clinician holds a caseload they consider sustainable
+  - clinicians and families stay long enough for outcomes to be observable
 authority: proposed
 provenance:
   source: author

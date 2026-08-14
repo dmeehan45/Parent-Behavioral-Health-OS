@@ -5,6 +5,9 @@ order: 7
 summary: >
   Understand care quality and feed useful signals back into the operating system.
 status: exploring
+exitConditions:
+  - care quality is observable for a clinician and for a care relationship
+  - observed quality can be compared against the judgements made when that clinician was selected
 authority: proposed
 provenance:
   source: author
