@@ -54,7 +54,11 @@ export const LENS_BANDS: Partial<Record<LensId, NodeKind[][]>> = {
   // propose, what got built. The step band is empty unless a problem is pinned
   // to a step rather than a whole stage, and an empty band takes no space.
   bets: [["stage"], ["step"], ["problem"], ["bet"], ["prototype"]],
-  evidence: [["stage"], ["step"], ["claim"], ["metric"]],
+  // Problems sit above the claims and metrics because the argument reads
+  // downward here too: the machine, where we think it breaks, what we believe
+  // about that, and what would settle it. Only problems that name evidence of
+  // their own reach this canvas, so the band is empty until one does.
+  evidence: [["stage"], ["step"], ["problem"], ["claim"], ["metric"]],
   entities: [["entity"], ["step"]],
 };
 
