@@ -57,5 +57,5 @@ PR-specific interaction checks are listed in each task and should be added only 
 - This checkout has no local `main` ref or configured remote. PR 1 is based directly on the latest available merged baseline, `d03fc97`; create the hosted PR against `main` once a remote is available.
 - Simplifying governance display must not conceal authority. PR 3 should treat this as an interpretation-safety constraint, not a cosmetic preference.
 - Focusing review must not separate a decision from its evidence. PR 4 changes pacing, not the human-accountability contract.
-- PR 1 retained the derived navigation and vocabulary disclosure, removed the long agent/workflow sections, and added a focused overflow check for the open disclosure.
+- PR 1 retains the derived navigation and all substantive workflow, responsibility, reuse, and contribution guidance. That depth now sits in two secondary disclosures after the primary care-flow, problem, and prototype paths instead of being removed.
 - Build is currently blocked by denied Google Font downloads, and Playwright browser installation is blocked by HTTP 403 from its CDN; responsive execution and the required screenshot remain environment-limited.

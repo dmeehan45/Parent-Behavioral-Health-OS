@@ -3331,3 +3331,16 @@ textarea.text-input {
     grid-column: 1 / -1;
   }
 }
+
+/* The home page keeps contributor and workflow depth without putting it in the
+   primary reading path. Each group opens as one bounded secondary section. */
+.home-secondary {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.home-secondary-body {
+  display: grid;
+  gap: var(--space-6);
+  padding-top: var(--space-4);
+}
