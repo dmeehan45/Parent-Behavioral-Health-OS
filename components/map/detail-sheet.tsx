@@ -157,7 +157,8 @@ export function DetailSheet({
         <div className="sheet-body">
           {/* Substance first. The panel is narrow, and a reader who opened a
               primitive wants to read it, not audit how completely it is filled in. */}
-          <DetailBlocks blocks={node.blocks} onNavigate={onNavigate} />
+          {/* Level three: inside the sheet these sit under the record's own h2. */}
+          <DetailBlocks blocks={node.blocks} onNavigate={onNavigate} headingLevel={3} />
 
           <footer className="sheet-foot">
             <Link className="button" href={node.href}>
