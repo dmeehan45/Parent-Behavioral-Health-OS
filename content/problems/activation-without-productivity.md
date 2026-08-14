@@ -1,7 +1,7 @@
 ---
 id: activation-without-productivity
 title: A clinician can finish onboarding and still have no work
-targets: [clinician-onboarding, matching, become-match-ready]
+targets: [clinician-onboarding, matching, become-match-ready, reach-sustainable-caseload]
 summary: >
   Completing onboarding makes a clinician eligible for families. It does not
   make them busy, and the gap between the two is not currently anybody's job.
