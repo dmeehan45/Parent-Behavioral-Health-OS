@@ -165,32 +165,84 @@ function checkEntityStates(steps: Step[], entities: Entity[]) {
   }
 }
 
+/**
+ * Read one of the research staging directories.
+ *
+ * A missing directory is not an error. `research/` is staging material that a
+ * checkout is allowed not to have, and this function runs inside
+ * `projectModel()`, so an unguarded read here does not merely fail a script:
+ * it makes `/api/model` return 500 and takes the live map down for every
+ * reader the moment a canonical record cites its first research run.
+ */
+function readResearchRecords<T>(
+  folder: string,
+  parse: (value: unknown) => T,
+  key: (record: T) => string,
+): Map<string, T> {
+  const directory = path.join(ROOT, "research", folder);
+  const records = new Map<string, T>();
+  if (!fs.existsSync(directory)) return records;
+  for (const name of fs.readdirSync(directory).filter((entry) => /\.ya?ml$/.test(entry))) {
+    const file = path.join("research", folder, name);
+    try {
+      const parsed = parse(yaml.load(fs.readFileSync(path.join(ROOT, file), "utf8")));
+      records.set(key(parsed), parsed);
+    } catch (error) {
+      const detail = error instanceof ZodError
+        ? error.issues.map((issue) => `${issue.path.join(".") || "document"}: ${issue.message}`).join("; ")
+        : (error as Error).message;
+      throw new Error(`Invalid research file ${file}: ${detail}. Run npm run validate:research for the full report.`);
+    }
+  }
+  return records;
+}
+
+/**
+ * A `researchTrace` is the claim that a canonical change was authorized by a
+ * reviewed research run, so every part of it has to still be true: the run
+ * exists, the finding is in it, the cited sources are that finding's evidence,
+ * the reviewer accepted it, and the handoff has not changed since.
+ */
 function checkResearchTrace(items: Array<Stage | Step | Entity | Claim | Metric | Problem | Bet>) {
   const traced = items.filter((item) => item.researchTrace?.length);
   if (!traced.length) return;
-  const handoffDirectory = path.join(ROOT, "research", "handoffs");
-  const decisionDirectory = path.join(ROOT, "research", "decisions");
-  const handoffs = new Map<string, ReturnType<typeof handoffSchema.parse>>();
-  const decisions = new Map<string, ReturnType<typeof decisionFileSchema.parse>>();
-  for (const name of fs.readdirSync(handoffDirectory).filter((entry) => /\.ya?ml$/.test(entry))) {
-    const parsed = handoffSchema.parse(yaml.load(fs.readFileSync(path.join(handoffDirectory, name), "utf8")));
-    handoffs.set(parsed.run.id, parsed);
-  }
-  for (const name of fs.readdirSync(decisionDirectory).filter((entry) => /\.ya?ml$/.test(entry))) {
-    const parsed = decisionFileSchema.parse(yaml.load(fs.readFileSync(path.join(decisionDirectory, name), "utf8")));
-    decisions.set(parsed.runId, parsed);
-  }
+  const handoffs = readResearchRecords("handoffs", (value) => handoffSchema.parse(value), (record) => record.run.id);
+  const decisions = readResearchRecords("decisions", (value) => decisionFileSchema.parse(value), (record) => record.runId);
   for (const item of traced) for (const trace of item.researchTrace ?? []) {
     const handoff = handoffs.get(trace.run);
-    if (!handoff) throw new Error(`Invalid researchTrace in ${item.file}: run '${trace.run}' does not exist`);
+    if (!handoff) {
+      throw new Error(
+        `Invalid researchTrace in ${item.file}: run '${trace.run}' does not exist. ` +
+          `Commit research/handoffs/${trace.run}.yaml before a canonical record cites it.`,
+      );
+    }
     const finding = handoff.findings.find((candidate) => candidate.id === trace.finding);
-    if (!finding) throw new Error(`Invalid researchTrace in ${item.file}: finding '${trace.finding}' does not exist`);
+    if (!finding) throw new Error(`Invalid researchTrace in ${item.file}: finding '${trace.finding}' is not in research/handoffs/${trace.run}.yaml`);
     trace.sources.forEach((source) => { if (!finding.sourceIds.includes(source)) throw new Error(`Invalid researchTrace in ${item.file}: source '${source}' is not evidence for '${trace.finding}'`); });
+
     const decisionFile = decisions.get(trace.run);
-    const decision = decisionFile?.decisions.find((candidate) => candidate.id === trace.decision);
-    if (!decision || !["accept", "accept-with-edits"].includes(decision.disposition)) throw new Error(`Invalid researchTrace in ${item.file}: decision '${trace.decision}' is not accepted`);
+    if (!decisionFile) {
+      throw new Error(
+        `Invalid researchTrace in ${item.file}: no reviewer decisions exist for run '${trace.run}'. ` +
+          `The accountable reviewer records them in research/decisions/${trace.run}.yaml — the packet at ` +
+          `research/reviews/${trace.run}.md carries a skeleton to fill in — and only then can a canonical record cite the run.`,
+      );
+    }
+    const decision = decisionFile.decisions.find((candidate) => candidate.id === trace.decision);
+    if (!decision) throw new Error(`Invalid researchTrace in ${item.file}: decision '${trace.decision}' is not in research/decisions/${trace.run}.yaml`);
+    if (!["accept", "accept-with-edits"].includes(decision.disposition)) {
+      throw new Error(
+        `Invalid researchTrace in ${item.file}: decision '${trace.decision}' is '${decision.disposition}'. ` +
+          `Only 'accept' and 'accept-with-edits' authorize a canonical change.`,
+      );
+    }
     const hash = crypto.createHash("sha256").update(JSON.stringify(handoff)).digest("hex");
-    if (decisionFile?.reviewedHandoffHash !== hash) throw new Error(`Invalid researchTrace in ${item.file}: decision '${trace.decision}' reviewed a stale handoff`);
+    if (decisionFile.reviewedHandoffHash !== hash) {
+      throw new Error(
+        `Invalid researchTrace in ${item.file}: research/decisions/${trace.run}.yaml reviewed an older version of ` +
+          `research/handoffs/${trace.run}.yaml. Regenerate the packet, re-review it, and update reviewedHandoffHash to ${hash}.`,
+      );
+    }
   }
 }
 

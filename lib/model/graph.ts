@@ -767,20 +767,32 @@ function repositoryUrl(sourceUrl?: string): string | undefined {
 }
 
 /**
- * Appends the references that justify a primitive, then fingerprints it.
+ * The evidence behind a primitive, in a form a reader can follow.
  *
- * `provenance.references` is where the evidence behind a belief is recorded, so
- * it is shown on every primitive that has any rather than only on claims.
+ * `provenance.references` is free text. A `researchTrace` is five IDs, and
+ * printing them slash-separated reads as machine bookkeeping — the reader
+ * cannot tell which ID is the run and has nowhere to go next. So the trace is
+ * rendered as a sentence that says what the research did to this belief and
+ * names the packet where the reasoning and the reviewer's decision are written
+ * down.
  */
-
 function researchReferences(record: { provenance?: { references?: string[] }; researchTrace?: Array<{ run: string; decision: string; finding: string; stance: string; sources: string[] }> }): string[] | undefined {
   const references = [...(record.provenance?.references ?? [])];
   for (const trace of record.researchTrace ?? []) {
-    references.push(`Research ${trace.run} / ${trace.decision} / ${trace.finding} (${trace.stance}; sources: ${trace.sources.join(", ")})`);
+    references.push(
+      `Research run ${trace.run} ${trace.stance} this: finding ${trace.finding}, evidence ${trace.sources.join(", ")}, ` +
+        `accepted in decision ${trace.decision}. Read research/reviews/${trace.run}.md.`,
+    );
   }
   return references.length > 0 ? references : undefined;
 }
 
+/**
+ * Appends the references that justify a primitive, then fingerprints it.
+ *
+ * References are shown on every primitive that has any rather than only on
+ * claims, because a belief is a belief wherever it is recorded.
+ */
 function finalise(node: Omit<ModelNode, "hash">, references?: string[]): ModelNode {
   const blocks = references && references.length > 0
     ? [...node.blocks, { type: "list" as const, label: "References", items: references }]

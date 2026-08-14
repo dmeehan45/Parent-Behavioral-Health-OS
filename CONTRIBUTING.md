@@ -47,7 +47,8 @@ npm run typecheck
 npm run build
 ```
 
-CI runs all four on every pull request.
+CI runs all of these on every pull request, plus `npm run lint:design` and
+`npm run test:responsive`.
 
 ## Branch from `main`, and target `main`
 

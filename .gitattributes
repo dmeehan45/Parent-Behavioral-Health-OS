@@ -1,0 +1,5 @@
+# Review packets under `research/reviews/` are produced by
+# `npm run generate:research-review` and never hand-edited. Marking them
+# generated collapses them by default in a pull request diff, so the review
+# reads the handoff that changed rather than the rendering of it.
+research/reviews/*.md linguist-generated=true
