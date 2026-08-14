@@ -2124,13 +2124,183 @@ p:last-child {
 
 /* Wraps rather than scrolling sideways: a hidden scroll region on a phone
    reads as a truncated command. */
-.home-clone {
+.home-command {
   display: block;
-  margin-top: 8px;
+  margin-top: 10px;
   padding: 8px 10px;
   font-size: 12.5px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+/*
+ * The loop: research, problem, bet, prototype, and what it teaches.
+ *
+ * A numbered rail rather than five headed paragraphs, because the thing being
+ * claimed is that these are one run with the context carried across each join —
+ * and a stack of separate sections says the opposite. The connecting line is
+ * the whole argument, so it is drawn rather than described.
+ *
+ * Deliberately uncoloured. Two of the five steps are model primitives and carry
+ * their kind badge; research and what a prototype teaches are staging, and
+ * painting them in a category hue would say they are part of the model.
+ */
+.loop {
+  counter-reset: loop;
+  margin: 28px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loop > li {
+  position: relative;
+  counter-increment: loop;
+  padding: 0 0 30px 44px;
+}
+
+.loop > li:last-child {
+  padding-bottom: 0;
+}
+
+.loop > li::before {
+  content: counter(loop);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+/* The join, drawn from under one marker to the top of the next. */
+.loop > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 34px;
+  bottom: 6px;
+  /* Centre of the 28px marker, less the 1px rule's own width. */
+  left: 13px;
+  width: 1px;
+  background: var(--line);
+}
+
+.loop h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0 8px;
+  font-size: 17px;
+}
+
+.loop p {
+  margin: 0 0 10px;
+  color: var(--ink-2);
+}
+
+/* What the step hands to the next one. The claim the whole section is making,
+   so it is said in the same words every time and sits last in each step. */
+.loop-carry {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.loop-carry strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+/*
+ * What an agent is for and what a person is for, side by side because the point
+ * is the division rather than either list. Collapses to one column early: two
+ * columns of prose under about 230px each read worse than one.
+ */
+.home-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 24px;
+  margin: 24px 0;
+}
+
+/* Markers opted back in — the reset strips them, and an indented column with
+   nothing in the gutter reads as a mistake rather than as a list. */
+.home-split .plain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: disc;
+  color: var(--ink-2);
+}
+
+.home-split .plain-list li::marker {
+  color: var(--ink-3);
+}
+
+/*
+ * The three ways in. Same left-rule device as the definitions above, because
+ * the page should not grow a second vocabulary for a list — but these are
+ * sentences rather than terms, so they keep sentence case.
+ */
+.home-ways {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.home-ways > li {
+  padding-left: 14px;
+  border-left: 2px solid var(--line-strong);
+}
+
+.home-ways h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.home-ways p {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.home-ways p + p {
+  margin-top: 10px;
+}
+
+/*
+ * Links inside this page's own sentences. Everywhere else here a link is a
+ * button; the global `a { color: inherit }` left these looking like plain text,
+ * which is the same failure the record pages already fixed. Scoped to the
+ * page's own paragraphs so projected Markdown keeps the `.prose` treatment.
+ */
+.home-band > p a,
+.home-ways p a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.home-band > p a:hover,
+.home-ways p a:hover {
+  color: var(--accent-ink);
+}
+
+/* The header is a sticky pill, so an in-page anchor would land under it. */
+.home [id] {
+  scroll-margin-top: calc(var(--header-h) + var(--header-gap) + 12px);
 }
 
 /* ==========================================================================

@@ -25,6 +25,7 @@ import {
 import { contentRevision, fingerprint } from "@/lib/model/revision";
 import { AUTHORITY_TERMS, EDGE_LEGEND, isFeedbackRelationship } from "@/lib/model/vocabulary";
 import type {
+  BuildTarget,
   DetailBlock,
   EntryPoint,
   LensId,
@@ -748,6 +749,20 @@ export function projectModel(): ModelGraph {
     ];
   });
 
+  // Unbuilt bets first. The front door hands the first one to a reader as the
+  // bet to point their own agent at, and a bet with nothing behind it is the
+  // more useful invitation. Derived from whether a prototype route exists, so
+  // the ordering corrects itself as software gets built.
+  const buildTargets: BuildTarget[] = bets
+    .map((bet) => ({
+      id: bet.id,
+      title: bet.title,
+      href: ROUTES.bet(bet.id),
+      problemTitle: problemById.get(bet.problem)?.title,
+      built: Boolean(bet.prototype?.route),
+    }))
+    .sort((a, b) => Number(a.built) - Number(b.built));
+
   return {
     revision: contentRevision(),
     title: map.title,
@@ -788,6 +803,7 @@ export function projectModel(): ModelGraph {
       stat(entryPoints.length, "prototype you can try", "prototypes you can try"),
     ],
     entryPoints,
+    buildTargets,
     vocab: { authority: AUTHORITY_TERMS, edges: EDGE_LEGEND },
     sourceUrl: process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL,
     repoUrl: repositoryUrl(process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL),
