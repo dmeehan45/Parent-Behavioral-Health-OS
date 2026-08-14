@@ -6,10 +6,10 @@
 > [`authoring.md`](authoring.md), [`prototype-workflow.md`](prototype-workflow.md),
 > [`research-workflow.md`](research-workflow.md), and `AGENTS.md`.
 >
-> The one thing it describes that has not happened: **no Bet has had its
-> experiment sections written.** That is a person's judgement, not an omission
-> to fix by filling them in. Until somebody does, `npm run prototype:brief`
-> correctly refuses to clear a build.
+> The loop has since been run once, end to end, on `guided-first-caseload`.
+> **[What the first run through it exposed](#what-the-first-run-exposed)** is at
+> the bottom — the parts of this design that only failed once somebody used
+> them.
 
 This document defines what an excellent version of the repository's learning
 loop looks like and sequences the changes that got there.
@@ -366,3 +366,52 @@ routine has its next question.
 
 At no point did an agent change what the model claims. At no point did a person
 re-assemble context a machine already held.
+
+## What the first run exposed
+
+The loop above was then run once for real, on `guided-first-caseload`: a person
+answered four questions, the five sections were written, the packet cleared the
+build, the prototype was rebuilt to the approved scope, and the whole thing was
+checked. Five things only broke at that point, and they are worth keeping
+because each is a gap the design did not predict.
+
+**Nothing checks that the built artifact matches the approved scope.** The
+packet gates on whether the five sections *exist*, and once they do it says
+"ready" forever. Approving a scope of two modes side by side while the built
+prototype offered one produced no error anywhere: not in validation, not in the
+packet, not on the page. Dropping `prototype.status` from `working` back to
+`concept` was a judgement call nothing prompted. This is the largest remaining
+hole in the arrangement — the readiness gate is about the *bet*, and there is
+no corresponding gate about the *artifact*.
+
+**A shaped Bet broke the test suite.** `tests/prototype/brief.test.ts` read its
+fixture from `getRepository()` and asserted the bet had no experiment sections
+— true only while nobody had written any. The first person to shape one turned
+a content edit into a red build, which is precisely the coupling this
+repository exists to prevent. The fixture now sets `sections` explicitly, and
+the suite passes whether or not `content/` is shaped. Worth generalising: any
+test reading `content/` is asserting about editorial state, and should say
+which part it means to depend on.
+
+**`lint:design` could not see an undefined token.** Writing `var(--bet-soft)`
+for a token actually called `--warn-soft` passed every check — the linter looked
+for literal colours, and an undefined property is not a colour. It resolves to
+nothing, so the element renders unstyled rather than wrong, which is exactly the
+failure a reviewer's eye skips. The check now fails on any custom property
+nothing defines, respecting `var(--x, fallback)` and properties `next/font`
+supplies. It found the bug it was written for, and nothing else.
+
+**`# Scope` holds four things, and coverage counts it as one.** Participant,
+moment, in-scope path and exclusions all live in one section, so the model
+cannot tell a scope that names its exclusions from one that does not — and
+exclusions are the half that stops a prototype quietly growing. Splitting the
+section would make that derivable; it would also make five sections into eight,
+which is why it was not done here rather than because it is wrong.
+
+**The Bet cannot point at the open question it is deliberately not answering.**
+The approved scope excludes match quality *because* `define-matching-quality` is
+queued, and the interface says the scores are provisional — but nothing in the
+model links the Bet to that question. Both statements are prose, so they can
+drift apart, and the queue cannot show that a bet is already waiting on it. An
+edge from a Bet to a research question would fix it, and is the one piece of new
+model shape this run actually argued for.

@@ -42,7 +42,7 @@ challenge, or safely reason from those claims.
 | Metrics | 7 with `dataStatus: unknown` | No canonical Metric claims available data |
 | Open research questions | 3 high-priority | Authority roles, matching quality, onboarding quality |
 | Generated research findings | 1 example, undecided | It concerns the intake contract, not care operations |
-| Working prototypes ready under the current experiment contract | 0 of 1 | The existing prototype predates and lacks all five required experiment sections |
+| Working prototypes ready under the current experiment contract | 1 of 1 | The Bet now carries all five experiment sections and a participant |
 | Empty Step `rules` / `exceptions` fields found | 22 | Seed filler; removed by this change |
 | Verbatim `purpose` / `activity` pairs found | 6 | Seed duplication; `activity` removed by this change |
 
@@ -170,23 +170,6 @@ These are not invitations to fill files with plausible workflows. They are the
 reasons the three high-priority research questions should remain ahead of match
 scoring, clinician ranking, or optimization work.
 
-### Medium — the working prototype has no approved experiment shape
-
-The current main branch added a derived prototype brief and five Bet sections:
-Learning decision, Scope, Assumptions, Signals and safeguards, and Fidelity. The
-brief correctly refuses to authorize a build when those judgements are absent.
-The only canonical Bet has a working prototype but none of those sections or a
-declared participant, so the repository now describes software that exists
-without recording what decision it was built to inform, what it assumes, or
-what would support, weaken, or stop the Bet.
-
-This does not turn the prototype into evidence. No session handoff exists, and
-no prototype finding has passed review or entered `content/`.
-
-**Disposition:** treat the existing prototype as an unshaped exploratory
-artifact. Before extending or interpreting it, have the accountable reviewer
-supply the experiment sections; do not infer them from the implemented UI.
-
 ### Low — seed scaffolding overstated completeness
 
 Twelve Steps carried empty `rules` and/or `exceptions` arrays, and six repeated
@@ -236,25 +219,25 @@ carry something inspectable; it cannot automate epistemic judgement.
    interpreting that Metric.
 3. Run the three queued high-priority research questions through the existing
    handoff and named-reviewer gate.
-4. Shape the existing Bet's experiment before extending its working prototype
-   or treating a prototype session as evidence.
-5. Decide how topology relationships carry authority and provenance.
-6. Rewrite current-fact language only where the accountable author agrees it is
+4. Decide how topology relationships carry authority and provenance.
+5. Rewrite current-fact language only where the accountable author agrees it is
    a proposed mechanism rather than a description of observed operations.
-7. Do not operationalize selection accuracy, readiness scoring, or match ranking
+6. Do not operationalize selection accuracy, readiness scoring, or match ranking
    until constructs, missingness, attribution, balancing harms, and permitted
    uses are accepted.
 
 ## Rebase and merge-impact review
 
-Rechecked against `main` after PRs #31–#40. Those changes added evidence edges
+Rechecked against `main` after PRs #31–#41. Those changes added evidence edges
 for Problems and Bets, session-source research handoffs, human-authored Problem
 composition, a prototype build packet, and authored-reference checks that prove
 the projection uses declared relationships. They did not add canonical research
 traces, decisions, care-delivery sources, or operational data, so the inventory,
 Metric findings, topology-provenance gap, and PR #20 contradiction remain
-unchanged. The prototype contract surfaced the additional unshaped-experiment
-finding above.
+unchanged. PR #41 resolved the earlier unshaped-experiment gap by adding the five
+experiment sections and participant to the canonical Bet. That makes the
+prototype build-ready under the repository contract; it does not make the Bet
+validated evidence, and no prototype session handoff exists yet.
 
 After the rebase, the functional prototype, research-composition, projection,
 and responsive-test changes shown in the earlier combined diff are already on

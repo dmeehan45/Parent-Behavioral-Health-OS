@@ -9,6 +9,12 @@
  *      an alias onto the semantic layer.
  *   2. `canvas-theme.ts` — the one legitimate exception, because SVG markers
  *      cannot read a custom property — drifts away from the ramp.
+ *   3. Something reads a custom property that nothing defines. This one is the
+ *      quietest: `var(--bet-soft)` for a token actually named `--warn-soft`
+ *      resolves to nothing at all, so the element renders transparent and no
+ *      check that looks only for literal colours notices. Reaching for a
+ *      plausible-sounding token is exactly the mistake somebody makes while
+ *      obeying rule 1.
  *
  * It is deliberately crude. It reads files as text and looks for colours. That
  * catches the mistake that actually happens without slowing anything down.
@@ -79,6 +85,42 @@ for (const dir of SEARCH_DIRS) {
   }
 }
 
+/*
+ * Every custom property that is read has to be one that something defines.
+ *
+ * Definitions come from two places, because not all of them are CSS: a
+ * stylesheet declaring `--x:`, and `next/font` handing a generated family name
+ * to a variable it names in `layout.tsx`.
+ *
+ * A `var(--x, fallback)` is exempt. Writing a fallback is the author saying the
+ * property may legitimately be absent, which is a different thing from reaching
+ * for a token that was never there.
+ */
+const defined = new Set<string>();
+for (const dir of SEARCH_DIRS) {
+  for (const file of walk(path.join(ROOT, dir))) {
+    const source = readFileSync(file, "utf8");
+    for (const match of source.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(match[1]);
+    for (const match of source.matchAll(/variable:\s*["'](--[a-z0-9-]+)["']/gi)) defined.add(match[1]);
+  }
+}
+
+const undefinedTokens: Finding[] = [];
+for (const dir of SEARCH_DIRS) {
+  for (const file of walk(path.join(ROOT, dir))) {
+    const rel = relative(file);
+    const lines = readFileSync(file, "utf8").split("\n");
+    stripComments(lines.join("\n"))
+      .split("\n")
+      .forEach((text, index) => {
+        for (const match of text.matchAll(/var\(\s*(--[a-z0-9-]+)\s*(,?)/gi)) {
+          if (defined.has(match[1]) || match[2] === ",") continue;
+          undefinedTokens.push({ file: rel, line: index + 1, text: lines[index].trim(), value: match[1] });
+        }
+      });
+  }
+}
+
 /* The canvas exception has to stay honest: every colour it paints must be a
    value that appears in the token source. */
 const tokenSource = readFileSync(path.join(ROOT, TOKEN_SOURCE), "utf8").toLowerCase();
@@ -94,9 +136,20 @@ readFileSync(path.join(ROOT, CANVAS_THEME), "utf8")
     }
   });
 
-if (findings.length === 0 && drifted.length === 0) {
-  console.log("Design system: no literal colours outside the token layer.");
+if (findings.length === 0 && drifted.length === 0 && undefinedTokens.length === 0) {
+  console.log("Design system: no literal colours outside the token layer, and every token read is defined.");
   process.exit(0);
+}
+
+if (undefinedTokens.length > 0) {
+  console.error(
+    `\nCustom properties that nothing defines. These resolve to nothing, so the ` +
+      `element renders unstyled rather than wrong — add the role to ${TOKEN_SOURCE} ` +
+      `and alias it in app/globals.css, or use the token that already exists:\n`,
+  );
+  for (const f of undefinedTokens) {
+    console.error(`  ${f.file}:${f.line}  ${f.value}\n      ${f.text}`);
+  }
 }
 
 if (findings.length > 0) {

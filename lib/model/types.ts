@@ -174,6 +174,25 @@ export type EntryPoint = {
 };
 
 /**
+ * A bet somebody could hand to their own coding agent.
+ *
+ * The front door tells a reader to point an agent at a bet, and an example is
+ * worth more there than a placeholder — but a bet id written into a component
+ * is a literal from `content/` in application code, which is the one thing the
+ * projection exists to prevent. Ordered so the first entry is the most useful
+ * invitation: a bet with no software behind it yet.
+ */
+export type BuildTarget = {
+  id: string;
+  title: string;
+  href: string;
+  /** Title of the Problem the bet answers, so a list of bets says why. */
+  problemTitle?: string;
+  /** Whether a prototype already exists for it. */
+  built: boolean;
+};
+
+/**
  * The complete projection handed to the client. Small enough to ship whole,
  * which is what lets lens switching and search stay instant.
  */
@@ -184,10 +203,15 @@ export type ModelGraph = {
   nodes: ModelNode[];
   edges: ModelEdge[];
   lenses: LensDescriptor[];
-  /** Size of the model in plain words. Labels are already pluralised. */
-  stats: Array<{ label: string; value: number }>;
+  /**
+   * Size of the model in plain words, each count leading to what it counts.
+   * Labels are already pluralised.
+   */
+  stats: Array<{ label: string; value: number; href: string }>;
   /** Working software a newcomer can try, derived from Bets that declare it. */
   entryPoints: EntryPoint[];
+  /** Every Bet, unbuilt ones first, for a reader who wants to build one. */
+  buildTargets: BuildTarget[];
   vocab: {
     authority: VocabTerm[];
     edges: Array<{ kind: EdgeKind; label: string; description: string }>;

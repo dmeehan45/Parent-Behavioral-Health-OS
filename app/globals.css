@@ -2057,27 +2057,61 @@ p:last-child {
   color: var(--ink-2);
 }
 
-.home-stats {
+/*
+ * The size of the model, doubling as the way into it: each count leads to what
+ * it counts. Sitting directly under the hero, it is the first navigation a
+ * reader meets — which is what a number on a front page should be, rather than
+ * a statistic nobody can act on.
+ *
+ * No surface, so `.home-start` stays the one block on the page that carries
+ * one.
+ */
+.home-doors {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 20px;
-  margin: 64px 0 0;
-  padding: 24px 0;
+  margin: 40px 0 0;
+  padding: 22px 0;
   border-block: 1px solid var(--line);
+  list-style: none;
 }
 
-.home-stats strong {
+.home-doors a {
+  display: block;
+  /* The design system's floor for anything you tap; the content clears it, and
+     this keeps that true if a label ever gets shorter. */
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.home-doors strong {
   display: block;
   font-size: 30px;
   letter-spacing: -0.04em;
   line-height: 1.1;
 }
 
-.home-stats span {
+/* Direct child only: the arrow lives in a span inside this one, and a blanket
+   `span` selector turned it into a block on a line of its own. */
+.home-doors a > span {
   display: block;
   margin-top: 4px;
   font-size: 12px;
-  color: var(--ink-3);
+  color: var(--ink-2);
+  transition: color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home-doors a:hover > span {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Reference material, and not what anybody arrived for. */
+.home-vocab {
+  margin: 32px 0 0;
+  border-top: 0;
+  padding-top: 0;
 }
 
 /* The one block on the page that carries a surface: it is the thing we most
@@ -2124,13 +2158,265 @@ p:last-child {
 
 /* Wraps rather than scrolling sideways: a hidden scroll region on a phone
    reads as a truncated command. */
-.home-clone {
+.home-command {
   display: block;
-  margin-top: 8px;
+  margin-top: 10px;
   padding: 8px 10px;
   font-size: 12.5px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+/*
+ * The loop: research, problem, bet, prototype, and what it teaches.
+ *
+ * A numbered rail rather than five headed paragraphs, because the thing being
+ * claimed is that these are one run with the context carried across each join —
+ * and a stack of separate sections says the opposite. The connecting line is
+ * the whole argument, so it is drawn rather than described.
+ *
+ * Deliberately uncoloured. Two of the five steps are model primitives and carry
+ * their kind badge; research and what a prototype teaches are staging, and
+ * painting them in a category hue would say they are part of the model.
+ */
+.loop {
+  counter-reset: loop;
+  margin: 28px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loop > li {
+  position: relative;
+  counter-increment: loop;
+  padding: 0 0 30px 44px;
+}
+
+.loop > li:last-child {
+  padding-bottom: 0;
+}
+
+.loop > li::before {
+  content: counter(loop);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+/* The join, drawn from under one marker to the top of the next. */
+.loop > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 34px;
+  bottom: 6px;
+  /* Centre of the 28px marker, less the 1px rule's own width. */
+  left: 13px;
+  width: 1px;
+  background: var(--line);
+}
+
+/*
+ * Each step is a native disclosure: no JavaScript, keyboard-operable already.
+ *
+ * Collapsed, the five summaries are a complete short account of the loop — what
+ * happens, and what it hands to the next step. Opening one adds the mechanism
+ * and the command. Nothing a reader needs in order to understand the argument
+ * is hidden; only what they need in order to run it.
+ */
+/*
+ * The affordance a native summary no longer gives you: the reset strips the
+ * default marker, which leaves a closed section looking like a heading with
+ * nothing to open. Every disclosure on this page draws its own chevron.
+ */
+.loop summary,
+.home-vocab > summary {
+  position: relative;
+  padding-right: 26px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.loop summary {
+  display: block;
+  padding-block: 2px;
+}
+
+.loop summary::-webkit-details-marker,
+.home-vocab > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Drawn in the text's own colour, so no brand value is stated here. */
+.loop summary::after,
+.home-vocab > summary::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  color: var(--ink-3);
+  transform: rotate(45deg);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loop details[open] > summary::after,
+.home-vocab[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+.home-vocab > summary::after {
+  top: 18px;
+}
+
+.loop summary:focus-visible,
+.home-vocab > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius);
+}
+
+.loop-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.loop h3 {
+  margin: 3px 0 8px;
+  font-size: 17px;
+}
+
+.loop-essence {
+  display: block;
+  color: var(--ink-2);
+}
+
+.loop p {
+  margin: 0 0 10px;
+  color: var(--ink-2);
+}
+
+.loop-detail {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.loop-detail p:last-child {
+  margin-bottom: 0;
+}
+
+/* What the step hands to the next one. The claim the whole section is making,
+   so it is said in the same words every time and stays visible when the step
+   is closed — the through-line is the point. */
+.loop-carry {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.loop-carry strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+/*
+ * What an agent is for and what a person is for, side by side because the point
+ * is the division rather than either list. Collapses to one column early: two
+ * columns of prose under about 230px each read worse than one.
+ */
+.home-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 24px;
+  margin: 24px 0;
+}
+
+/* Markers opted back in — the reset strips them, and an indented column with
+   nothing in the gutter reads as a mistake rather than as a list. */
+.home-split .plain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: disc;
+  color: var(--ink-2);
+}
+
+.home-split .plain-list li::marker {
+  color: var(--ink-3);
+}
+
+/*
+ * The three ways in. Same left-rule device as the definitions above, because
+ * the page should not grow a second vocabulary for a list — but these are
+ * sentences rather than terms, so they keep sentence case.
+ */
+.home-ways {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.home-ways > li {
+  padding-left: 14px;
+  border-left: 2px solid var(--line-strong);
+}
+
+.home-ways h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.home-ways p {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.home-ways p + p {
+  margin-top: 10px;
+}
+
+/*
+ * Links inside this page's own sentences. Everywhere else here a link is a
+ * button; the global `a { color: inherit }` left these looking like plain text,
+ * which is the same failure the record pages already fixed. Scoped to the
+ * page's own paragraphs so projected Markdown keeps the `.prose` treatment.
+ */
+.home-band > p a,
+.home-ways p a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.home-band > p a:hover,
+.home-ways p a:hover {
+  color: var(--accent-ink);
+}
+
+/* The header is a sticky pill, so an in-page anchor would land under it. */
+.home [id] {
+  scroll-margin-top: calc(var(--header-h) + var(--header-gap) + 12px);
 }
 
 /* ==========================================================================
@@ -2154,6 +2440,93 @@ p:last-child {
   display: grid;
   grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
   gap: 20px;
+}
+
+/*
+ * The guided-caseload prototype reads downward rather than in two columns: the
+ * clinician, then the choice of how to build, then the caseload itself. The
+ * choice has to come before the list, because which mode you are in changes
+ * what the list means.
+ */
+.caseload {
+  display: grid;
+  gap: 20px;
+}
+
+/* The decision under test. Two equal targets, so neither reads as the default
+   by being larger or first-and-only. */
+.mode-switch {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
+}
+
+.mode {
+  display: grid;
+  gap: 4px;
+  min-height: 44px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.mode:hover {
+  border-color: var(--accent);
+}
+
+.mode.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.panel-title {
+  margin: 10px 0 8px;
+}
+
+/*
+ * A quality signal the model has not decided yet, said so in the interface.
+ * Gold is what we propose to change rather than what we have established, which
+ * is exactly what these scores are — and the words say it too, because colour is
+ * never the only signal.
+ */
+.provisional {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  background: var(--warn-soft);
+  border-left: 3px solid var(--kind-bet);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.family-why {
+  display: block;
+  margin-top: 6px;
+}
+
+.family.chosen .family-state {
+  color: var(--accent);
+}
+
+/* Departing from what was proposed is the most informative thing a participant
+   can do, so the interface acknowledges it rather than letting it pass. */
+.badge-changed {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink);
+  background: var(--warn-soft);
+  border-radius: 999px;
+}
+
+.closing p {
+  max-width: 60ch;
 }
 
 .clinician-card {
@@ -2506,8 +2879,8 @@ p:last-child {
     margin-top: 48px;
   }
 
-  .home-stats {
-    margin-top: 48px;
+  .home-doors {
+    margin-top: 32px;
   }
 
   .home-start {
