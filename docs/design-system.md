@@ -148,3 +148,31 @@ them; do not grow them into a visual regression suite.
 To pull a change from the design system, update `app/design-system.css` from
 `design-system-output/tokens/tokens.css` plus the polish report, and re-run
 `npm run lint:design`. Nothing else should need to move.
+
+## Interface copy and reading order
+
+The interface should help somebody think about care delivery, not ask them to
+learn the repository before they can begin.
+
+- Name the reader's subject before naming the model, projection, repository, or
+  workflow that renders it.
+- Prefer concrete nouns and verbs. Say “care-delivery flow,” “problem,” “source,”
+  and “review” instead of using “machine,” “lands,” “bites,” or “context” as
+  shorthand.
+- Give each page one clear starting point. Supporting definitions, provenance,
+  contributor commands, and implementation detail remain available through
+  links or disclosures near the point where they become useful.
+- Explain a concept once. Do not repeat the same safety boundary or process
+  description in the heading, introduction, badges, and footer.
+- A disclosure must have a useful label and a complete collapsed state. It is
+  not a place to hide information that changes how the visible content should
+  be interpreted.
+- Exact numbers require a defined source or method. Synthetic examples must not
+  imply precision the prototype does not calculate.
+- Remove an explanation when a clearer label or interaction makes it
+  unnecessary.
+
+Plain language does not weaken the model's guardrails. Authority stays visible
+when it separates a proposal from policy, accepted research stays distinct from
+an applied model change, and unknown information is still named rather than
+filled with plausible copy.

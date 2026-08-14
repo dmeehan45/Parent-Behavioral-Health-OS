@@ -107,3 +107,21 @@ generalized model.
 Use the issue templates for proposing a bet, adding a claim, challenging a claim,
 or recording a gap in the model. Recording something we do not understand is a
 real contribution and does not need a proposed answer.
+
+## Review interface copy
+
+Before opening a pull request that changes a reader-facing surface, check:
+
+- What question brought the reader to this page?
+- Is the next useful action clear without reading an explanation of the
+  repository?
+- What must be visible for the content to be interpreted safely?
+- What supporting information can wait behind a clearly labelled disclosure or
+  a link?
+- Does any sentence describe how the application works when it could describe
+  the reader's subject instead?
+- Are any numbers more precise than their source or method allows?
+- Did the change remove obsolete copy as well as add new copy?
+
+Use the copy and reading-order rules in `docs/design-system.md`. Keep authority,
+provenance, research review, and honest gaps intact while reducing repetition.

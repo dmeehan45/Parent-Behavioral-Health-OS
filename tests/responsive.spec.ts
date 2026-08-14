@@ -99,6 +99,17 @@ test.describe("responsive shell", () => {
     }
   });
 
+  test("the home-page vocabulary disclosure fits when open", async ({ page }) => {
+    await page.goto("/");
+
+    const disclosure = page.locator(".home-vocab");
+    await disclosure.locator("summary").click();
+    await expect(disclosure).toHaveAttribute("open", "");
+
+    const overflow = await horizontalOverflow(page);
+    expect(overflow, `the open home-page disclosure overflows by ${overflow}px`).toBeLessThanOrEqual(1);
+  });
+
   test("primary navigation is reachable and hits the 44px target", async ({ page }) => {
     await page.goto("/");
 
