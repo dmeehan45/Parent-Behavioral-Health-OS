@@ -13,6 +13,7 @@ import {
 } from "../../lib/research/intake";
 import { buildQueue, checkAnsweredQuestions, loadQuestions, nextUp } from "../../lib/research/questions";
 import { loadAllowlist, matchHash, scan, staleApprovals, unapproved } from "../../lib/research/safety";
+import { findingState, researchAbout } from "../../lib/research/view";
 
 const CONTRACT = fs.readFileSync("research/contract/v1.example.yaml", "utf8");
 
@@ -249,4 +250,63 @@ test("the allowlist itself is never scanned", () => {
     "research/safety-allowlist.yaml": "approved: []\n# jane.doe@somewhere.example.net\n",
   });
   assert.deepEqual(scan(root), []);
+});
+
+// A reviewer accepting a finding authorizes a change; it does not make one.
+// Collapsing the two would hide accepted research that changed nothing, which
+// is the failure the whole arrangement is otherwise built to prevent.
+test("accepted and applied are different states", () => {
+  const base = { appliedIn: [] as unknown[] };
+  assert.equal(findingState({ ...base }), "awaiting");
+  assert.equal(findingState({ ...base, decision: { disposition: "accept" } }), "accepted");
+  assert.equal(
+    findingState({ decision: { disposition: "accept" }, appliedIn: [{ id: "clinician-onboarding" }] }),
+    "applied",
+  );
+  assert.equal(findingState({ ...base, decision: { disposition: "accept-with-edits" } }), "accepted");
+});
+
+test("a rejected or deferred finding keeps its own state", () => {
+  assert.equal(findingState({ decision: { disposition: "reject" }, appliedIn: [] }), "rejected");
+  assert.equal(findingState({ decision: { disposition: "defer" }, appliedIn: [] }), "deferred");
+  assert.equal(findingState({ decision: { disposition: "needs-research" }, appliedIn: [] }), "needs-research");
+});
+
+// Superseding beats everything else: the model must stop presenting a retired
+// conclusion as current, even where a record still cites it.
+test("superseded outranks whatever the decision said", () => {
+  assert.equal(
+    findingState({ decision: { disposition: "accept" }, appliedIn: [{ id: "x" }], supersededBy: "decide-later-x" }),
+    "superseded",
+  );
+});
+
+test("a record finds the research that names it, whether proposed or already applied", () => {
+  const finding = (id: string, targets: string[], applied: string[] = []) => ({
+    id,
+    decisionId: `decide-run-${id}`,
+    statement: id,
+    classification: "new",
+    evidenceStance: "supports",
+    evidenceQuality: "primary",
+    generalizedApplicability: true,
+    sourceIds: [],
+    suggestedTargets: targets.map((target) => ({ id: target, title: target, href: "#", kind: "stage" })),
+    existingClaimCandidates: [],
+    priorArt: [],
+    appliedIn: applied.map((record) => ({ id: record, title: record, href: "#", kind: "stage" })),
+    state: "awaiting" as const,
+  });
+  const runs = [
+    {
+      id: "run-one",
+      findings: [finding("proposes", ["matching"]), finding("applied", [], ["matching"]), finding("elsewhere", ["care-initiation"])],
+    },
+  ] as unknown as Parameters<typeof researchAbout>[0];
+
+  assert.deepEqual(
+    researchAbout(runs, "matching").map(({ finding: found }) => found.id),
+    ["proposes", "applied"],
+  );
+  assert.deepEqual(researchAbout(runs, "nothing-here"), []);
 });

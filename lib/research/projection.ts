@@ -1,7 +1,8 @@
 import { getRepository } from "@/lib/content/repository";
+import { findGaps } from "./gaps";
 import { decisionId, loadDecisions, loadHandoffs, supersededDecisions } from "./intake";
-import { loadQuestions } from "./questions";
-import type { ReviewFinding, ReviewIndex, ReviewRun, ReviewSource } from "./view";
+import { buildQueue, loadQuestions, nextUp } from "./questions";
+import { findingState, type QueueEntry, type ReviewFinding, type ReviewIndex, type ReviewRun, type ReviewSource } from "./view";
 
 /**
  * `research/` projected for the review interface.
@@ -46,6 +47,16 @@ export function projectReview(): ReviewIndex {
     const title = "title" in record ? record.title : "statement" in record ? record.statement : id;
     return { title, href: `/${kind}s/${id}`, kind };
   };
+
+  // Which canonical records already cite which decision. This is what separates
+  // "a reviewer accepted this" from "the model actually says it now" — the gap
+  // where accepted research otherwise sits forever having changed nothing.
+  const appliedBy = new Map<string, Array<{ id: string; title: string; href: string; kind: string }>>();
+  for (const record of records) {
+    for (const trace of record.researchTrace ?? []) {
+      appliedBy.set(trace.decision, [...(appliedBy.get(trace.decision) ?? []), { id: record.id, ...titleOf(record.id) }]);
+    }
+  }
 
   // Which runs read which source, so a reviewer can see when a run is going
   // over ground an earlier one covered.
@@ -100,7 +111,7 @@ export function projectReview(): ReviewIndex {
             }),
         );
 
-      return {
+      const partial = {
         id: finding.id,
         decisionId: id,
         statement: finding.statement,
@@ -121,7 +132,9 @@ export function projectReview(): ReviewIndex {
         priorArt,
         decision: byDecisionId.get(id),
         supersededBy: superseded.get(id),
+        appliedIn: appliedBy.get(id) ?? [],
       };
+      return { ...partial, state: findingState(partial) };
     });
 
     return {
@@ -151,5 +164,25 @@ export function projectReview(): ReviewIndex {
       .map((finding) => ({ id: finding.decisionId, run: run.id, statement: finding.statement })),
   );
 
-  return { runs, supersedable, sourceUrl: process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL };
+  // The same queue `npm run research:queue` prints. Asked questions first,
+  // then gaps the model has in itself — so somebody deciding what is worth
+  // investigating is looking at the same list a scheduled run would pick from,
+  // rather than at a terminal they have to remember to open.
+  const queue: QueueEntry[] = [
+    ...nextUp(buildQueue(questions, handoffs)).map((item) => ({
+      kind: "question" as const,
+      id: item.id,
+      question: item.question,
+      detail: item.why ?? `Asked by ${item.askedBy}.`,
+    })),
+    ...findGaps(repo, handoffs, questions).map((gap) => ({
+      kind: "gap" as const,
+      id: `${gap.kind}-${gap.subject}`,
+      question: gap.suggestedQuestion,
+      detail: gap.why,
+      subject: gap.subjectKind === "run" ? undefined : { id: gap.subject, ...titleOf(gap.subject) },
+    })),
+  ];
+
+  return { runs, supersedable, queue, sourceUrl: process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL };
 }
