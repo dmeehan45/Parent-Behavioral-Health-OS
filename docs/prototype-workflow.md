@@ -93,6 +93,62 @@ brief names exactly which sections are missing and what each one is for, and a
 Bet with a prototype underway and no learning decision says so on its own page
 under **Where this is still open**.
 
+### Refining the experiment is what re-opens the build
+
+Readiness answers a question about the *bet*. Once something is built, there is
+a second question about the *artifact*, and it is the one that goes stale: a
+scope widened after the software was written leaves the prototype testing the
+old question while `prototype.status: working` claims otherwise.
+
+So a built prototype records the experiment it was checked against:
+
+```yaml
+prototype:
+  status: working
+  route: /prototypes/guided-first-caseload
+  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7
+```
+
+`npm run prototype:brief` prints that value; a **person** writes it, because it
+says *somebody looked at both of these*. This is the same trust boundary the
+research intake uses, for the same reason: **a machine can prove staleness; only
+a person can assert conformance.** Nothing reads the prototype's source and
+decides whether it implements a scope — that is semantics, which deterministic
+tooling here does not resolve.
+
+Refine any of the five sections and the stamp no longer matches. Validation says
+which section moved and what to do:
+
+```text
+Stale prototype in content/bets/guided-first-caseload.md: # Scope changed after
+the prototype was last checked against it, so prototype.status 'working' is
+claiming something nobody has confirmed since.
+```
+
+and the packet turns that refinement into the brief for the next build — it
+leads with what changed and hands over the new text verbatim:
+
+```text
+## Is this ready to build?
+
+**The experiment moved.** Something is already built here, and one section has
+changed since anybody last checked the software against it. What follows is what
+to build *to* — the rest of the packet is unchanged and still applies.
+
+### What changed
+
+**Scope** — now reads: …
+```
+
+Two honest answers, and one dishonest one. Restamp if the software still tests
+the refined section; drop `prototype.status` to `concept` if it does not.
+Leaving it as it is is the only answer that is not available.
+
+The check lives in `npm run validate:content`, not in the content loader.
+Refining a bet must not make the repository unloadable — that would take down
+the map, every record page, and the packet whose whole job is to explain what
+changed.
+
 If a section is unanswered, ask the person a focused question, narrow the
 prototype to the answerable part, or defer it. Do not compensate by inventing
 workflow, policy, clinical rules, or participant preferences — a guess written

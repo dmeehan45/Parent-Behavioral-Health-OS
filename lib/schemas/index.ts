@@ -62,7 +62,16 @@ export const problemSchema = z.object({
 // Problem, which keeps one statement of where the trouble is.
 export const betSchema = z.object({
   id: idSchema, title: z.string().min(1), problem: idSchema, status: z.string().optional(), confidence: confidenceSchema.optional(),
-  claims: z.array(idSchema).optional(), metrics: z.array(idSchema).optional(), prototype: z.object({ status: z.enum(["not-started", "concept", "working", "tested", "retired"]), route: z.string().startsWith("/").optional() }).optional(),
+  claims: z.array(idSchema).optional(), metrics: z.array(idSchema).optional(),
+  prototype: z.object({
+    status: z.enum(["not-started", "concept", "working", "tested", "retired"]),
+    route: z.string().startsWith("/").optional(),
+    // The experiment this software was last checked against, printed by
+    // `npm run prototype:brief` and written by the person who checked. It says
+    // "somebody looked at both of these", which is the one part of conformance
+    // no deterministic check can establish for itself.
+    builtAgainst: z.string().min(1).optional(),
+  }).optional(),
   // The actor the experiment studies, as an Entity. `# Scope` says which moment
   // and what path; this says who, in a form the projection can link. Optional,
   // because a bet may be proposed long before anyone has decided who it is for.

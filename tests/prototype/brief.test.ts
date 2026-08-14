@@ -15,8 +15,13 @@ const repo = getRepository();
  * while the one bet in the model happened to have no experiment written down,
  * and the first person to shape one broke the suite. Authoring content must
  * never require a code change, and that has to be true of the tests too.
+ *
+ * `prototype` is cleared for the same reason, and it caught the same bug twice:
+ * inheriting a built, stamped prototype made every "ready to build" case read as
+ * stale the moment the real bet was stamped. A fixture may borrow a record's
+ * shape; it must not borrow its editorial state.
  */
-const bare: Bet = { ...repo.bets[0], sections: {} };
+const bare: Bet = { ...repo.bets[0], sections: {}, prototype: undefined };
 
 /** The same bet, with its experiment written down. */
 function shaped(overrides: Record<string, string> = {}): Bet {

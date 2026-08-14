@@ -204,6 +204,20 @@ a reader to a 404. Validation also checks the route actually goes through
 problem and the provenance. A Bet without a prototype omits `route` entirely — a
 Bet is allowed to exist long before any software does.
 
+Once the prototype is built and you have checked it against the five experiment
+sections, record which experiment that was:
+
+```yaml
+prototype:
+  status: working
+  route: /prototypes/<id>
+  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7   # printed by prototype:brief
+```
+
+Refine any of those sections afterwards and validation says which one moved, so
+software cannot go on quietly testing a question the bet no longer asks. Restamp
+if it still tests the refined section; set `status: concept` if it does not.
+
 ## What you never have to edit
 
 Adding any primitive is a content-only change. A new stage, step, entity, claim,

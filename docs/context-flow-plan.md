@@ -375,14 +375,13 @@ build, the prototype was rebuilt to the approved scope, and the whole thing was
 checked. Five things only broke at that point, and they are worth keeping
 because each is a gap the design did not predict.
 
-**Nothing checks that the built artifact matches the approved scope.** The
-packet gates on whether the five sections *exist*, and once they do it says
-"ready" forever. Approving a scope of two modes side by side while the built
-prototype offered one produced no error anywhere: not in validation, not in the
-packet, not on the page. Dropping `prototype.status` from `working` back to
-`concept` was a judgement call nothing prompted. This is the largest remaining
-hole in the arrangement — the readiness gate is about the *bet*, and there is
-no corresponding gate about the *artifact*.
+**Nothing checks that the built artifact matches the approved scope.** *Closed
+— see [The second gate](#the-second-gate) below.* The packet gated on whether
+the five sections *exist*, and once they did it said "ready" forever. Approving
+a scope of two modes side by side while the built prototype offered one produced
+no error anywhere: not in validation, not in the packet, not on the page.
+Dropping `prototype.status` from `working` back to `concept` was a judgement call
+nothing prompted.
 
 **A shaped Bet broke the test suite.** `tests/prototype/brief.test.ts` read its
 fixture from `getRepository()` and asserted the bet had no experiment sections
@@ -415,3 +414,50 @@ model links the Bet to that question. Both statements are prose, so they can
 drift apart, and the queue cannot show that a bet is already waiting on it. An
 edge from a Bet to a research question would fix it, and is the one piece of new
 model shape this run actually argued for.
+
+## The second gate
+
+The largest of those findings is closed. Readiness asks a question about the
+*bet*; this asks the one about the *artifact*, and it is the one that goes stale
+— because refining a bet is the normal thing to do to one.
+
+A built prototype records the experiment it was checked against:
+
+```yaml
+prototype:
+  status: working
+  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7
+```
+
+The value is a digest per experiment section, in order, printed by
+`prototype:brief` and written by a person. Refine any section and it no longer
+matches; because the digests are positional, the failure names the section that
+moved rather than shrugging at the whole thing.
+
+**The split is the design.** A machine can prove staleness; only a person can
+assert conformance. Nothing here reads the prototype's source and decides
+whether it implements a scope — that is semantics, and deterministic tooling in
+this repository does not resolve semantics. It proves the cheaper, sufficient
+thing: that somebody looked at both, and that neither has moved since. This is
+the mechanism `researchTrace` already uses, where a citation over a superseded
+handoff hash stops validating.
+
+Two decisions inside it are worth keeping.
+
+**The gate belongs in `validate:content`, not the content loader.** The first
+version threw from `getRepository()`, which was wrong in a way that took thirty
+seconds to demonstrate and is worth recording: refining a scope made the whole
+repository unloadable, so the map, every record page, and the prototype packet
+all failed — including the packet whose error message told you to run it. A gate
+that breaks the tool for fixing it is not a gate. `research/` already had this
+rule; the same reasoning applies to anything a person edits mid-flight.
+
+**The refinement is the brief.** When the stamp is stale, the packet leads with
+*what changed* and prints the refined sections verbatim, then says the rest of
+the packet still applies. That is the point of the whole arrangement in one
+screen: a person sharpens the scope, and the next builder is handed the sharper
+scope as the thing to build to, without anybody re-assembling it.
+
+What is still true: nothing verifies the software *actually* implements the
+scope, and nothing can. The gate makes it impossible to drift silently, not
+impossible to be wrong.

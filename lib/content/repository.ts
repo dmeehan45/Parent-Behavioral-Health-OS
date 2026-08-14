@@ -387,6 +387,11 @@ export function getRepository() {
     bet.metrics?.forEach((id) => requireRef(id, metricIds, bet.file, "metrics", at(bet.id, "bet")));
     if (bet.participant) requireRef(bet.participant, entityIds, bet.file, "participant", at(bet.id, "bet"));
     if (bet.prototype?.route) requirePrototypeRoute(bet.prototype.route, bet.file);
+    // Whether the software still tests the approved experiment is checked in
+    // `npm run validate:content`, not here. Refining a bet is the normal thing
+    // to do to one, and it must not make the repository unloadable: that would
+    // take down the map, every record page, and — worst of all — the packet
+    // whose whole job is to tell you what changed and what to build to.
   });
 
   requireMapMembership(stages, map.stages);

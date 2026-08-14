@@ -231,6 +231,27 @@ Three rules keep this from rotting:
 The sections describe the *test*. They never restate the problem or the
 intervention, which are already written down once each.
 
+### A built prototype says which experiment it was built against
+
+Readiness is a question about the bet. Once software exists there is a second
+question about the artifact, and refining the bet is exactly what makes it go
+stale. A built prototype therefore carries `builtAgainst`, a fingerprint of the
+five sections printed by `prototype:brief` and written by a person.
+
+**A machine can prove staleness; only a person can assert conformance.** Nothing
+reads the prototype's source and decides whether it implements a scope — that is
+semantics, which deterministic tooling here does not resolve. It proves the
+cheaper, sufficient thing: somebody looked at both, and neither has moved since.
+
+- **Do not restamp to clear a failing check.** The stamp means the software was
+  looked at against the refined section. If it has not been, `prototype.status:
+  concept` is the honest answer and costs nothing.
+- **The check lives in `validate:content`, not the loader.** A loader that threw
+  on drift would make the repository unloadable the moment somebody refined a
+  bet — taking down the map, every record page, and the packet whose whole job
+  is to say what changed. A gate that breaks the tool for fixing it is not a
+  gate.
+
 ## The interface uses one design system
 
 The UI follows the **Family Health Provider** design system, vendored into

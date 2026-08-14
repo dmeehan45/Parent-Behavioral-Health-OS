@@ -10,6 +10,7 @@ metrics: [time-to-first-match, time-to-first-session]
 prototype:
   status: working
   route: /prototypes/guided-first-caseload
+  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-14

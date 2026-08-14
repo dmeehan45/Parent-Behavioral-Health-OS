@@ -22,6 +22,7 @@ import {
   stageCoverage,
   stepCoverage,
 } from "@/lib/model/coverage";
+import { conformance } from "@/lib/prototype/conformance";
 import { contentRevision, fingerprint } from "@/lib/model/revision";
 import { AUTHORITY_TERMS, EDGE_LEGEND, isFeedbackRelationship } from "@/lib/model/vocabulary";
 import type {
@@ -469,6 +470,7 @@ export function projectModel(): ModelGraph {
         ],
         coverage: betCoverage(bet),
         experimentGaps: experimentGaps(bet),
+        experimentDrift: conformance(bet).drifted,
         blocks: [
           ...linksBlock(
             "The problem this answers",

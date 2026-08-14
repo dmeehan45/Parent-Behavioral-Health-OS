@@ -20,7 +20,7 @@ import type { ModelGraph, ModelNode } from "@/lib/model/types";
 
 export type OpenEnd = {
   /** What kind of loose end this is, for the reader to recognise the pattern. */
-  kind: "unanswered" | "unproven" | "unmeasured" | "untested" | "unshaped" | "thin";
+  kind: "unanswered" | "unproven" | "unmeasured" | "untested" | "unshaped" | "drifted" | "thin";
   /** Written as an invitation, not a scolding. */
   invitation: string;
   href?: string;
@@ -114,6 +114,20 @@ export function openEnds(graph: ModelGraph, node: ModelNode): OpenEnd[] {
         missing.length === 1
           ? `Something is being built here, and its ${missing[0].toLowerCase()} has not been written down.`
           : `Something is being built here, and ${names(missing.map((name) => name.toLowerCase()), 2)} have not been written down.`,
+    });
+  }
+
+  // Refinement is the normal thing to do to a bet, and it silently ages the
+  // software built against it. Validation already refuses this, but a reader on
+  // the page should see why before they hit a failing check.
+  if (node.kind === "bet" && node.experimentDrift?.length) {
+    const drifted = node.experimentDrift;
+    ends.push({
+      kind: "drifted",
+      invitation:
+        drifted.length === 1
+          ? `The ${drifted[0].toLowerCase()} changed after this was built — nobody has confirmed the software still tests it.`
+          : `${names(drifted.map((name) => name.toLowerCase()), 2)} changed after this was built, and the software has not been re-checked.`,
     });
   }
 
