@@ -128,6 +128,30 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/*
+ * On the map, the shell *is* the viewport.
+ *
+ * `min-height` alone leaves the body's height indefinite, and an indefinite
+ * height reverses the constraint the panes below assume: instead of the shell
+ * bounding its content, the content sizes the shell. A tall detail sheet was
+ * handed 900px of height inside a 900px window that had already spent 137px on
+ * chrome, so `.sheet-body` never overflowed, never scrolled, and the document
+ * absorbed the wheel instead — dragging the canvas and the nav off-screen and
+ * stranding the rest of the record below the fold.
+ *
+ * The tell is that `.sheet-body` measured the same height at a 900px viewport as
+ * at a 700px one. A pane sized by its own content is not a pane that can scroll.
+ *
+ * A document page still grows and scrolls normally; only the one view that
+ * claims the whole viewport is pinned to it. This is the same definite height
+ * that already makes the phone's sheet work — `height: 86dvh` on a fixed
+ * element — applied to the case that was missing it.
+ */
+body:has(.workspace) {
+  height: 100dvh;
+  overflow: hidden;
+}
+
 #content {
   display: flex;
   flex-direction: column;

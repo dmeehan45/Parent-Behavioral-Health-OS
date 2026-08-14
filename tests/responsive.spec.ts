@@ -33,6 +33,26 @@ async function routesFromModel(page: Page): Promise<string[]> {
 }
 
 /**
+ * The primitive with the most to say, whatever it currently is.
+ *
+ * The sheet only misbehaves once its content is taller than the screen, so the
+ * test needs the longest record in the model rather than a written-down id that
+ * would rot the first time content moved.
+ */
+async function longestRecordId(page: Page): Promise<string> {
+  const response = await page.request.get("/api/model");
+  expect(response.ok()).toBeTruthy();
+  const model = (await response.json()) as {
+    nodes: Array<{ id: string; blocks?: unknown[] }>;
+  };
+
+  const richest = model.nodes.reduce((best, node) =>
+    (node.blocks?.length ?? 0) > (best.blocks?.length ?? 0) ? node : best,
+  );
+  return richest.id;
+}
+
+/**
  * The page may exceed the viewport by a sub-pixel from a fractional layout;
  * anything past that is a real overflow a reader would feel as a sideways
  * scrollbar.
@@ -164,6 +184,52 @@ test.describe("responsive shell", () => {
     expect(box!.width, "the decision file is wider than the viewport").toBeLessThanOrEqual(
       page.viewportSize()!.width,
     );
+  });
+
+  /*
+   * The map fitting the viewport was already checked — but only with nothing
+   * open, which is the one state where the sheet cannot push it out of shape.
+   * The sheet is the tallest thing the workspace ever holds, so it is the thing
+   * that finds an indefinite height, and the failure is silent: the shell grows
+   * to fit the content instead of the content scrolling inside the shell, the
+   * scrollport never overflows, and the wheel moves the document instead.
+   */
+  test("an open detail sheet scrolls inside the map instead of growing the page", async ({ page }) => {
+    await page.goto("/map");
+    const target = await longestRecordId(page);
+
+    await page.goto(`/map?open=${encodeURIComponent(target)}`);
+    await expect(page.locator(".sheet-body")).toBeVisible({ timeout: 15_000 });
+
+    const vertical = await page.evaluate(() => {
+      const doc = document.documentElement;
+      return doc.scrollHeight - doc.clientHeight;
+    });
+    expect(vertical, `an open sheet made the page ${vertical}px taller than the viewport`)
+      .toBeLessThanOrEqual(1);
+
+    const viewport = page.viewportSize()!;
+    const pane = await page.evaluate(() => {
+      const element = document.querySelector(".sheet-body")!;
+      return { visible: element.clientHeight, content: element.scrollHeight };
+    });
+
+    /*
+     * A scrollport taller than the window is a scrollport that can never
+     * overflow, and a pane that never overflows never scrolls. This is the
+     * measurement that tells a bounded pane from one sized by its own content.
+     */
+    expect(pane.visible, `the sheet's scrollport is ${pane.visible}px inside a ${viewport.height}px window`)
+      .toBeLessThan(viewport.height);
+
+    // And the part that a reader would actually notice.
+    const reachedEnd = await page.evaluate(async () => {
+      const element = document.querySelector(".sheet-body")!;
+      element.scrollTop = element.scrollHeight;
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      return Math.abs(element.scrollTop + element.clientHeight - element.scrollHeight) < 3;
+    });
+    expect(reachedEnd, "the end of the record cannot be reached by scrolling the sheet").toBe(true);
   });
 
   test("body copy stays readable rather than stretching the full width", async ({ page }) => {
