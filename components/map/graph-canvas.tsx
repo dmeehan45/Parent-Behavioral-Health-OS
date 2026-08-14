@@ -14,7 +14,12 @@ import {
   type NodeChange,
 } from "@xyflow/react";
 import { layoutGraph, NODE_SIZE } from "@/lib/model/layout";
-import { EDGE_COLOR, KIND_COLOR } from "@/components/map/canvas-theme";
+import {
+  EDGE_COLOR,
+  KIND_COLOR,
+  MINIMAP_MASK,
+  UNKNOWN_NODE_COLOR,
+} from "@/components/map/canvas-theme";
 import { useLayoutOverrides } from "@/components/map/layout-overrides";
 import { nodeTypes, type CanvasNode, type DetailTier, type NodeState } from "@/components/map/model-node";
 import type { LensId, ModelGraph, ModelNode } from "@/lib/model/types";
@@ -387,18 +392,19 @@ export function GraphCanvas({
         ) : null}
       </Panel>
 
+      {/* Size lives in `.canvas-minimap`, not here: an inline style outranks the
+          media query that shrinks this on a phone. */}
       <MiniMap
         className="canvas-minimap"
-        style={{ width: 168, height: 108 }}
         pannable
         zoomable
         ariaLabel="Map overview"
         nodeColor={(node) => {
           const model = byId.get(node.id);
-          return model ? KIND_COLOR[model.kind] : "#c3cec8";
+          return model ? KIND_COLOR[model.kind] : UNKNOWN_NODE_COLOR;
         }}
         nodeStrokeWidth={0}
-        maskColor="rgba(21, 33, 28, 0.08)"
+        maskColor={MINIMAP_MASK}
       />
     </ReactFlow>
   );

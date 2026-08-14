@@ -36,9 +36,7 @@ export function GuidedCaseload() {
   return (
     <div className="prototype-grid">
       <section className="clinician-card">
-        <span className="eyebrow" style={{ color: "#a7d9c5" }}>
-          New clinician
-        </span>
+        <span className="eyebrow">New clinician</span>
         <h3>{CLINICIAN.name}</h3>
         <p>{CLINICIAN.role}</p>
         <div className="clinician-facts">

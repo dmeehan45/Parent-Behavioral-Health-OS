@@ -21,7 +21,11 @@ export default function Home() {
   return (
     <main className="shell page home">
       <section className="home-hero">
-        <h1>How the practice works, and where we think it breaks</h1>
+        {/* One script word per page, in the h1, in brand blue. It is the design
+            system's signature device and it stops working if it is used twice. */}
+        <h1>
+          How the practice <em className="script">actually</em> works, and where we think it breaks
+        </h1>
         <p className="lede">
           This is a written model of a parent-focused behavioral health practice. It lays out the stages a clinician and
           a family move through, what has to happen at each one, and the places we are not confident it holds up. Where

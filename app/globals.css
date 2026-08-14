@@ -1,81 +1,95 @@
 @import "tailwindcss";
 @import "@xyflow/react/dist/style.css";
+@import "./design-system.css";
 
 /* ==========================================================================
    Tokens
+
+   Every value below is an alias onto the Family Health Provider semantic layer
+   in `design-system.css`. Nothing here may be a literal colour, shadow, radius
+   or font: this is the seam where the brand system meets this application's
+   vocabulary, and keeping it aliases-only is what makes a retheme one file.
+   `npm run lint:design` enforces that.
    ========================================================================== */
 
 :root {
-  --paper: #f4f7f5;
-  --surface: #ffffff;
-  --surface-2: #eef2ef;
-  --surface-3: #e5ebe7;
-  --ink: #131b18;
-  --ink-2: #5c6a64;
-  --ink-3: #8a958f;
-  --line: #dbe3de;
-  --line-strong: #c2cec7;
+  --paper: var(--ds-surface-wash);
+  --surface: var(--ds-surface-base);
+  --surface-2: var(--ds-surface-subtle);
+  --surface-3: var(--ds-surface-hover);
+  --ink: var(--ds-text-body);
+  /* One muted tier, not two. The source's second grey (#959e9f) measures
+     2.74:1 and the system replaced it; splitting the difference again would
+     just reintroduce the failure at a smaller size. Hierarchy below `--ink-2`
+     is carried by size, weight and tracking instead of by a lighter grey. */
+  --ink-2: var(--ds-text-muted);
+  --ink-3: var(--ds-text-muted);
+  --line: var(--ds-border-default);
+  --line-strong: var(--ds-border-strong);
 
-  --accent: #1d5b45;
-  --accent-ink: #14402f;
-  --accent-soft: #e2f0e8;
-  --warn: #8a5f27;
-  --warn-soft: #f6ecdc;
-  --evidence: #276b6b;
-  --evidence-soft: #dcecec;
+  --accent: var(--ds-action);
+  --accent-ink: var(--ds-action-hover);
+  --accent-soft: var(--ds-action-wash);
+  --warn: var(--ds-gold-on-tint);
+  --warn-soft: var(--ds-gold-lightest);
+  --evidence: var(--ds-green-on-tint);
+  --evidence-soft: var(--ds-green-lightest);
 
-  --kind-stage: #1d5b45;
-  --kind-step: #3f6b7d;
-  --kind-bet: #8a5f27;
-  --kind-prototype: #6b4a86;
-  --kind-claim: #8a4a58;
-  --kind-metric: #276b6b;
-  --kind-entity: #5d6a72;
+  /* Hue means category (P2). Three kinds of thinking, three hue families, and
+     a neutral for the things the machine handles:
+       blue  — the machine as it is      (stage, and the step inside it)
+       gold  — what we propose to change (bet, and the prototype that tests it)
+       green — what we can measure       (metric)
+       coral — what we assert unproven   (claim)
+       grey  — what moves through it     (entity)
+     Each pair shares a hue and separates by ramp step, because the two members
+     are genuinely related. Colour is never the only signal — every node and
+     badge carries its kind as a word as well. */
+  --kind-stage: var(--ds-blue-on-tint);
+  --kind-step: var(--ds-blue-darkest);
+  --kind-bet: var(--ds-gold-on-tint);
+  --kind-prototype: var(--ds-gold-darkest);
+  --kind-claim: var(--ds-coral-on-tint);
+  --kind-metric: var(--ds-green-on-tint);
+  --kind-entity: var(--ds-gray-aa);
 
-  --header-h: 56px;
+  /* A floor the floating nav cannot go under: a 44px touch target inside 8px
+     of padding, top and bottom. Nothing subtracts it — the shell is a flex
+     column, so the map takes whatever the nav leaves. */
+  --header-h: 64px;
+  --header-gap: 12px;
   --sheet-w: 400px;
-  --radius: 6px;
-  --radius-lg: 10px;
+  --radius: var(--ds-radius-sm);
+  --radius-lg: var(--ds-radius-lg);
+  --radius-card: var(--ds-card-radius);
+  --radius-pill: var(--ds-radius-pill);
 
-  --shadow-sm: 0 1px 2px rgba(15, 30, 24, 0.06), 0 2px 6px rgba(15, 30, 24, 0.04);
-  --shadow-md: 0 4px 12px rgba(15, 30, 24, 0.08), 0 12px 28px rgba(15, 30, 24, 0.06);
-  --shadow-lg: 0 12px 32px rgba(15, 30, 24, 0.12), 0 32px 64px rgba(15, 30, 24, 0.1);
+  --shadow-sm: var(--ds-shadow-rest);
+  --shadow-md: var(--ds-shadow-lift);
+  --shadow-lg: var(--ds-shadow-overlay);
 
-  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --font: var(--ds-font-primary);
+  --script: var(--ds-font-script);
+  --mono: var(--ds-font-mono);
 }
 
+/* Dark mode moves each category to a lighter step of its own hue, so the
+   category system survives the ground changing. The surfaces themselves are
+   handled at the semantic layer in `design-system.css`. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0f1613;
-    --surface: #16201c;
-    --surface-2: #1b2622;
-    --surface-3: #222e29;
-    --ink: #e8efea;
-    --ink-2: #9aa8a1;
-    --ink-3: #74827b;
-    --line: #26332d;
-    --line-strong: #35443d;
+    --kind-stage: var(--ds-blue-medium);
+    --kind-step: var(--ds-blue-light);
+    --kind-bet: var(--ds-gold-medium);
+    --kind-prototype: var(--ds-gold-light);
+    --kind-claim: var(--ds-coral-light);
+    --kind-metric: var(--ds-green-medium);
+    --kind-entity: var(--ds-gray);
 
-    --accent: #5fbf99;
-    --accent-ink: #a7e0c8;
-    --accent-soft: #163026;
-    --warn: #d3a469;
-    --warn-soft: #322619;
-    --evidence: #6cc2c2;
-    --evidence-soft: #14302f;
-
-    --kind-stage: #5fbf99;
-    --kind-step: #7fb2c8;
-    --kind-bet: #d3a469;
-    --kind-prototype: #b193d0;
-    --kind-claim: #d3919e;
-    --kind-metric: #6cc2c2;
-    --kind-entity: #9aa8b2;
-
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --warn: var(--ds-gold-medium);
+    --warn-soft: var(--ds-surface-wash-alt);
+    --evidence: var(--ds-green-medium);
+    --evidence-soft: var(--ds-surface-wash);
   }
 }
 
@@ -93,7 +107,17 @@ body {
   padding: 0;
 }
 
+/*
+ * A flex column, so the one full-height view — the map — can take whatever the
+ * floating nav leaves rather than subtracting a guessed header height from the
+ * viewport. The nav is a pill whose height depends on its own padding and touch
+ * targets; every time that changed, a `calc(100dvh - …)` somewhere else was
+ * quietly wrong by a few pixels.
+ */
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font);
@@ -101,6 +125,13 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
+}
+
+#content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 a {
@@ -121,10 +152,16 @@ code {
   border-radius: 3px;
 }
 
+/*
+ * The reference focus treatment for the whole system: a spacer ring the colour
+ * of the ground, then a blue halo. It was the one properly designed focus state
+ * on the source; everything else there fell back to the browser default.
+ * Built from `:focus-visible`, never `:focus`.
+ */
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 3px;
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+  border-radius: var(--radius);
 }
 
 .skip-link {
@@ -156,6 +193,25 @@ h5 {
 h1 {
   font-size: clamp(28px, 4vw, 46px);
   letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+/*
+ * The script word. One word per page, inside the `h1`, in brand blue — the
+ * signature typographic device and the single clearest carrier of warmth.
+ * More than one and it stops meaning anything.
+ */
+.script {
+  font-family: var(--script);
+  font-weight: var(--ds-weight-bold);
+  color: var(--accent);
+  letter-spacing: 0;
+  /* Caveat sits small on its em box next to a grotesque at the same size, and
+     its side bearings are tight enough that the word runs into its neighbour. */
+  font-size: 1.15em;
+  line-height: 1;
+  padding-inline: 0.06em;
+  margin-inline: 0.04em;
 }
 
 h2 {
@@ -219,54 +275,66 @@ p:last-child {
    Controls
    ========================================================================== */
 
+/*
+ * Pills, at the measured 44px floor. The source shipped the same button class
+ * at 38px as a `<button>` and 52px as an `<a>`; the anchor form was the
+ * intended size, so both get it here.
+ */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 40px;
-  padding: 10px 16px;
-  background: var(--ink);
-  color: var(--paper);
-  border: 1px solid var(--ink);
-  border-radius: var(--radius);
-  font-size: 14px;
-  font-weight: 600;
+  min-height: var(--ds-touch-target);
+  padding: 10px 24px;
+  background: var(--accent);
+  color: var(--ds-text-on-action);
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: var(--ds-weight-medium);
   text-decoration: none;
-  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+  transition: background var(--ds-duration) var(--ds-ease),
+    border-color var(--ds-duration) var(--ds-ease),
+    box-shadow var(--ds-duration) var(--ds-ease);
 }
 
 .button:hover {
   background: var(--accent-ink);
-  border-color: var(--accent-ink);
 }
 
+/* The outlined pill: the alternative real choice beside the primary, not a
+   throwaway. Hover tints and lifts the shadow one step, as measured. */
 .button.secondary {
   background: var(--surface);
-  color: var(--ink);
-  border-color: var(--line-strong);
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: var(--ds-shadow-rest);
 }
 
 .button.secondary:hover {
-  background: var(--surface-2);
+  background: var(--accent-soft);
   border-color: var(--accent);
+  box-shadow: var(--ds-shadow-lift);
 }
 
 .icon-button {
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill);
   color: var(--ink-2);
   font-size: 14px;
   line-height: 1;
+  transition: background var(--ds-duration) var(--ds-ease),
+    color var(--ds-duration) var(--ds-ease);
 }
 
 .icon-button:hover {
-  background: var(--surface-2);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
@@ -274,10 +342,10 @@ p:last-child {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 9px;
+  padding: 4px 10px;
   background: var(--accent-soft);
   color: var(--accent-ink);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   font-size: 12px;
   text-decoration: none;
 }
@@ -296,8 +364,8 @@ p:last-child {
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
-  border-radius: 20px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   font-size: 11px;
   font-weight: 600;
@@ -340,8 +408,8 @@ p:last-child {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -467,6 +535,10 @@ p:last-child {
    Application shell
    ========================================================================== */
 
+/*
+ * A floating white pill bar over a pale wash, not a bar welded to the top of
+ * the screen. The surface language is soft frame, floating nav, no hard chrome.
+ */
 .app-header {
   position: sticky;
   top: 0;
@@ -475,30 +547,54 @@ p:last-child {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  height: var(--header-h);
-  padding: 0 20px;
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  min-height: var(--header-h);
+  margin: var(--header-gap) auto 0;
+  padding: 8px 8px 8px 18px;
+  max-width: calc(var(--ds-container) - 40px);
+  width: calc(100% - 24px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--ds-shadow-rest);
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-weight: 700;
+  font-weight: var(--ds-weight-bold);
   font-size: 14px;
   letter-spacing: -0.02em;
   text-decoration: none;
   white-space: nowrap;
 }
 
+/* Four dots, four hues — the category ramp is the identity. Not the source's
+   logo artwork, which is a protected asset. */
 .brand-mark {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  background: var(--accent);
-  box-shadow: 4px 4px 0 color-mix(in srgb, var(--accent) 25%, transparent);
+  display: grid;
+  grid-template-columns: repeat(2, 7px);
+  gap: 2px;
+  flex: none;
+}
+
+.brand-mark i {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+}
+
+.brand-mark i:nth-child(1) {
+  background: var(--kind-stage);
+}
+.brand-mark i:nth-child(2) {
+  background: var(--kind-metric);
+}
+.brand-mark i:nth-child(3) {
+  background: var(--kind-bet);
+}
+.brand-mark i:nth-child(4) {
+  background: var(--kind-claim);
 }
 
 .app-nav {
@@ -514,25 +610,38 @@ p:last-child {
   display: none;
 }
 
+/* Nav links are ink with a pale blue hover wash, as measured — not blue text.
+   Blue is reserved for in-copy links, the filled CTA, and icon accents. */
 .app-nav a {
-  padding: 7px 11px;
-  border-radius: var(--radius);
-  color: var(--ink-2);
-  font-size: 13px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ds-touch-target);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: var(--ds-weight-regular);
   text-decoration: none;
   white-space: nowrap;
+  transition: background var(--ds-duration) var(--ds-ease);
 }
 
 .app-nav a:hover {
-  background: var(--surface-2);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .shell {
-  max-width: 1180px;
+  max-width: var(--ds-container);
   margin: 0 auto;
   padding: 0 20px;
+}
+
+/* The article measure. Long-form reading is the point of every record page,
+   and 720px is the single most important number in the system's layout. */
+.shell.page > .prose,
+.shell.page .detail-prose {
+  max-width: var(--ds-container-text);
 }
 
 .page {
@@ -551,7 +660,8 @@ p:last-child {
   grid-template-areas:
     "bar bar"
     "canvas sheet";
-  height: calc(100dvh - var(--header-h));
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -581,31 +691,34 @@ p:last-child {
   display: none;
 }
 
+/* The segmented indicator: unselected segments are ink on nothing, the active
+   one is a filled blue pill. Same device the system uses for intake steps. */
 .lens-tab {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 36px;
-  padding: 7px 12px;
+  min-height: var(--ds-touch-target);
+  padding: 7px 14px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill);
   color: var(--ink-2);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--ds-weight-semibold);
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background var(--ds-duration) var(--ds-ease),
+    color var(--ds-duration) var(--ds-ease);
 }
 
 .lens-tab:hover {
-  background: var(--surface-2);
+  background: var(--surface-3);
   color: var(--ink);
 }
 
 .lens-tab.active {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+  background: var(--accent);
+  color: var(--ds-text-on-action);
+  border-color: transparent;
 }
 
 .lens-count {
@@ -622,8 +735,8 @@ p:last-child {
 }
 
 .lens-tab.active .lens-count {
-  background: color-mix(in srgb, var(--paper) 20%, transparent);
-  color: var(--paper);
+  background: color-mix(in srgb, var(--ds-text-on-action) 22%, transparent);
+  color: var(--ds-text-on-action);
 }
 
 .bar-actions {
@@ -722,6 +835,14 @@ p:last-child {
   background: var(--paper);
 }
 
+/*
+ * React Flow writes `height: 100%` onto its root as an inline style, so no rule
+ * here can override it and the canvas is only ever as tall as the percentage
+ * resolves to. Keep `.workspace-canvas` inside something that gives it a
+ * definite height — a grid row does, a flex item does not — or the map renders
+ * blank while every node in it still measures correctly.
+ */
+
 .canvas-background {
   color: var(--line-strong);
 }
@@ -783,6 +904,8 @@ p:last-child {
 
 /* Canvas controls -------------------------------------------------------- */
 
+/* Sits to the left of the minimap: 168px of map, plus its 12px margin and a
+   12px gap. Both are bottom-right panels, so they would otherwise overlap. */
 .canvas-controls {
   display: flex;
   gap: 1px;
@@ -790,7 +913,7 @@ p:last-child {
   padding: 0;
   background: var(--line);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
@@ -816,8 +939,20 @@ p:last-child {
   height: 108px;
   background: var(--surface) !important;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/*
+ * React Flow sizes the minimap's `svg` from the `style` prop it is handed in
+ * JavaScript, defaulting to 200x150 — which on a phone hangs off the bottom of
+ * the screen. Scaling the svg to its container puts the size back under CSS,
+ * where the media query can reach it. The viewBox keeps the aspect ratio.
+ */
+.canvas-minimap svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* ==========================================================================
@@ -981,6 +1116,7 @@ p:last-child {
 
 /* Fades the lens strip when it scrolls past the edge on narrow screens. */
 .lens-tabs {
+  /* ds-allow: a mask's black is opacity, not a colour role. */
   mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 18px), transparent 100%);
 }
 
@@ -1662,16 +1798,23 @@ p:last-child {
   padding: 0;
 }
 
+/* White card on a pale wash, generously rounded, soft shadow, no hard border.
+   Hover raises it exactly one step on the elevation ladder. */
 .card {
   display: flex;
   flex-direction: column;
   gap: 10px;
   height: 100%;
-  padding: 18px;
-  background: var(--surface);
+  padding: var(--ds-space-8);
+  background: var(--ds-card-bg);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-card);
+  box-shadow: var(--ds-card-shadow);
+  transition: box-shadow var(--ds-duration) var(--ds-ease);
+}
+
+.card:hover {
+  box-shadow: var(--ds-card-shadow-hover);
 }
 
 .card h2 {
@@ -1867,10 +2010,17 @@ p:last-child {
 }
 
 .clinician-card {
-  padding: 22px;
+  padding: var(--ds-space-8);
   background: var(--accent-ink);
-  color: #eef7f2;
-  border-radius: var(--radius-lg);
+  color: var(--ds-blue-lightest);
+  border-radius: var(--radius-card);
+  box-shadow: var(--ds-shadow-brand);
+}
+
+/* On the deep blue card the eyebrow takes the light step of its own hue,
+   which is the rule for tinted text on a tinted ground. */
+.clinician-card .eyebrow {
+  color: var(--ds-blue-light);
 }
 
 .clinician-card h3 {
@@ -1972,7 +2122,11 @@ p:last-child {
 
 @media (max-width: 860px) {
   :root {
-    --header-h: 52px;
+    --header-gap: 8px;
+  }
+
+  .app-header {
+    padding-left: 14px;
   }
 
   .shell {
@@ -1996,12 +2150,21 @@ p:last-child {
     grid-template-columns: 1fr;
   }
 
-  /* The canvas keeps the full viewport; detail rises over it as a sheet. */
+  /*
+   * The canvas keeps the full viewport; detail rises over it as a sheet.
+   *
+   * Still a grid, dropped to one column, rather than a flex column. React
+   * Flow's root is sized by an inline `height: 100%`, and a percentage only
+   * resolves against a definite height — which a grid row gives it and a
+   * flex item does not. As a flex child the canvas collapses to zero and the
+   * map renders blank while every node still measures correctly.
+   */
   .workspace,
   .workspace.sheet-open {
-    display: flex;
-    flex-direction: column;
-    grid-template-columns: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "bar"
+      "canvas";
   }
 
   .workspace-bar {
@@ -2029,11 +2192,6 @@ p:last-child {
     padding: 0;
   }
 
-  .workspace-canvas {
-    flex: 1;
-    min-height: 0;
-  }
-
   /* The active lens tab already names the view, so the orientation card is
      redundant here and the canvas is the scarcer resource. */
   .canvas-orientation {
@@ -2048,9 +2206,11 @@ p:last-child {
     margin: 0 12px 12px 0;
   }
 
+  /* There is no room beside the minimap on a phone, so the controls stack
+     above it: 68px of minimap, its 12px margin, and a 12px gap. */
   .canvas-controls {
     flex-direction: column;
-    margin-right: 12px;
+    margin: 0 12px 92px 0;
   }
 
   .canvas-controls button {
