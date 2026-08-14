@@ -171,9 +171,13 @@ function QueueList({ entries }: { entries: ReturnType<typeof projectReview>["que
             <Badge tone={entry.kind === "question" ? "accent" : "quiet"}>
               {entry.kind === "question" ? "asked" : "gap"}
             </Badge>{" "}
+            {/* A question something is already waiting on is the one worth
+                answering first, and priority alone cannot say that. */}
+            {entry.blocking?.length ? <Badge tone="warn">a bet is waiting</Badge> : null}{" "}
             {entry.question}
           </p>
           <p className="small muted">
+            {entry.blocking?.length ? `${entry.blocking.join(", ")} is scoped around not knowing this. ` : ""}
             {entry.detail}
             {/* The question already names the subject, so the link is a way in
                 rather than a repeat of it. */}

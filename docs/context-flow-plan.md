@@ -400,20 +400,18 @@ failure a reviewer's eye skips. The check now fails on any custom property
 nothing defines, respecting `var(--x, fallback)` and properties `next/font`
 supplies. It found the bug it was written for, and nothing else.
 
-**`# Scope` holds four things, and coverage counts it as one.** Participant,
-moment, in-scope path and exclusions all live in one section, so the model
-cannot tell a scope that names its exclusions from one that does not — and
-exclusions are the half that stops a prototype quietly growing. Splitting the
-section would make that derivable; it would also make five sections into eight,
-which is why it was not done here rather than because it is wrong.
+**`# Scope` holds four things, and coverage counts it as one.** *Closed — see
+[Naming the boundary](#naming-the-boundary).* Participant, moment, in-scope path
+and exclusions all lived in one section, so the model could not tell a scope that
+named its exclusions from one that did not — and exclusions are the half that
+stops a prototype quietly growing.
 
 **The Bet cannot point at the open question it is deliberately not answering.**
-The approved scope excludes match quality *because* `define-matching-quality` is
-queued, and the interface says the scores are provisional — but nothing in the
-model links the Bet to that question. Both statements are prose, so they can
-drift apart, and the queue cannot show that a bet is already waiting on it. An
-edge from a Bet to a research question would fix it, and is the one piece of new
-model shape this run actually argued for.
+*Closed — see [Naming the boundary](#naming-the-boundary).* The approved scope
+excludes match quality *because* `define-matching-quality` is queued, and the
+interface says the scores are provisional — but nothing in the model linked the
+Bet to that question. Both statements were prose, so they could drift apart, and
+the queue could not show that a bet was already waiting on it.
 
 ## The second gate
 
@@ -461,3 +459,51 @@ scope as the thing to build to, without anybody re-assembling it.
 What is still true: nothing verifies the software *actually* implements the
 scope, and nothing can. The gate makes it impossible to drift silently, not
 impossible to be wrong.
+
+## Naming the boundary
+
+The two remaining findings were the same finding twice: a prototype's boundary
+was written down in a way nothing could read. Both are closed.
+
+**`# Out of scope` is its own section.** Scope held participant, moment, path
+and exclusions, so a bet that said what it deliberately left out counted exactly
+the same as one that did not — and readiness passed either way. Exclusions are
+the half that stops a prototype quietly growing, so they are gated on their own
+now. Only that one split was made: `participant` already has a structured field,
+and the moment and the path are one thought. Six sections, not eight.
+
+**`awaiting` names the open question an exclusion is waiting on.** The scope
+excludes match quality *because* `define-matching-quality` is queued, and until
+now those were two pieces of prose that agreed by coincidence. The Bet names the
+question, so the packet can tell a builder the boundary is provisional — *do not
+resolve any of it in the prototype* — and `/review` marks the question as one a
+bet is already scoped around, which is the difference between a question worth
+answering next and one that merely exists.
+
+It is a reference into `research/`, and deliberately **not** an edge. The far end
+is not a model record: it is staging, and drawing it would put unreviewed
+material on the map and go stale the moment a handoff landed. It is declared
+block-only in `lib/model/conformance.ts` with that reason, because a reference
+nobody classified is the thing that registry exists to prevent.
+
+Splitting a section changed the fingerprint's length, which made every existing
+stamp uncomparable — so the gate from the previous section fired on its first
+real content change. The honest answer happened to be *restamp*: the exclusion
+text moved verbatim, the software still tests both sections, and a person checked
+before saying so. That is the discipline working, not a formality: the check
+fired, somebody looked, and the looking is the whole point.
+
+### The same test bug, three times
+
+The fixtures in `tests/prototype/` spread a real bet to borrow its problem,
+claims and metrics, and inherited its editorial state along with them. That broke
+the suite three separate times — `sections` when a bet was first shaped,
+`prototype` when one was first stamped, `awaiting` when one first named a
+question — and each time it was fixed by clearing one more field.
+
+Clearing fields is whack-a-mole; the fixture now lists what it *takes*. A field
+added to `Bet` tomorrow is absent by default, which is the safe direction. The
+general rule, since this repository will keep adding fields to records that tests
+borrow: **a fixture should opt in to what it borrows, not opt out of what it does
+not.** A test that misses new state is inconvenient; one that silently inherits
+it is wrong, and it fails somewhere unrelated to the change that caused it.

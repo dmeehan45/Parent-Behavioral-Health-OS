@@ -202,9 +202,14 @@ bites, one click away and with more context.
 
 ## A bet carries the shape of its experiment, and the packet can refuse
 
-A Bet says what we would try. Five optional sections — `# Learning decision`,
-`# Scope`, `# Assumptions`, `# Signals and safeguards`, `# Fidelity` — say what
-*trying it* would settle. They are the five things `docs/prototype-workflow.md`
+A Bet says what we would try. Six optional sections — `# Learning decision`,
+`# Scope`, `# Out of scope`, `# Assumptions`, `# Signals and safeguards`,
+`# Fidelity` — say what *trying it* would settle. `# Out of scope` is separate
+because exclusions are the half that stops a prototype quietly growing, and a
+builder who is not told them invents them. Where an exclusion is waiting on a
+decision nobody has made, `awaiting: [<question-id>]` names the open research
+question, so the boundary reads as provisional rather than arbitrary and the
+research queue can see a bet is held up by it. They are the five things `docs/prototype-workflow.md`
 requires a person to approve before anything is built, and they live in the Bet
 so that approval is a pull request with history rather than a message in a chat.
 

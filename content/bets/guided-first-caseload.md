@@ -5,12 +5,13 @@ problem: activation-without-productivity
 status: concept
 confidence: medium
 participant: clinician
+awaiting: [define-matching-quality]
 claims: [claim-first-caseload-retention]
 metrics: [time-to-first-match, time-to-first-session]
 prototype:
   status: working
   route: /prototypes/guided-first-caseload
-  builtAgainst: deea66-943d88-f1a58e-127106-acd1c7
+  builtAgainst: deea66-ce20fd-92aff0-f1a58e-127106-acd1c7
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-14
@@ -55,10 +56,12 @@ Either route reaches a proposed caseload and a closing state that says what
 would happen next. Switching between them, and abandoning one for the other, is
 the behaviour worth watching, so it stays available at any point.
 
-**Explicitly out of scope.** How fit is judged: the scores are shown, but the
-model has not decided what makes a match good, and `define-matching-quality` is
-queued as open research. Also out of scope: the family's side of the
-interaction, real matching, scheduling, messaging, and anything that persists.
+# Out of scope
+
+How fit is judged: the scores are shown, but the model has not decided what
+makes a match good, and `define-matching-quality` is queued as open research.
+Also out of scope: the family's side of the interaction, real matching,
+scheduling, messaging, and anything that persists.
 
 # Assumptions
 

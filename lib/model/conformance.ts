@@ -71,6 +71,14 @@ export const RELATIONSHIPS: Record<string, Resolution> = {
       "The actor an experiment studies. Read on the bet and in the prototype packet; drawing it would put an entity on " +
       "the bets lens, which answers what we are trying rather than who is involved.",
   },
+  "bet.awaiting": {
+    blockOnly: true,
+    note:
+      "An open research question the bet is deliberately not answering. It cannot be an edge because the far end is not " +
+      "a model record at all — it is staging, and painting it on the map would put unreviewed material there and go " +
+      "stale the moment a handoff landed. Read on the bet, in the prototype packet beside the exclusion it explains, " +
+      "and on the research queue, which renders per request.",
+  },
 };
 
 export type Unrepresented = {

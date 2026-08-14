@@ -168,12 +168,21 @@ export function projectReview(): ReviewIndex {
   // then gaps the model has in itself — so somebody deciding what is worth
   // investigating is looking at the same list a scheduled run would pick from,
   // rather than at a terminal they have to remember to open.
+  // Which bets are already held up by which question. A question nothing is
+  // waiting on and a question blocking a build look identical in a list ordered
+  // by priority alone, and the second is the one worth answering first.
+  const awaiting = new Map<string, string[]>();
+  for (const bet of repo.bets) {
+    for (const id of bet.awaiting ?? []) awaiting.set(id, [...(awaiting.get(id) ?? []), bet.title]);
+  }
+
   const queue: QueueEntry[] = [
     ...nextUp(buildQueue(questions, handoffs)).map((item) => ({
       kind: "question" as const,
       id: item.id,
       question: item.question,
       detail: item.why ?? `Asked by ${item.askedBy}.`,
+      blocking: awaiting.get(item.id) ?? [],
     })),
     ...findGaps(repo, handoffs, questions).map((gap) => ({
       kind: "gap" as const,

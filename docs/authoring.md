@@ -145,12 +145,23 @@ what is available.
 
 # Scope
 
+# Out of scope
+
 # Assumptions
 
 # Signals and safeguards
 
 # Fidelity
 ```
+
+`# Out of scope` is separate from `# Scope` on purpose. Scope held four things
+at once, so a bet that named what it deliberately left out counted the same as
+one that did not — and a builder handed the second invents the difference.
+
+Where something is out of scope because the model has not decided it yet, name
+the open question with `awaiting: [<question-id>]`. The exclusion then reads as
+provisional rather than arbitrary, and the research queue can see that a bet is
+waiting on the answer.
 
 Optionally add `participant: <entity-id>` to name the actor the experiment
 studies; `# Scope` still says which moment and what path.

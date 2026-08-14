@@ -252,6 +252,26 @@ function readResearchRecords<T>(
 }
 
 /**
+ * Question IDs, read from filenames rather than parsed.
+ *
+ * `awaiting` needs to catch a typo, not to validate staging. Parsing every
+ * question file here would let one malformed one — a normal thing to find in
+ * `research/`, and what `validate:research` exists to report — break content
+ * validation and the live map along with it. The ID is the filename stem, and
+ * `loadQuestions` already enforces that where it belongs.
+ */
+function questionIds(): Set<string> {
+  const directory = path.join(ROOT, "research", "questions");
+  if (!fs.existsSync(directory)) return new Set();
+  return new Set(
+    fs
+      .readdirSync(directory)
+      .filter((name) => /\.ya?ml$/.test(name))
+      .map((name) => name.replace(/\.ya?ml$/, "")),
+  );
+}
+
+/**
  * A `researchTrace` is the claim that a canonical change was authorized by a
  * reviewed research run, so every part of it has to still be true: the run
  * exists, the finding is in it, the cited sources are that finding's evidence,
@@ -345,6 +365,7 @@ export function getRepository() {
   const stepIds = new Set(steps.map((x) => x.id));
   const targetIds = new Set([...stageIds, ...stepIds]);
   const entityIds = new Set(entities.map((x) => x.id));
+  const openQuestions = questionIds();
   const claimIds = new Set(claims.map((x) => x.id));
   const metricIds = new Set(metrics.map((x) => x.id));
   const problemIds = new Set(problems.map((x) => x.id));
@@ -386,6 +407,7 @@ export function getRepository() {
     bet.claims?.forEach((id) => requireRef(id, claimIds, bet.file, "claims", at(bet.id, "bet")));
     bet.metrics?.forEach((id) => requireRef(id, metricIds, bet.file, "metrics", at(bet.id, "bet")));
     if (bet.participant) requireRef(bet.participant, entityIds, bet.file, "participant", at(bet.id, "bet"));
+    bet.awaiting?.forEach((id) => requireRef(id, openQuestions, bet.file, "awaiting", at(bet.id, "bet")));
     if (bet.prototype?.route) requirePrototypeRoute(bet.prototype.route, bet.file);
     // Whether the software still tests the approved experiment is checked in
     // `npm run validate:content`, not here. Refining a bet is the normal thing

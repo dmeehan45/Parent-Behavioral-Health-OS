@@ -11,13 +11,18 @@ import type { Bet } from "../../lib/schemas";
  */
 const base = getRepository().bets[0];
 
-const EXPERIMENT: Record<string, string> = {
-  "Learning decision": "Whether a clinician wants a caseload assembled at all.",
-  Scope: "A clinician who has just become match-ready.",
-  Assumptions: "That enough families are waiting.",
-  "Signals and safeguards": "Accept, edit, or decline. Watch for reluctant acceptance.",
-  Fidelity: "Interaction high; match quality out of scope.",
-};
+/**
+ * Built from `EXPERIMENT_SECTIONS` rather than listed, so splitting or adding a
+ * section does not silently turn every shaped fixture here into an unshaped one
+ * and take the whole suite red for a reason that has nothing to do with
+ * conformance.
+ */
+const EXPERIMENT: Record<string, string> = Object.fromEntries(
+  EXPERIMENT_SECTIONS.map((name) => [name, `Approved text for ${name.toLowerCase()}.`]),
+);
+
+/** The section a drift test moves. Any one would do; this names it once. */
+const [, MOVED] = EXPERIMENT_SECTIONS;
 
 function bet(sections: Record<string, string>, prototype?: Bet["prototype"]): Bet {
   return { ...base, sections, prototype } as Bet;
@@ -37,7 +42,7 @@ test("an unshaped bet has nothing to conform to, and is not nagged about it", ()
 // stamping half an experiment would attest to something incomplete.
 test("a partly shaped experiment does not produce a fingerprint", () => {
   const partial = { ...EXPERIMENT };
-  delete partial.Fidelity;
+  delete partial[EXPERIMENT_SECTIONS[EXPERIMENT_SECTIONS.length - 1]];
   assert.equal(experimentFingerprint(bet(partial, built())), "");
   assert.equal(conformance(bet(partial, built())).state, "unshaped");
 });
@@ -73,29 +78,30 @@ test("a current stamp is accepted and says so", () => {
  */
 test("refining a section retires the claim, and names the section that moved", () => {
   const stamp = experimentFingerprint(bet(EXPERIMENT));
-  const refined = { ...EXPERIMENT, Scope: "Both modes, side by side, switchable at any point." };
+  const refined = { ...EXPERIMENT, [MOVED]: "Both modes, side by side, switchable at any point." };
   const subject = bet(refined, built({ builtAgainst: stamp }));
 
   const result = conformance(subject);
   assert.equal(result.state, "stale");
-  assert.deepEqual(result.drifted, ["Scope"]);
-  assert.match(conformanceProblem(subject)!, /# Scope changed after the prototype was last checked/);
+  assert.deepEqual(result.drifted, [MOVED]);
+  assert.match(conformanceProblem(subject)!, new RegExp(`# ${MOVED} changed after the prototype was last checked`));
   assert.match(conformanceProblem(subject)!, new RegExp(`builtAgainst: ${result.fingerprint}`));
 });
 
 test("several sections moving are all named", () => {
   const stamp = experimentFingerprint(bet(EXPERIMENT));
-  const refined = { ...EXPERIMENT, Scope: "changed", Fidelity: "also changed" };
-  assert.deepEqual(conformance(bet(refined, built({ builtAgainst: stamp }))).drifted, ["Scope", "Fidelity"]);
+  const last = EXPERIMENT_SECTIONS[EXPERIMENT_SECTIONS.length - 1];
+  const refined = { ...EXPERIMENT, [MOVED]: "changed", [last]: "also changed" };
+  assert.deepEqual(conformance(bet(refined, built({ builtAgainst: stamp }))).drifted, [MOVED, last]);
 });
 
 // Re-wrapping a paragraph is not a change to the experiment; editing a word is.
 test("whitespace does not count as drift, and a word does", () => {
   const stamp = experimentFingerprint(bet(EXPERIMENT));
-  const rewrapped = { ...EXPERIMENT, Scope: "  A clinician who has just\n  become match-ready.  " };
+  const rewrapped = { ...EXPERIMENT, [MOVED]: `  ${EXPERIMENT[MOVED].replace(" ", "\n  ")}  ` };
   assert.equal(conformance(bet(rewrapped, built({ builtAgainst: stamp }))).state, "current");
 
-  const reworded = { ...EXPERIMENT, Scope: "A clinician who has just become match-ready today." };
+  const reworded = { ...EXPERIMENT, [MOVED]: `${EXPERIMENT[MOVED]} And one more sentence.` };
   assert.equal(conformance(bet(reworded, built({ builtAgainst: stamp }))).state, "stale");
 });
 

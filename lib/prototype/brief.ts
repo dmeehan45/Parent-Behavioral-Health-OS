@@ -280,7 +280,19 @@ export function renderPrototypeBrief(
   const shaped = EXPERIMENT_SECTIONS.filter((name) => bet.sections[name]?.trim());
   if (shaped.length) {
     lines.push(heading(2, "The experiment, as approved"), "");
-    for (const name of shaped) lines.push(heading(3, name), "", bet.sections[name].trim(), "");
+    for (const name of shaped) {
+      lines.push(heading(3, name), "", bet.sections[name].trim(), "");
+      // Beside the exclusion it explains, so an exclusion reads as something
+      // waiting on an answer rather than as an arbitrary line somebody drew.
+      if (name === SECTION.outOfScope && bet.awaiting?.length) {
+        lines.push(
+          `Some of this is out of scope because the model has not decided it yet. Open research: ` +
+            `${bet.awaiting.map((id) => `\`${id}\``).join(", ")}. Do not resolve any of it in the prototype — ` +
+            `label it, keep it out of the flow, or ask.`,
+          "",
+        );
+      }
+    }
   }
 
   /* ---- The problem ------------------------------------------------------- */
