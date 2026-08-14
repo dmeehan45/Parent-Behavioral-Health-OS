@@ -137,6 +137,115 @@ export function decisionId(runId: string, findingId: string) {
   return `decide-${runId}-${findingId}`;
 }
 
+/** Runs in the order they were created, so "earlier" is well defined. */
+function chronological(handoffs: LoadedHandoff[]) {
+  return [...handoffs].sort((a, b) => {
+    const byDate = a.handoff.run.createdAt.getTime() - b.handoff.run.createdAt.getTime();
+    return byDate !== 0 ? byDate : a.handoff.run.id.localeCompare(b.handoff.run.id);
+  });
+}
+
+/** Loose enough to catch a restatement, strict enough to stay deterministic. */
+function statementKey(statement: string) {
+  return statement.toLowerCase().replace(/[\s]+/g, " ").replace(/[.;:,!?]+$/, "").trim();
+}
+
+/**
+ * Stop a scheduled run from rediscovering what an earlier run already found.
+ *
+ * An agent researching twice a day against the same public sources will
+ * resurface the same statement indefinitely, and every repeat costs a reviewer
+ * the same attention as something new. Only an exact restatement is an error:
+ * deciding whether two differently-worded findings are the same claim is
+ * semantics, and deterministic tooling here never resolves semantics. Softer
+ * overlap is reported instead — see `sourceOverlap`.
+ */
+export function checkForRepeatedFindings(handoffs: LoadedHandoff[]) {
+  const seen = new Map<string, { run: string; finding: string }>();
+  for (const { handoff, file } of chronological(handoffs)) {
+    for (const finding of handoff.findings) {
+      const key = statementKey(finding.statement);
+      const prior = seen.get(key);
+      if (prior && prior.run !== handoff.run.id) {
+        throw new Error(
+          `${file}: findings.${finding.id}: run '${prior.run}' already recorded this statement as '${prior.finding}'. ` +
+            `A later run either supersedes that decision, cites the earlier finding and qualifies it, or drops it. ` +
+            `Run npm run research:brief -- ${handoff.run.id} before researching to see what previous runs established.`,
+        );
+      }
+      if (!prior) seen.set(key, { run: handoff.run.id, finding: finding.id });
+    }
+  }
+}
+
+/**
+ * Where a run went over ground an earlier run already covered.
+ *
+ * Reported rather than rejected: re-reading a source to qualify or contradict
+ * what it was previously taken to say is exactly what a second run is for. The
+ * reviewer wants to know it happened, not to be stopped.
+ */
+export function sourceOverlap(handoffs: LoadedHandoff[]) {
+  const firstSeen = new Map<string, string>();
+  const overlaps: Array<{ run: string; identity: string; earlier: string }> = [];
+  for (const { handoff } of chronological(handoffs)) {
+    for (const source of handoff.sources) {
+      const earlier = firstSeen.get(source.identity);
+      if (earlier && earlier !== handoff.run.id) overlaps.push({ run: handoff.run.id, identity: source.identity, earlier });
+      else if (!earlier) firstSeen.set(source.identity, handoff.run.id);
+    }
+  }
+  return overlaps;
+}
+
+/**
+ * Every decision that a later decision has replaced.
+ *
+ * This is what makes a run genuinely separate from the last one: run two can
+ * retire run one's conclusion, and a canonical record that still cites the
+ * retired decision stops validating. Without it, superseding would be a note
+ * in a file rather than a change to what the model is allowed to claim.
+ */
+export function supersededDecisions(loaded: LoadedDecisions[]) {
+  const superseded = new Map<string, string>();
+  for (const { decisions: record } of loaded) {
+    for (const decision of record.decisions) {
+      if (decision.supersedes) superseded.set(decision.supersedes, decision.id);
+    }
+  }
+  return superseded;
+}
+
+export function checkSupersedes(handoffs: LoadedHandoff[], loaded: LoadedDecisions[]) {
+  const order = new Map(chronological(handoffs).map((entry, index) => [entry.handoff.run.id, index]));
+  const everyDecision = new Map<string, string>();
+  for (const { decisions: record } of loaded) {
+    for (const decision of record.decisions) everyDecision.set(decision.id, record.runId);
+  }
+
+  for (const { decisions: record, file } of loaded) {
+    for (const decision of record.decisions) {
+      if (!decision.supersedes) continue;
+      const supersededRun = everyDecision.get(decision.supersedes);
+      if (!supersededRun) {
+        throw new Error(`${file}: decisions.${decision.id}.supersedes: '${decision.supersedes}' is not a decision anyone has recorded`);
+      }
+      if (supersededRun === record.runId) {
+        throw new Error(
+          `${file}: decisions.${decision.id}.supersedes: '${decision.supersedes}' is a decision in this same run. ` +
+            `Superseding replaces an earlier run's conclusion; within one run, decide once.`,
+        );
+      }
+      if ((order.get(supersededRun) ?? 0) > (order.get(record.runId) ?? 0)) {
+        throw new Error(
+          `${file}: decisions.${decision.id}.supersedes: run '${supersededRun}' is newer than run '${record.runId}'. ` +
+            `A run cannot supersede a conclusion reached after it.`,
+        );
+      }
+    }
+  }
+}
+
 export function loadDecisions(root = process.cwd()): LoadedDecisions[] {
   const directory = path.join(root, DECISION_DIRECTORY);
   if (!fs.existsSync(directory)) return [];

@@ -15,7 +15,7 @@ import type { NodeKind } from "../lib/model/types";
  */
 
 /** Static routes that exist regardless of what is in `content/`. */
-const FIXED_ROUTES = ["/", "/map", "/prototypes"];
+const FIXED_ROUTES = ["/", "/map", "/prototypes", "/review"];
 
 /** One record page per primitive, so every page template gets looked at once. */
 async function routesFromModel(page: Page): Promise<string[]> {
@@ -131,6 +131,39 @@ test.describe("responsive shell", () => {
         a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
       expect(overlaps, "the minimap and the zoom controls are on top of each other").toBe(false);
     }
+  });
+
+  /*
+   * The review page carries a generated decision file in a `<pre>`, which is
+   * the first unbreakable long line in the application — and it pushed every
+   * page sideways on a phone.
+   *
+   * The shell is a flex item whose `margin: 0 auto` are cross-axis auto
+   * margins, so it is sized by fit-content rather than stretched. Fit-content
+   * never drops below min-content, and `min-width: 0` cannot lower that floor,
+   * so the longest line in the decision file set the width of the document and
+   * the child's own `overflow-x: auto` did nothing. The fix is a definite width
+   * on `.shell`; this is the case that would have caught it.
+   */
+  test("wide content scrolls inside its own box rather than widening the page", async ({ page }) => {
+    const response = await page.request.get("/api/model");
+    expect(response.ok()).toBeTruthy();
+
+    await page.goto("/review");
+    const firstRun = page.locator(".card-grid a").first();
+    if ((await firstRun.count()) === 0) return; // No research handed off yet.
+
+    await firstRun.click();
+    const block = page.locator(".review-yaml");
+    await expect(block).toBeVisible();
+
+    const overflow = await horizontalOverflow(page);
+    expect(overflow, `the review page overflows its viewport by ${overflow}px`).toBeLessThanOrEqual(1);
+
+    const box = await block.boundingBox();
+    expect(box!.width, "the decision file is wider than the viewport").toBeLessThanOrEqual(
+      page.viewportSize()!.width,
+    );
   });
 
   test("body copy stays readable rather than stretching the full width", async ({ page }) => {

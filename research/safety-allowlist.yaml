@@ -1,0 +1,11 @@
+# Matches a reviewer has looked at and judged safe for a public repository.
+#
+# `npm run scan:safety` prints the block to paste here for anything it flags.
+# The match is recorded as a hash, never as text: approving a leaked credential
+# by pasting it into an allowlist would commit the credential a second time, in
+# the file that says it is fine.
+#
+# An approval covers exactly one match in one file. Edit the line and it is
+# flagged again, which is deliberate — an approval should not outlive the thing
+# it approved.
+approved: []

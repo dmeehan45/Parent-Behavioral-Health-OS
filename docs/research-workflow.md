@@ -3,8 +3,20 @@
 This workflow turns research from Claude, ChatGPT, or another agent into a small,
 reviewable proposal without making chat history or unreviewed research canonical.
 
+Running it on a schedule is described in `docs/research-routine.md`.
+
 ## Happy path
 
+0. Find out what is worth researching and what is already known:
+
+   ```bash
+   npm run research:queue                    # questions and gaps
+   npm run research:brief -- <question-id>   # what previous runs established
+   npm run research:new -- <question-id>     # scaffold, with a collision-safe run ID
+   ```
+
+   The brief is not optional housekeeping. A run that skips it will restate
+   something an earlier run already found, and validation rejects that.
 1. Research a question in chat using public, non-sensitive material.
 2. Ask the agent to synthesize `research/handoffs/<run-id>.yaml` using
    `research/contract/v1.example.yaml` as the contract example. Do not include a
@@ -16,11 +28,15 @@ reviewable proposal without making chat history or unreviewed research canonical
 4. Run `npm run generate:research-review` and `npm run validate:research`.
    Commit the deterministic review packet. CI runs both validation modes and
    verifies that generated packets are current.
-5. The accountable reviewer answers the decisions in
-   `research/decisions/<run-id>.yaml` using an allowed disposition. The packet
-   ends with a ready-to-fill skeleton carrying the run ID and the reviewed
-   handoff hash — copy it, replace every `TODO`, run `npm run validate:research`
-   again. A partial review is valid: the validator reports what is still
+5. The accountable reviewer decides, at **`/review`**. The page puts each
+   finding next to its evidence, what earlier runs concluded from the same
+   sources, and what it would change in the model, then hands back a complete
+   decision file to save as `research/decisions/<run-id>.yaml`. Run
+   `npm run validate:research` again.
+
+   The committed packet at `research/reviews/<run-id>.md` carries the same
+   skeleton in text, for reviewing from GitHub without running the app. Either
+   way a partial review is valid: the validator reports what is still
    outstanding rather than failing.
 6. After this intake PR is reviewed, create a separate model-change PR from
    `main`. Apply only accepted decisions and add `researchTrace` entries naming
@@ -57,7 +73,39 @@ is a reviewer concern, not a nondeterministic CI network check.
 
 Partial acceptance is represented by separate decision IDs. `accept-with-edits`
 requires `editedRecommendation`; `reject`, `defer`, and `needs-research` require
-a rationale. Later work supersedes rather than erases old decisions.
+a rationale.
+
+Later work supersedes rather than erases old decisions, and superseding has
+teeth: a decision names the earlier decision it replaces, and any canonical
+record still citing the replaced one stops validating. That is how the model
+changes its mind instead of accumulating contradictions. A decision may only
+supersede one from an earlier run.
+
+An exact restatement of an earlier run's finding is rejected, naming the run
+that said it first. A source identity read by more than one run is reported and
+allowed — re-reading a source to qualify what it was taken to say is what a
+later run is for.
+
+## Nothing confidential
+
+```bash
+npm run scan:safety
+```
+
+CI runs it on every pull request. It looks for the shapes of things that must
+not be in a public repository: credentials, tokens, connection strings, contact
+details, patient identifiers, and confidentiality markers carried over from
+another document.
+
+Anything it flags is either a real leak — remove it, and rotate it if it is
+live, because it is in Git history now — or a false positive, which the
+reviewer approves by pasting the printed block into
+`research/safety-allowlist.yaml`. The match is recorded as a hash rather than as
+text, so approving something never writes it into the repository a second time,
+and an approval covers exactly one match in one file.
+
+It cannot catch confidential material written as ordinary prose. Nothing
+regex-shaped could, and the check does not pretend otherwise.
 
 ## Failure recovery
 

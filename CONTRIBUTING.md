@@ -15,6 +15,10 @@ the process around both.
 For provider-neutral research intake, follow `docs/research-workflow.md`. Both a
 conversational GitHub connector and a coding agent use the same files and npm
 commands; no transcript, provider credential, or private material belongs here.
+`docs/research-routine.md` describes running that workflow on a schedule.
+
+Research never edits `content/`. A person decides what it means at `/review`,
+and only an accepted decision authorizes a later, separate model change.
 
 ## Setup
 
@@ -42,6 +46,7 @@ bug in the projection — please open an issue.
 npm run validate:content
 npm run validate:research
 npm run test:research
+npm run scan:safety
 npm run lint
 npm run typecheck
 npm run build
@@ -87,6 +92,9 @@ Set `authority: proposed` unless there is a specific reason to claim more.
 - Real patient data, PHI, or anything HIPAA-regulated
 - Real clinician data or identifiable individuals
 - Company-confidential material presented as public documentation
+- Credentials, contact details, or patient identifiers — `npm run scan:safety`
+  looks for the shapes of these on every pull request, and prints the block to
+  paste into `research/safety-allowlist.yaml` if it flags something harmless
 - Production infrastructure: databases, auth, billing, scheduling, matching engines
 
 The reference model is a generalized account of how a parent-focused

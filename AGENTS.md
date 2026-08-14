@@ -79,6 +79,33 @@ This is deliberate, and it is the rule most likely to feel like an extra step:
 - Do not give a Bet its own targets. If a Bet seems to land somewhere its
   Problem does not, the Problem's `targets` are wrong, or it is a second problem.
 
+## Research is staging, and only a person promotes it
+
+Research from a chat — Claude, ChatGPT, anything — enters as a handoff under
+`research/`, never as an edit to `content/`. `docs/research-workflow.md` covers
+one run; `docs/research-routine.md` covers running it on a schedule.
+
+The rule that matters here: **an agent cannot change what the model claims.**
+A canonical record cites research through `researchTrace`, and that citation
+only validates against an `accept` or `accept-with-edits` decision, written by a
+named person, over the current handoff hash, not since superseded. This is
+enforced in `checkResearchTrace` at content validation *and* inside
+`projectModel()`, so it holds for the live map too. An agent with full write
+access to this repository still cannot promote its own research.
+
+Three consequences worth knowing before you touch any of it:
+
+- **`research/` never moves the map's revision.** `contentRevision()` hashes
+  `content/` only. Staging churn must not make every open map re-fetch.
+- **Read the brief before researching.** `npm run research:brief -- <id>` prints
+  what earlier runs established. Restating an earlier finding exactly is a
+  validation error, because a routine running twice a day would otherwise
+  resurface the same sentence forever.
+- **`/review` is the one human step.** It is a reading surface, not a form: the
+  evidence, the prior art, and what a finding would change all sit next to the
+  decision. Do not add a way to skip it, and do not add server-side writes to
+  make it "complete" — it hands back a decision file, and Git records it.
+
 ## The interface uses one design system
 
 The UI follows the **Family Health Provider** design system, vendored into
@@ -155,6 +182,7 @@ future layer. See `docs/future-agent-model.md`.
 npm run validate:content   # schema + cross-reference errors, names the file and field
 npm run validate:research  # research handoffs, decisions, and generated packets
 npm run test:research      # the intake contract itself
+npm run scan:safety        # credentials, contact details, confidentiality markers
 npm run lint
 npm run lint:design        # brand values outside the token layer
 npm run typecheck
@@ -162,7 +190,7 @@ npm run build
 npm run test:responsive    # phone and desktop smoke test; builds and serves the app
 ```
 
-CI runs all eight. Validation failures name the offending file and field.
+CI runs all nine. Validation failures name the offending file and field.
 
 `test:responsive` needs a browser once: `npx playwright install chromium`.
 
