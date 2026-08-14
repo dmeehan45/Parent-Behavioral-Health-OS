@@ -726,6 +726,15 @@ export function projectModel(): ModelGraph {
   const countByKind = (kind: NodeKind) => nodes.filter((node) => node.kind === kind).length;
   const lensCount = (lens: LensId) => nodes.filter((node) => node.lenses.includes(lens)).length;
 
+  // Where a count should lead: straight to the record while there is only one
+  // of it, and to the lens that holds them once there are several. A model with
+  // a single problem in it should put a reader in front of that problem rather
+  // than in front of a canvas they then have to search.
+  const soleHref = (kind: NodeKind) => {
+    const matches = nodes.filter((node) => node.kind === kind);
+    return matches.length === 1 ? matches[0].href : "/map?lens=bets";
+  };
+
   // A Bet with a route has software behind it; the loader has already checked
   // the route resolves, so anything listed here is genuinely runnable. The
   // problem comes from the Problem it answers, which is the only place that
@@ -795,12 +804,18 @@ export function projectModel(): ModelGraph {
       },
     ],
     // Four numbers that answer "how much of this is real yet?" without
-    // requiring the reader to already know the vocabulary.
+    // requiring the reader to already know the vocabulary — and that double as
+    // the front door's navigation, so each one leads to what it counts.
     stats: [
-      stat(countByKind("stage"), "stage of the machine", "stages of the machine"),
-      stat(countByKind("problem"), "problem named", "problems named"),
-      stat(countByKind("bet"), "bet on the table", "bets on the table"),
-      stat(entryPoints.length, "prototype you can try", "prototypes you can try"),
+      stat(countByKind("stage"), "stage of the machine", "stages of the machine", "/map"),
+      stat(countByKind("problem"), "problem named", "problems named", soleHref("problem")),
+      stat(countByKind("bet"), "bet on the table", "bets on the table", soleHref("bet")),
+      stat(
+        entryPoints.length,
+        "prototype you can try",
+        "prototypes you can try",
+        entryPoints.length === 1 ? entryPoints[0].href : "/prototypes",
+      ),
     ],
     entryPoints,
     buildTargets,
@@ -814,9 +829,9 @@ export function projectModel(): ModelGraph {
 /* Small helpers                                                               */
 /* -------------------------------------------------------------------------- */
 
-/** A count with its label already agreeing with it. */
-function stat(value: number, singular: string, plural: string) {
-  return { value, label: value === 1 ? singular : plural };
+/** A count with its label already agreeing with it, and somewhere to go. */
+function stat(value: number, singular: string, plural: string, href: string) {
+  return { value, label: value === 1 ? singular : plural, href };
 }
 
 /**
