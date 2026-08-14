@@ -3,6 +3,7 @@ id: confirm-care-continuation
 title: Confirm Care Continuation
 stage: care-initiation
 order: 3
+next: [reach-operating-rhythm]
 purpose: Make the family and clinician decision to continue explicit after the first encounter.
 entryConditions:
   - the first encounter was completed

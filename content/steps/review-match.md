@@ -3,6 +3,7 @@ id: review-match
 title: Review and Decide on a Match
 stage: matching
 order: 2
+next: [plan-first-encounter]
 purpose: Keep family and clinician acceptance explicit before care initiation begins.
 entryConditions:
   - a match has been proposed

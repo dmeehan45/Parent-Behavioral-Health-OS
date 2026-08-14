@@ -11,6 +11,7 @@ import {
   sourceOverlap,
   supersededDecisions,
 } from "../../lib/research/intake";
+import { findGaps } from "../../lib/research/gaps";
 import { buildQueue, checkAnsweredQuestions, loadQuestions, nextUp } from "../../lib/research/questions";
 import { loadAllowlist, matchHash, scan, staleApprovals, unapproved } from "../../lib/research/safety";
 import { findingState, researchAbout } from "../../lib/research/view";
@@ -309,4 +310,30 @@ test("a record finds the research that names it, whether proposed or already app
     ["proposes", "applied"],
   );
   assert.deepEqual(researchAbout(runs, "nothing-here"), []);
+});
+
+// Validation lets an unproduced state through on purpose: it is a part of the
+// system nobody has modelled, and the answer is a person describing what really
+// happens. That is only true if somebody is asked — a gap visible on one record
+// page nobody opened is not an invitation, it is a secret.
+test("a state no step produces reaches the queue, not just the record page", () => {
+  const repo = {
+    stages: [],
+    steps: [
+      { id: "propose-match", title: "Propose a Match", inputs: [{ entity: "family", state: "match-ready" }] },
+      { id: "become-match-ready", title: "Become Match-Ready", outputs: [{ entity: "clinician", state: "match-ready" }] },
+    ],
+    entities: [{ id: "family", title: "Family" }],
+    claims: [],
+    metrics: [],
+    problems: [],
+    bets: [],
+  } as unknown as Parameters<typeof findGaps>[0];
+
+  const unsupplied = findGaps(repo, [], []).filter((gap) => gap.kind === "unsupplied");
+
+  assert.equal(unsupplied.length, 1, "the clinician state one step does produce is not a gap");
+  assert.equal(unsupplied[0].subject, "propose-match");
+  assert.match(unsupplied[0].why, /Family in state 'match-ready'/);
+  assert.match(unsupplied[0].suggestedQuestion, /What work actually brings a family to 'match-ready'/);
 });

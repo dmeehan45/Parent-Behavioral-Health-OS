@@ -20,7 +20,7 @@ import type { ModelGraph, ModelNode } from "@/lib/model/types";
 
 export type OpenEnd = {
   /** What kind of loose end this is, for the reader to recognise the pattern. */
-  kind: "unanswered" | "unproven" | "unmeasured" | "untested" | "unshaped" | "drifted" | "thin";
+  kind: "unanswered" | "unproven" | "unmeasured" | "untested" | "unshaped" | "drifted" | "unsupplied" | "thin";
   /** Written as an invitation, not a scolding. */
   invitation: string;
   href?: string;
@@ -129,6 +129,39 @@ export function openEnds(graph: ModelGraph, node: ModelNode): OpenEnd[] {
           ? `The ${drifted[0].toLowerCase()} changed after this was built — nobody has confirmed the software still tests it.`
           : `${names(drifted.map((name) => name.toLowerCase()), 2)} changed after this was built, and the software has not been re-checked.`,
     });
+  }
+
+  // A step that needs something nothing in the model makes. Validation refuses
+  // a handoff the flow cannot carry, but it deliberately says nothing here: an
+  // unproduced state is a part of the system nobody has modelled yet, and the
+  // right answer is somebody describing what really happens, not a plausible
+  // step invented to satisfy a checker. So it is an invitation, on the step
+  // that feels the absence, where a reader who knows is best placed to say.
+  if (node.kind === "step") {
+    const byId = new Map(graph.nodes.map((candidate) => [candidate.id, candidate]));
+    const states = graph.edges.filter((edge) => edge.kind === "state" && edge.label);
+    // A step's own output cannot supply its own input: what it produces exists
+    // once it has run, and an input has to exist before it does. Counting it
+    // would hide the gap on exactly the steps that confirm a state rather than
+    // change it — the ones whose input is most obviously somebody else's work.
+    const produced = new Set(
+      states
+        .filter((edge) => edge.source !== node.id && byId.get(edge.source)?.kind === "step")
+        .map((edge) => `${edge.target}:${edge.label}`),
+    );
+    const unsupplied = states
+      .filter((edge) => edge.target === node.id && !produced.has(`${edge.source}:${edge.label}`))
+      .map((edge) => `${byId.get(edge.source)?.title ?? edge.source} in ${edge.label}`);
+
+    if (unsupplied.length) {
+      ends.push({
+        kind: "unsupplied",
+        invitation:
+          unsupplied.length === 1
+            ? `Nothing in the model produces the ${unsupplied[0]} that this step needs.`
+            : `This step needs ${names(unsupplied)}, and nothing in the model produces them.`,
+      });
+    }
   }
 
   if (node.coverage.total > 0 && node.coverage.filled / node.coverage.total < 1 / 2) {

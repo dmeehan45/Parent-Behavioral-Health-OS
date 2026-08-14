@@ -25,6 +25,7 @@ import {
 import { parseBody, RENDERED_SECTIONS } from "./body";
 import { decisionFileSchema, handoffSchema } from "@/lib/research/schema";
 import { checkContentQuality } from "./quality";
+import { checkFlowContinuity } from "./flow";
 
 const ROOT = process.cwd();
 const MAP_FILE = "content/map.yaml";
@@ -418,6 +419,7 @@ export function getRepository() {
 
   requireMapMembership(stages, map.stages);
   checkEntityStates(steps, entities);
+  checkFlowContinuity(steps);
   const records = [...stages, ...steps, ...entities, ...claims, ...metrics, ...problems, ...bets];
   checkContentQuality(records);
   checkResearchTrace(records);
