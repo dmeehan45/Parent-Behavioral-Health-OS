@@ -115,7 +115,7 @@ findings:
     evidenceQuality: secondary
     generalizedApplicability: true
     uncertainty: >
-      The evidence supports competency-based assessment in training contexts but does not establish a specific assessment method, pass threshold, or requirement to simulate every workflow for already licensed practicing clinicians.
+      The evidence supports competency-based assessment in training contexts but does not establish a specific assessment method, pass threshold, or requirement to simulate every workflow for already licensed practicing clinicians. It also does not justify using onboarding as an unvalidated second screen of general clinical competence; any gate should distinguish platform-specific, safety-critical readiness from selection criteria and preserve remediation where appropriate.
   - id: finding-patient-facing-conditions-constrain-readiness
     statement: >
       Telehealth readiness spans patient safety, privacy, access and equity, patient preference, communication, technology, and legal or ethical practice, so a readiness definition limited to technical platform use or clinician-side completion is materially incomplete.
@@ -141,6 +141,8 @@ findings:
 questions:
   - id: question-critical-match-ready-workflows
     question: "Which observable workflows are sufficiently safety-, access-, or quality-critical to gate match-ready status for practicing behavioral-health clinicians?"
+  - id: question-readiness-gate-versus-remediation
+    question: "When a clinician is not yet ready on an onboarding-specific capability, which failures should block matching, trigger remediation, or remain monitored without gating so onboarding does not become an unvalidated second selection screen?"
   - id: question-onboarding-attribution-window
     question: "Which post-activation defects are sufficiently proximal to onboarding to count as onboarding-quality signals, and where should attribution explicitly stop?"
   - id: question-correctness-versus-completeness
