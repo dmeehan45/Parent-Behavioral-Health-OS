@@ -20,7 +20,7 @@ import type { ModelGraph, ModelNode } from "@/lib/model/types";
 
 export type OpenEnd = {
   /** What kind of loose end this is, for the reader to recognise the pattern. */
-  kind: "unanswered" | "unproven" | "unmeasured" | "untested" | "thin";
+  kind: "unanswered" | "unproven" | "unmeasured" | "untested" | "unshaped" | "thin";
   /** Written as an invitation, not a scolding. */
   invitation: string;
   href?: string;
@@ -100,6 +100,21 @@ export function openEnds(graph: ModelGraph, node: ModelNode): OpenEnd[] {
   // A bet is an argument until something runs.
   if (node.kind === "bet" && !neighbours(graph, node, "prototype").length) {
     ends.push({ kind: "untested", invitation: "This bet has no prototype, so nothing has tested it yet." });
+  }
+
+  // The question `docs/prototype-workflow.md` asks before anything is built: if
+  // no decision changes, there is no reason to build it yet. Asked only once
+  // something is being built, because a bet nobody is prototyping is allowed to
+  // be an idea — and aggregated into one line, never five.
+  if (node.kind === "bet" && node.experimentGaps?.length && neighbours(graph, node, "prototype").length) {
+    const missing = node.experimentGaps;
+    ends.push({
+      kind: "unshaped",
+      invitation:
+        missing.length === 1
+          ? `Something is being built here, and its ${missing[0].toLowerCase()} has not been written down.`
+          : `Something is being built here, and ${names(missing.map((name) => name.toLowerCase()), 2)} have not been written down.`,
+    });
   }
 
   if (node.coverage.total > 0 && node.coverage.filled / node.coverage.total < 1 / 2) {

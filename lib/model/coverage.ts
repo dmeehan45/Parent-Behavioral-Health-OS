@@ -12,7 +12,7 @@
  * bet never touches this file.
  */
 
-import { SECTION } from "@/lib/content/body";
+import { EXPERIMENT_SECTIONS, SECTION } from "@/lib/content/body";
 import type { Bet, Claim, Entity, Metric, Problem, Stage, Step } from "@/lib/schemas";
 import type { Coverage } from "@/lib/model/types";
 
@@ -99,9 +99,18 @@ export function betCoverage(bet: Bet): Coverage {
     ["Prototype", bet.prototype],
     ["Status", bet.status],
     ["Authority", bet.authority],
+    // The shape of the experiment. Counted like any other modelable field, so a
+    // bet nobody has worked out how to test reads as thin instead of finished.
+    ...EXPERIMENT_SECTIONS.map((name) => [name, bet.sections[name]] as const),
+    ["Participant", bet.participant],
     ["Provenance", bet.provenance?.source],
     ["Last reviewed", bet.lastReviewed],
   ]);
+}
+
+/** Which parts of the approved experiment shape a Bet is still missing. */
+export function experimentGaps(bet: Bet): string[] {
+  return EXPERIMENT_SECTIONS.filter((name) => !isPresent(bet.sections[name]));
 }
 
 export function claimCoverage(claim: Claim): Coverage {

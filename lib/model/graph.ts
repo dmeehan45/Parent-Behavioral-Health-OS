@@ -16,6 +16,7 @@ import {
   betCoverage,
   claimCoverage,
   entityCoverage,
+  experimentGaps,
   metricCoverage,
   problemCoverage,
   stageCoverage,
@@ -439,6 +440,7 @@ export function projectModel(): ModelGraph {
   for (const bet of bets) {
     const betClaims = claims.filter((claim) => bet.claims?.includes(claim.id));
     const betMetrics = metrics.filter((metric) => bet.metrics?.includes(metric.id));
+    const participant = bet.participant ? entityById.get(bet.participant) : undefined;
     const problem = problemById.get(bet.problem);
     // Where a bet lands in the machine follows from the problem it answers,
     // so a bet never restates it and the two can never disagree.
@@ -465,14 +467,22 @@ export function projectModel(): ModelGraph {
           signal(openQuestionCount(bet.sections), "warn", "question"),
         ],
         coverage: betCoverage(bet),
+        experimentGaps: experimentGaps(bet),
         blocks: [
           ...linksBlock(
             "The problem this answers",
             problem ? [link("problem", problem.id, problem.title, problem.status)] : [],
           ),
           ...proseBlock("Intervention", bet.sections[SECTION.bet]),
+          // Everything else the author wrote, in the order they wrote it —
+          // which for a bet with an experiment is the intervention, then what
+          // trying it would settle.
           ...markdownBlocks(bet.sections, [SECTION.bet]),
           ...linksBlock("Where it lands", targets),
+          ...linksBlock(
+            "Who it studies",
+            participant ? [link("entity", participant.id, participant.title)] : [],
+          ),
           ...linksBlock("Supporting claims", betClaims.map((claim) => link("claim", claim.id, claim.statement, claim.confidence))),
           ...linksBlock("Success would affect", betMetrics.map((metric) => link("metric", metric.id, metric.title, metric.dataStatus))),
         ],

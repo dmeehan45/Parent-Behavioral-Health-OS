@@ -249,6 +249,36 @@ test("many unmeasured metrics collapse to one line, one stays specific", () => {
   assert.match(openEnds(one, stage)[0].invitation, /^a would tell us whether this works/);
 });
 
+// docs/prototype-workflow.md: "If no decision changes, there is no reason to
+// build it yet." Asked once something is being built, and never before.
+test("a bet being built without an experiment shape is asked what it would settle", () => {
+  const gaps = ["Learning decision", "Scope", "Assumptions"];
+  const built = graphOf(
+    [node("bet:a-bet", "bet", { experimentGaps: gaps }), node("prototype:a-bet", "prototype")],
+    [["bet:a-bet", "prototype:a-bet", "prototype"]],
+  );
+  const [end] = openEnds(built, built.nodes[0]).filter((e) => e.kind === "unshaped");
+  assert.match(end.invitation, /learning decision, scope and 1 other have not been written down/);
+
+  // One missing section reads as itself, not as a list of one.
+  const nearly = graphOf(
+    [node("bet:b-bet", "bet", { experimentGaps: ["Fidelity"] }), node("prototype:b-bet", "prototype")],
+    [["bet:b-bet", "prototype:b-bet", "prototype"]],
+  );
+  assert.match(openEnds(nearly, nearly.nodes[0])[0].invitation, /its fidelity has not been written down/);
+
+  // A bet nobody is prototyping is allowed to be an idea.
+  const unbuilt = graphOf([node("bet:c-bet", "bet", { experimentGaps: gaps })], []);
+  assert.equal(openEnds(unbuilt, unbuilt.nodes[0]).filter((e) => e.kind === "unshaped").length, 0);
+
+  // And one that has written it down is not nagged.
+  const shaped = graphOf(
+    [node("bet:d-bet", "bet", { experimentGaps: [] }), node("prototype:d-bet", "prototype")],
+    [["bet:d-bet", "prototype:d-bet", "prototype"]],
+  );
+  assert.equal(openEnds(shaped, shaped.nodes[0]).filter((e) => e.kind === "unshaped").length, 0);
+});
+
 test("a well-described record with nothing loose says nothing", () => {
   const stage = node("stage:tidy", "stage");
   assert.deepEqual(openEnds(graphOf([stage], []), stage), []);

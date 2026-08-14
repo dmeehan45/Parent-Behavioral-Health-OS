@@ -21,7 +21,42 @@ export const SECTION = {
   whyItMatters: "Why it matters",
   bet: "Bet",
   questions: "Questions",
+  learningDecision: "Learning decision",
+  scope: "Scope",
+  assumptions: "Assumptions",
+  signals: "Signals and safeguards",
+  fidelity: "Fidelity",
 } as const;
+
+/**
+ * The shape of the experiment a Bet proposes, in the Bet itself.
+ *
+ * `docs/prototype-workflow.md` already required a person to approve these five
+ * things before anything is built. They had nowhere to live but a chat, so the
+ * approval left no record, and every build re-derived them.
+ *
+ * Five named sections rather than one free-form block, because the names are
+ * what make readiness *derivable*: coverage counts them, open ends can say
+ * which is missing, and the build packet can refuse to say "build" without
+ * them. All five stay optional — a Bet is allowed to exist long before an
+ * experiment does.
+ */
+export const EXPERIMENT_SECTIONS = [
+  SECTION.learningDecision,
+  SECTION.scope,
+  SECTION.assumptions,
+  SECTION.signals,
+  SECTION.fidelity,
+] as const;
+
+/** What each one is for, said where somebody is deciding whether to write it. */
+export const EXPERIMENT_SECTION_MEANING: Record<string, string> = {
+  [SECTION.learningDecision]: "What somebody should be better able to decide after trying this. If no decision changes, there is no reason to build it yet.",
+  [SECTION.scope]: "Who encounters it, at what moment in the flow, the thinnest path that tests the decision, and what is deliberately not represented.",
+  [SECTION.assumptions]: "What the prototype assumes in order to run, kept separate from what the model claims. A blank model field is not a licence to invent behaviour.",
+  [SECTION.signals]: "The observable signal that would support or weaken the bet, and the harm or trade-off to watch while looking for it.",
+  [SECTION.fidelity]: "How real this needs to be, dimension by dimension, so polish has a stated reason and low fidelity is a choice rather than an apology.",
+};
 
 export const RENDERED_SECTIONS: Record<string, readonly string[]> = {
   stages: [SECTION.currentModel, SECTION.openQuestions],
@@ -29,7 +64,9 @@ export const RENDERED_SECTIONS: Record<string, readonly string[]> = {
   problems: [SECTION.whatHappensToday, SECTION.whyItMatters, SECTION.openQuestions],
   // A Bet no longer states its own problem: it names one, and the Problem file
   // is where that is written. Two statements of the same trouble would drift.
-  bets: [SECTION.bet, SECTION.questions],
+  // The experiment sections describe the test, which is the one thing no other
+  // primitive holds — they never restate the problem or the intervention.
+  bets: [SECTION.bet, SECTION.questions, ...EXPERIMENT_SECTIONS],
   // Entities, claims, and metrics render their body as a single block of prose.
   // Any heading in them would be invisible, so none are permitted.
   entities: [],

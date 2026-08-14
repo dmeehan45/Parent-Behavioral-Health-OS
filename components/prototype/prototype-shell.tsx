@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge, Breadcrumb, ConfidenceBadge, KindBadge, SourceLink } from "@/components/model/badges";
 import { DetailBlocks } from "@/components/model/detail-blocks";
+import { EXPERIMENT_SECTIONS } from "@/lib/content/body";
 import { projectModel } from "@/lib/model/graph";
 
 /**
@@ -41,11 +42,16 @@ export function PrototypeShell({ route, children }: { route: string; children: R
   // or rewording the model updates this page without touching it.
   const problem = bet.blocks.find((block) => block.type === "links" && block.label === "The problem this answers");
   const targets = bet.blocks.find((block) => block.type === "links" && block.label === "Where it lands");
+  // The experiment sections come across whole. A reviewer standing in front of
+  // the software should be able to see what it is meant to settle, what was
+  // deliberately left out, and what to watch for — without the builder there to
+  // narrate it.
+  const experiment = new Set<string>(EXPERIMENT_SECTIONS);
   const context = bet.blocks.filter(
     (block) =>
       (block.type === "prose" && block.label === "Intervention") ||
       (block.type === "links" && (block.label === "Success would affect" || block.label === "Supporting claims")) ||
-      (block.type === "markdown" && block.label.toLowerCase().includes("question")),
+      (block.type === "markdown" && (experiment.has(block.label) || block.label.toLowerCase().includes("question"))),
   );
 
   return (
