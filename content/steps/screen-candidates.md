@@ -19,7 +19,6 @@ exitConditions:
   - a candidate is either removed or advanced to evaluation
 roles:
   primary: [platform-operations]
-rules: []
 exceptions:
   - condition: a candidate is screened out on incomplete information
     outcome: the candidate is lost, and nothing in the model revisits the decision

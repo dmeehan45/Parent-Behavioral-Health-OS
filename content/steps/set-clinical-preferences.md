@@ -12,8 +12,6 @@ entryConditions:
 inputs:
   - entity: clinician
     state: configured
-activity: >
-  Capture concise preferences needed to support appropriate matching.
 outputs:
   - entity: clinician
     state: preferences-defined
@@ -22,8 +20,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-13

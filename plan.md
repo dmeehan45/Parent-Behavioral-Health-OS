@@ -1,83 +1,44 @@
 # Goal
 
-Build on the completed D1-D8 system-boundary, metric-accountability, and lifecycle work with a deeper adversarial pass on clinician readiness, patient matching, and the first care transition. Produce decision-ready journey, measurement, misuse, evidence, candidate-Problem, and prototype analyses without promoting unreviewed research into canonical `content/`.
+Audit the repository for claims that outrun their evidence, unsupported or incorrectly attributed data, weak seed content, and important loose ends; preserve the findings in a reviewable artifact and add the smallest enforceable guardrails that prevent the same quality drift.
 
 # Acceptance criteria
 
-- The pass reconstructs onboarding/readiness and matching from family, patient, clinician, and platform decisions rather than only the existing Stage sequence.
-- Readiness dimensions, expiring conditions, observable defects, counter-hypotheses, and attribution limits are explicit.
-- Matching distinguishes eligibility, recommendation, mutual review, acceptance, initiation, constrained supply, and recovery outcomes.
-- Every proposed measure states its denominator, horizon, missingness, confounders, balancing risks, permitted use, and prohibited inference.
-- Misuse and gaming risks are assessed before automation or clinician-level feedback is recommended.
-- Public research enters as validated research handoffs and generated review packets; it does not directly change `content/`.
-- Candidate Problems are ranked by harm, breadth, uncertainty, prototypeability, and learning value; prototype recommendations remain proposals pending reviewer decisions.
-- Work requiring lived experience, clinical/safety expertise, privacy review, or operational data is clearly assigned rather than guessed.
-- The completed D1-D8 implementation remains intact: product boundary, actor-aware Metrics, separated onboarding/matching/initiation transitions, failure/recovery prompts, and open research questions.
-- Relevant repository validation passes, changes are committed on a new branch, and a pull request is created if tooling permits.
+- Every canonical primitive is checked against its authority, provenance, confidence, data status, references, wording, and relationships.
+- Research staging, generated review material, documentation, prototypes, and relevant merged history are checked for evidence claims that conflict with canonical metadata.
+- Findings distinguish demonstrable contradictions from hypotheses, thin records, missing evidence, and intentionally unknown data.
+- The audit gives file-level evidence, severity, impact, and a safe recommended disposition without inventing or promoting canonical facts.
+- Repeatable checks catch objective provenance/data-quality contradictions where the repository contracts can do so without judging prose.
+- Relevant validation passes, changes are committed on a feature branch, and a pull request is created.
 
 # Tasks
 
-- [x] Create a new branch and inventory the current onboarding, matching, initiation, Claims, Metrics, and queued research contracts.
-- [x] Preserve the completed D1-D8 implementation that this deeper pass analyzes rather than duplicating its completed task list.
-- [ ] Conduct bounded public research on clinician readiness/onboarding quality and matching/access/measurement quality (blocked: configured web search returned HTTP 401 and direct NCBI access returned proxy HTTP 403).
-- [ ] Write separate public-research handoffs and review packets (not produced because source retrieval was blocked; inventing sources would violate the intake contract).
-- [x] Produce the deep-dive decision packet: actor journeys, readiness model, matching failure/recovery model, metric protocol, and misuse register.
-- [x] Rank repository-grounded candidate Problems and recommend the smallest high-learning prototype targets without adding canonical Problems or Bets; source-backed ranking remains pending public research and direct evidence.
-- [x] Record the remaining direct-research, qualified-review, operational-data, and accountable-reviewer decisions.
-- [x] Run repository validation and safety checks, resolve the `plan.md` merge conflict in favor of the current deeper pass while retaining its completed prerequisite, and update this branch.
+- [x] Inventory the provenance and evidence contracts, merged-history context, and all canonical/research records.
+- [x] Run structured and prose-level scans for speculation presented as evidence, unsupported numbers, mismatched provenance, and stale or low-quality seed material.
+- [x] Trace topology and open ends to identify consequential gaps and misleading implications.
+- [x] Write a prioritized audit with evidence, limitations, and recommended human decisions.
+- [x] Add focused automated guardrails and tests for objective quality failures discovered by the audit.
+- [x] Rebase onto current `main` through PR #41, preserve main's content-independent prototype tests, and separate already-merged functionality from this branch's remaining diff.
+- [x] Assess and document breaking changes and functional shifts before merge.
+- [x] Re-run all non-build validation and commit the rebased review branch. Build and responsive remain blocked by external Google Fonts retrieval.
+- [ ] Push the rebased branch and update the pull request; this environment still needs working GitHub credentials.
 
 # Relevant contracts
 
-- `content/` remains unchanged by this research pass. Any later canonical claim, Problem, Metric, or topology change requires an accepted, current decision and `researchTrace` where applicable.
-- Public sources can sharpen generalized hypotheses but cannot substitute for parent lived experience, clinician workflow observation, clinical judgment, legal/privacy advice, or company-specific operating evidence.
-- No PHI, private company material, raw transcript, production permissions, matching algorithm, or clinical protocol is introduced.
-- The D1-D8 implementation is the completed prerequisite for this pass. Its old execution checklist is intentionally not duplicated here; `plan.md` remains the current execution record rather than a cumulative changelog.
+- `content/` is canonical, but this audit does not promote new claims or silently rewrite model meaning.
+- `author` provenance means reasoning supplied by an author, not interviews, observations, or operational data.
+- Unknown data, low confidence, and incomplete fields are valid; the defect is representing them as stronger evidence than they are.
+- PR descriptions and historical rationale are evidence-layer records too, but repository checks can only enforce material available in the checkout.
 
 # Validation
 
-- Run `npm run generate:research-review`, `npm run validate:research`, `npm run test:research`, `npm run scan:safety`, `npm run validate:content`, `npm run lint`, `npm run lint:design`, `npm run typecheck`, and `git diff --check`.
+- Run all nine checks listed in `AGENTS.md`, plus focused tests for any new audit rule and `git diff --check`.
 
 # Risks / decisions
 
-- Quantitative thresholds and causal attribution will remain undefined without operational data and predeclared analysis plans.
-- Family/patient authority, safety escalation, and permitted information sharing require qualified review and cannot be resolved by public research alone.
-- Prototype ranking is advisory until the accountable reviewer accepts the relevant research findings and Problem framing.
-- Public-source retrieval is an environment blocker rather than evidence that no research exists. The packet records repository observations, inferences, and hypotheses only; the two existing high-priority public-research questions remain open.
-Define a repeatable, human-accountable workflow for turning one canonical Bet into a small prototype that supports self-directed research and discovery without confusing a prototype with production software or allowing an agent to invent canonical claims.
-
-# Acceptance criteria
-
-- The workflow names the inputs inherited from the Problem, Bet, targeted system context, evidence, metrics, and repository design/build rules.
-- It separates facts, assumptions, open questions, and prototype decisions, and says when missing information should stop or narrow the build.
-- It defines the user checkpoints needed to refine scope and consequential decisions without turning every implementation detail into an approval request.
-- It describes a thin end-to-end user flow, synthetic-data and safety boundaries, learning instrumentation, review, and the path from learning back to research or canonical content.
-- It distinguishes work an agent may perform from decisions and promotions that remain human-accountable.
-- Existing authoring and repository orientation docs point contributors to the workflow.
-- Relevant repository checks pass, changes are committed on a feature branch, and a pull request is created.
-
-# Tasks
-
-- [x] Create a feature branch from the current merged base.
-- [x] Write the Bet-to-prototype workflow and its decision gates.
-- [x] Link the workflow from the repository and authoring guidance.
-- [x] Review the guidance against the current Bet, prototype shell, research workflow, and system boundaries.
-- [x] Run relevant validation and documentation checks. All non-build checks pass; build and responsive remain limited by blocked Google-font retrieval.
-- [x] Update this plan and commit the change. Pull-request creation was attempted but GitHub CLI has no authentication in this environment.
-- [x] Rebase onto current `origin/main` and align the workflow with the new record-page open ends and `/review/apply` learning path.
-
-# Relevant contracts
-
-- `content/` remains canonical; a prototype consumes model context but does not restate or silently amend it.
-- A Bet answers one Problem, and its system targets remain derived from that Problem.
-- Prototype routes use `PrototypeShell`, synthetic data, and no production integrations, PHI, authentication, or autonomous clinical/operational action.
-- Agent-produced research stays under `research/`; only a named person's accepted decision may authorize research-derived changes to canonical content.
-
-# Validation
-
-- Run the documentation-relevant content, research, safety, lint, design-lint, and type checks.
-- Inspect links and the final diff for consistency with the existing model and research contracts.
-
-# Risks / decisions
-
-- The workflow must enable self-directed progress without letting automation decide the purpose, safety boundary, evidence interpretation, or canonical promotion of a prototype.
-- Not every Bet is ready to prototype; an explicit narrow/defer outcome is necessary to avoid filling missing knowledge with plausible product behavior.
+- A prose audit cannot prove that external evidence never existed; it can prove that the repository does not record it and that stronger claims are unsupported here.
+- Historical pull-request bodies were retrieved from the repository's public GitHub API. PR #20 contains the suspected contradiction; the audit quotes only the two material source-category claims and compares them to the committed records.
+- Remediation that changes canonical beliefs or promotes research remains a named-person decision.
+- The production build still cannot retrieve the configured Google Fonts in this environment. Because responsive testing builds first, it is blocked by the same external dependency rather than by this change.
+- PR #41 resolved the previously identified prototype-shaping gap. The audit now records one of one working prototypes as build-ready while preserving the distinction between a shaped experiment and evidence.
+- The remaining branch intentionally breaks the authoring-validation contract for unsupported evidence labels and seed filler; it does not break runtime routes, APIs, topology, or component behavior.

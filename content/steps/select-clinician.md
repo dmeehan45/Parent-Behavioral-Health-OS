@@ -18,8 +18,6 @@ exitConditions:
 roles:
   primary: [platform-operations]
   supporting: [clinician]
-rules: []
-exceptions: []
 claims:
   - claim-selection-predicts-quality
 metrics:

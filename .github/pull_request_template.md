@@ -26,7 +26,19 @@
 **Evidence or reasoning**
 
 <!-- Where this came from: author reasoning, public research, interview,
-     observation, data, experiment. Reflect it in the `provenance` field. -->
+     observation, data, experiment. Reflect it in every affected record's
+     `provenance` field. Do not list a source category unless the repository
+     records the corresponding reference or accepted researchTrace. If this is
+     author reasoning with no external evidence, say that directly. -->
+
+**Evidence alignment**
+
+<!-- For each affected primitive, confirm that the source, references,
+     confidence/dataStatus, and authority in content/ agree with the reasoning
+     above. "No evidence yet" is valid; an interview or dataset that is not
+     recorded in provenance is not. -->
+
+- [ ] The PR's evidence claims match each affected record's provenance, references, confidence/data status, and authority
 
 **Authority**
 

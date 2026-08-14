@@ -12,8 +12,6 @@ entryConditions:
 inputs:
   - entity: clinician
     state: selected
-activity: >
-  Confirm that clinician selection is complete and hand off a clear onboarding state.
 outputs:
   - entity: clinician
     state: selected
@@ -22,8 +20,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-13

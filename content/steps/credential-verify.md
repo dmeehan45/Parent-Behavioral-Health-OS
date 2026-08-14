@@ -12,8 +12,6 @@ entryConditions:
 inputs:
   - entity: clinician
     state: selected
-activity: >
-  Verify the minimum proposed professional and operating prerequisites.
 outputs:
   - entity: credential
     state: verified
@@ -24,8 +22,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-13

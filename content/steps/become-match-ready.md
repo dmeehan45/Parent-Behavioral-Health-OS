@@ -10,8 +10,6 @@ entryConditions:
 inputs:
   - entity: clinician
     state: availability-defined
-activity: >
-  Confirm the proposed inputs needed for the clinician to receive family demand.
 outputs:
   - entity: clinician
     state: match-ready
@@ -22,8 +20,6 @@ exitConditions:
 roles:
   primary: [clinician]
   supporting: [platform-operations]
-rules: []
-exceptions: []
 claims:
   - claim-first-caseload-retention
 metrics:
