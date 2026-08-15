@@ -137,6 +137,51 @@ export function projectReview(): ReviewIndex {
       return { ...partial, state: findingState(partial) };
     });
 
+    const candidates = handoff.candidates.map((candidate) => {
+      const id = decisionId(handoff.run.id, candidate.id);
+      const partial = {
+        id: candidate.id,
+        decisionId: id,
+        kind: candidate.kind,
+        description: candidate.description,
+        targets: candidate.targets.map((target) => ({ id: target, ...titleOf(target) })),
+        restsOn: candidate.restsOn,
+        rationale: candidate.rationale,
+        wouldWeakenIf: candidate.wouldWeakenIf,
+        decision: byDecisionId.get(id),
+        appliedIn: appliedBy.get(id) ?? [],
+      };
+      // The same three states a finding has, and for the same reason: accepted
+      // and applied are different, and a candidate accepted months ago that
+      // never became a Problem is exactly the debt this distinction exists for.
+      return { ...partial, state: findingState({ ...partial, appliedIn: partial.appliedIn }) };
+    });
+
+    // A note's state comes from one line covering the whole set, plus the
+    // exceptions named against it. `except` flips whichever way the batch went,
+    // so one good note survives a discarded batch and one bad note can be
+    // dropped from a kept one.
+    const notesDecision = record?.notes;
+    const flipped = new Set(notesDecision?.except ?? []);
+    const notes = handoff.notes.map((note) => {
+      const kept = notesDecision ? (notesDecision.disposition === "noted") !== flipped.has(note.id) : undefined;
+      return {
+        id: note.id,
+        statement: note.statement,
+        sourceIds: note.sourceIds,
+        // An anchor may be a queued question rather than a canonical record.
+        // `titleOf` would call that unknown, which is exactly backwards: a note
+        // gathered for an open question is doing the job notes exist for.
+        anchors: note.anchors.map((anchor) =>
+          questionText.has(anchor)
+            ? { id: anchor, title: questionText.get(anchor) as string, href: `/review#${anchor}`, kind: "question" }
+            : { id: anchor, ...titleOf(anchor) },
+        ),
+        note: note.note,
+        state: kept === undefined ? ("awaiting" as const) : kept ? ("kept" as const) : ("discarded" as const),
+      };
+    });
+
     return {
       id: handoff.run.id,
       question: handoff.run.question,
@@ -148,12 +193,20 @@ export function projectReview(): ReviewIndex {
       file,
       decisionFile: `research/decisions/${handoff.run.id}.yaml`,
       answers: (handoff.run.answers ?? []).map((id) => ({ id, question: questionText.get(id) ?? id })),
+      kind: handoff.run.kind ?? "research",
+      reflectsOn: handoff.run.reflectsOn ?? [],
       sources,
       findings,
+      candidates,
+      notes,
+      notesDecision,
       openQuestions: handoff.questions,
       reviewer: record?.reviewer,
-      decided: findings.filter((finding) => finding.decision).length,
-      total: findings.length,
+      // Candidates count here too: they are decided one at a time, so a
+      // reflection carrying eight undecided candidates is eight pieces of work
+      // and should not read as "reviewed" because its findings were.
+      decided: [...findings, ...candidates].filter((item) => item.decision).length,
+      total: findings.length + candidates.length,
     };
   });
 
@@ -183,7 +236,7 @@ export function projectReview(): ReviewIndex {
       detail: item.why ?? `Asked by ${item.askedBy}.`,
       blocking: awaiting.get(item.id) ?? [],
     })),
-    ...findGaps(repo, handoffs, questions).map((gap) => ({
+    ...findGaps(repo, handoffs, questions, decisions).map((gap) => ({
       kind: "gap" as const,
       id: `${gap.kind}-${gap.subject}`,
       question: gap.suggestedQuestion,

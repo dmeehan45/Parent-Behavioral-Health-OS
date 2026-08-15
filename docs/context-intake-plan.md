@@ -1,10 +1,16 @@
 # Widening the intake: how a lot of context gets in without burying anyone
 
-> **Status: plan, not yet landed.** Six changes, each independently valuable,
-> each its own pull request from `main`. When one lands, mark it here the way
-> [`context-flow-plan.md`](context-flow-plan.md) marks its six — that document
-> is this one's template, and its "landed, kept for the reasoning" header is
-> the state this file should eventually reach.
+> **Status: all six landed; two pieces of content work remain.** Each change is
+> marked below. What is deliberately *not* done is the judgement half of two of
+> them: converting the deep dive's eight candidate Problems (change 4), and
+> deciding which clock `time-to-first-session` runs (change 6). Both are a
+> person's sentences, and the infrastructure now exists to receive them.
+>
+> Kept for the reasoning, the way [`context-flow-plan.md`](context-flow-plan.md)
+> is. Three things were learned building it that the plan did not predict, and
+> each is recorded with its change: the handoff hash was sensitive to the
+> schema's own growth, two copies of that hash recipe had already drifted, and
+> the rule that a candidate carries no title was enforced only by accident.
 
 ## The workflow this is for
 
@@ -75,6 +81,8 @@ that order; 5 reads the states 2–4 create; 6 is independent.
 
 ### 1. One statement, one home
 
+*Landed.*
+
 **Change.** Give every contributor-facing document exactly one job, and make
 duplicated contract statements links instead of copies:
 
@@ -84,15 +92,17 @@ duplicated contract statements links instead of copies:
 | `AGENTS.md` | **The contract** — the rules and their reasoning, for human and AI contributors alike. The only home of the loop diagram, the check list, and the section tables |
 | `CONTRIBUTING.md` | Process mechanics: the three kinds of contribution, branching, PR shape. Links to the contract, restates none of it |
 | `docs/authoring.md` | How to write each primitive |
-| `docs/research-workflow.md` | Intake mechanics — one run, and the schedule. **Absorbs `research-routine.md`**, which is the same workflow at a cadence |
-| `docs/research-practice.md` | The craft — **merges `conversational-research.md` and `research-source-quality.md`**: how to research with a person, and how to judge evidence |
+| `docs/research-workflow.md` | Intake mechanics — one run, and the schedule. **Absorbed `research-routine.md`**, which is the same workflow at a cadence |
+| `docs/research-practice.md` | The craft — **merged `conversational-research.md` and `research-source-quality.md`**: how to research with a person, and how to judge evidence |
 | `docs/prototype-workflow.md` | One Bet becoming a prototype |
 
 Add the rule itself to `AGENTS.md`, because it is the only thing that stops the
 next drift: **a contract statement lives in exactly one file; everywhere else
 links to it.** The planning-file audit found three statements that had drifted
 across four files; each was fixed by editing every copy, which is the fix that
-does not last.
+does not last. It carries a second clause worth keeping: adding a document is a
+real decision, and a section in the file that already owns the topic is usually
+the right answer.
 
 **What it unlocks.** Each future run stops growing the documentation surface —
 the first real run added two files; under this shape it would have added
@@ -104,6 +114,8 @@ prose — a lint that judges documentation is machinery this plan exists to
 avoid. The rule is cultural, stated once, in the contract.
 
 ### 2. Name the conversational review lane
+
+*Landed.*
 
 **Change.** Document what the first run already did, as the intended cheap
 lane rather than an improvisation. In `research-workflow.md`:
@@ -137,6 +149,14 @@ in your ear, and this lane is explicitly the trade in the other direction.
 
 ### 3. Notes: a cheaper unit than a finding
 
+*Landed.* One thing had to be fixed on the way, and it is worth knowing about:
+adding a single optional field re-hashed every handoff ever written, because the
+hash was taken over the parsed object and a `[]` default is not nothing. A
+decision a person had made weeks earlier stopped authorizing anything. Absent
+and empty values are now normalized away before hashing, which restores every
+existing hash exactly and makes all future optional fields safe — with one
+invariant left behind: **add fields, never reorder them.**
+
 **Change.** The handoff contract gains an optional `notes` list alongside
 `findings`. A note is atomic context that changes no claim: a source that
 exists, a standard definition, a competitor behaviour, a regulation's shape,
@@ -166,6 +186,13 @@ No note-to-claim promotion path: a note that turns out to bear on belief
 re-enters as a finding in a later run, through the full gate.
 
 ### 4. Reflection runs: large structured thinking enters as structure
+
+*Landed*, except the deep-dive migration itself, which is content work rather
+than infrastructure and wants a person's eye on each of the eight. One thing
+was learned building it: Zod strips unknown keys, so the rule that a candidate
+carries no title was enforced by accident — a `title:` parsed cleanly and was
+silently discarded, leaving the author believing they had named it. The
+candidate schema is strict now, so writing one is an error that says so.
 
 **Change.** A handoff may declare `run.kind: reflection` (default:
 `research`). A reflection is the conversational agent's structured thinking
@@ -214,6 +241,8 @@ rule stands.
 
 ### 5. The gap finder learns saturation
 
+*Landed.*
+
 **Change.** `findGaps` currently measures thinness — `unmeasured`,
 `unevidenced`, `unproven`, `unsupplied`, `thin`, `raised`. It cannot see the
 opposite failure: context arriving faster than it becomes model. Add gap
@@ -243,6 +272,14 @@ it, and Git is the archive. No saturation-driven automation of any kind: the
 gap invites a person to write the Claim, it does not write one.
 
 ### 6. Metrics get a measurement contract
+
+*Landed, except the content decision.* The fields exist, coverage counts them,
+and a Metric claiming `available` data without a `startEvent` and `endEvent` is
+now refused. **`time-to-first-session` is deliberately untouched:** which clock
+it runs is the accountable decision the deep dive queued and the evidence audit
+put first, and filling those two fields while nobody was looking is exactly the
+move this repository asks nobody to make. The field is now there to record the
+decision in.
 
 **Change.** The Metric schema gains the optional structured fields its own
 definitions keep needing and putting in prose: `startEvent`, `endEvent`,

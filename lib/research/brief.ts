@@ -75,6 +75,29 @@ export function renderBrief(
   }
   lines.push(established.length ? established.join("\n") : "Nothing yet — this is early research.", "");
 
+  // Context earlier runs gathered about the same territory. This is the payoff
+  // for anchoring: a note accepted cheaply months ago reaches the next run that
+  // touches what it was anchored to, without anybody remembering it exists.
+  // Scoped to the question's own targets when it has them, because every note
+  // in the repository is not context for every question.
+  const scope = new Set(item?.targets ?? []);
+  const relevantNotes = handoffs.flatMap(({ handoff }) =>
+    handoff.notes
+      .filter((note) => !scope.size || note.anchors.some((anchor) => scope.has(anchor) || anchor === item?.id))
+      .map((note) => ({ run: handoff.run.id, note })),
+  );
+  if (relevantNotes.length) {
+    lines.push(
+      "## Context already gathered",
+      "",
+      "Background from earlier runs, anchored to what this question bites. None of it is something the model claims,",
+      "and none of it has been cited as evidence — but do not spend this run rediscovering it.",
+      "",
+      ...relevantNotes.map(({ run, note }) => `- ${note.statement}  \n  run \`${run}\`, note \`${note.id}\``),
+      "",
+    );
+  }
+
   const identities = new Map<string, { title: string; runs: string[] }>();
   for (const { handoff } of handoffs) {
     for (const source of handoff.sources) {
@@ -112,6 +135,14 @@ export function renderBrief(
     `Write one handoff at \`research/handoffs/<run-id>.yaml\` following \`research/contract/v1.example.yaml\`.`,
     item ? `Set \`run.answers: [${item.id}]\`.` : "Leave `run.answers` out; this question is not queued.",
     "Quote no more than 25 words from any one source. Commit no transcript, no private material, and nothing identifying a real person.",
+    "",
+    "Two kinds of output, and choosing correctly is most of what makes a run cheap to review:",
+    "",
+    "- a **finding** proposes something the model might come to believe. It costs the reviewer a judgement, one at a time.",
+    "- a **note** is context that changes no claim — a source worth knowing, a definition, how something is usually done.",
+    "  Notes are dispositioned as a set, so they are nearly free. Each must be anchored to a record or a queued question.",
+    "",
+    "When in doubt, propose a finding. A note that turns out to need its own judgement is a finding you filed wrong.",
     "",
     "Branch from `main`, commit that one file, and open a pull request. Nothing else belongs in an intake:",
     "the review packet is derived, and CI renders it onto the pull request for the reviewer to read.",

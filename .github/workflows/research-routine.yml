@@ -84,7 +84,7 @@ jobs:
                 : "Nothing is queued and the model shows no gaps. Add a question with `npm run research:ask`.",
               "",
               "Commit the handoff and nothing else. The review packet is derived, and CI renders it onto the",
-              "pull request. `docs/research-routine.md` describes the loop; `docs/research-workflow.md` one run.",
+              "pull request. `docs/research-workflow.md` describes the loop; `docs/research-practice.md` the craft.",
               "",
               "```text",
               queue.trim(),

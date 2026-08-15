@@ -35,6 +35,14 @@ findings:
     proposedClaim:
       id: claim-review-first-research
       statement: Research intake needs human review before it changes the generalized operating model.
+# Context that changes no claim. Optional, dispositioned as a set in one line,
+# and never citable by `researchTrace`. `anchors` is required: a note has to be
+# context *for* something, or nothing will ever retrieve it again.
+notes:
+  - id: note-projection-is-derived
+    statement: The application renders a projection of content/, so a model change needs no application change.
+    sourceIds: [source-project-readme]
+    anchors: [clinician-onboarding]
 questions:
   - id: question-review-owner
     question: Who is the accountable reviewer for a given intake pull request?

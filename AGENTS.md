@@ -23,6 +23,28 @@ they are not a second source of truth.
 If you find yourself adding a literal ID or a literal count to a component, the
 model is missing a field. Add the field instead.
 
+## The same rule, for documentation
+
+**A contract statement lives in exactly one file. Everywhere else links to it.**
+
+This file is the contract: the loop diagram, the check list, the section tables,
+the branch rule, and every rule about the model and its projection live here and
+nowhere else. `CONTRIBUTING.md` routes; `docs/authoring.md` teaches primitives;
+`docs/research-workflow.md` is intake mechanics and `docs/research-practice.md`
+the research craft; `docs/prototype-workflow.md` turns a Bet into software. Each
+has one job.
+
+This is the same rule as the one above, applied to prose instead of components.
+It exists because a planning-file audit found four documents describing
+contribution and disagreeing three ways — the loop diagram, the pre-PR check
+list, and how many experiment sections a Bet has. Each was fixed by editing
+every copy, which is the fix that does not last. If a rule needs restating to be
+findable, the link is the restatement.
+
+Adding a document is a real decision: prefer a section in the file that already
+owns the topic. Two runs in a row added a research document, which is how four
+became the number.
+
 ## How the projection works
 
 `lib/model/` is the single boundary between canonical content and the interface.
@@ -135,16 +157,18 @@ This is deliberate, and it is the rule most likely to feel like an extra step:
 ## Research is staging, and only a person promotes it
 
 Research from a chat — Claude, ChatGPT, anything — enters as a handoff under
-`research/`, never as an edit to `content/`. `docs/research-workflow.md` covers
-one run; `docs/research-routine.md` covers running it on a schedule.
+`research/`, never as an edit to `content/`. `docs/research-workflow.md` is the
+mechanics, one run and on a schedule; `docs/research-practice.md` is the craft.
 
-When research is conducted through conversation, also follow
-`docs/conversational-research.md`. The agent is responsible for helping the user
-learn along with the repository: orient from the current model before external
-research, pressure-test findings before handoff, and close reviewed/applied work
-with a learning checkpoint before moving to the next question. Do not rely on
-chat history as the source of current understanding; reconstruct it from the
-repository and let the user correct the framing.
+Read the practice document before researching. The agent is responsible for
+helping the user learn along with the repository: orient from the current model
+before external research, pressure-test findings before handoff, and close
+reviewed/applied work with a learning checkpoint before moving to the next
+question. Do not rely on chat history as the source of current understanding;
+reconstruct it from the repository and let the user correct the framing. The
+same file governs source selection and evidence appraisal — recency in
+proportion to how fast the subject changes, directness, study strength,
+triangulation, and a bar that rises with the decision a finding could support.
 
 The rule that matters here: **an agent cannot change what the model claims.**
 A canonical record cites research through `researchTrace`, and that citation
@@ -158,6 +182,13 @@ Four consequences worth knowing before you touch any of it:
 
 - **`research/` never moves the map's revision.** `contentRevision()` hashes
   `content/` only. Staging churn must not make every open map re-fetch.
+- **The queue counts what is owed, not only what is thin.** `findGaps` reports
+  `undecided`, `unapplied`, `unconverted` and `saturated` above every invitation
+  to go and research something, because those are answered by writing rather
+  than by researching. `saturated` — several pieces of context anchored to a
+  record that still claims nothing — is the anti-bloat instrument: a context
+  base growing correctly and changing nothing looks fine from the inside until
+  something counts it.
 - **An intake commits the handoff and nothing else.** Everything a reviewer
   reads is derived from that one file, and the actor this workflow is written
   for — a conversational agent on a GitHub connector — writes files through the
@@ -174,10 +205,41 @@ Four consequences worth knowing before you touch any of it:
   what earlier runs established. Restating an earlier finding exactly is a
   validation error, because a routine running twice a day would otherwise
   resurface the same sentence forever.
-- **`/review` is the one human step.** It is a reading surface, not a form: the
-  evidence, the prior art, and what a finding would change all sit next to the
-  decision. Do not add a way to skip it, and do not add server-side writes to
-  make it "complete" — it hands back a decision file, and Git records it.
+- **A finding is not the only thing a run produces.** A finding proposes
+  something the model might come to believe and costs a judgement each. A
+  **note** is context that changes no claim, dispositioned as a set, and it is
+  how volume gets in without the reviewer paying per item. Two rules keep it
+  honest: a note must be **anchored** to a record or a queued question, and a
+  note can never be cited by `researchTrace`. When in doubt propose a finding —
+  a note needing its own judgement is a finding filed wrong.
+- **A reflection is a run that thinks rather than reads.** `run.kind:
+  reflection` carries structured thinking about the model or about earlier runs,
+  and may propose **candidates**: that something should *exist*, as a Problem or
+  a queued question. A candidate carries no title and the schema is strict, so
+  writing one is an error rather than a silently dropped field — naming is the
+  judgement that separates recording a trouble from recording a fix, and
+  accepting a candidate composes a skeleton with the name left blank. Candidates
+  are decided one at a time; only notes are decided as a set.
+- **Adding an optional field to a research contract must not invalidate a
+  review.** Absent and empty values are normalized away before a handoff is
+  hashed, so a field nobody used hashes as it did before it existed. The
+  corollary is a rule: **add fields, never reorder or rename them.** Key order
+  still reaches the digest. `handoffHash` lives in `lib/research/schema.ts`
+  beside the contract, because the loader and the intake both check it and a
+  second copy of the recipe once let the live map refuse a trace that validation
+  had passed.
+- **The decision file is the gate, not the surface that produced it.** A person
+  may decide at `/review` — a reading surface, not a form, where the evidence,
+  the prior art, and what a finding would change sit next to the decision — or
+  in the conversation the research happened in, with the agent recording what
+  they said over the hash CI printed on the intake pull request. Everything
+  enforced lives in the file, so both lanes carry the same guarantees;
+  `decidedVia` records which was used, and gates nothing.
+
+  What an agent may never do is supply a disposition the person did not state,
+  name them as reviewer without their say, or treat silence as assent. Do not
+  add a way to skip the person, and do not add server-side writes to make
+  `/review` "complete" — it hands back a decision file, and Git records it.
 
 ### Where research appears, and where it deliberately does not
 

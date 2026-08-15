@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import yaml from "js-yaml";
-import crypto from "node:crypto";
 import { ZodType, ZodError } from "zod";
 import {
   mapSchema,
@@ -23,7 +22,7 @@ import {
   type Bet,
 } from "@/lib/schemas";
 import { parseBody, RENDERED_SECTIONS } from "./body";
-import { decisionFileSchema, handoffSchema } from "@/lib/research/schema";
+import { decisionFileSchema, handoffHash, handoffSchema } from "@/lib/research/schema";
 import { checkContentQuality } from "./quality";
 import { checkFlowContinuity } from "./flow";
 
@@ -298,7 +297,20 @@ function checkResearchTrace(items: Array<Stage | Step | Entity | Claim | Metric 
       );
     }
     const finding = handoff.findings.find((candidate) => candidate.id === trace.finding);
-    if (!finding) throw new Error(`Invalid researchTrace in ${item.file}: finding '${trace.finding}' is not in research/handoffs/${trace.run}.yaml`);
+    if (!finding) {
+      // A note is context, never evidence for what the model claims — so it
+      // has no decision to cite and can never authorize a canonical change.
+      // Naming one here is the mistake most likely to look reasonable, so it
+      // gets the specific answer rather than "not in this run".
+      const isNote = handoff.notes.some((note) => note.id === trace.finding);
+      throw new Error(
+        `Invalid researchTrace in ${item.file}: finding '${trace.finding}' is not in research/handoffs/${trace.run}.yaml` +
+          (isNote
+            ? ` — it is a note. Notes are context and carry no decision, so they cannot authorize a canonical change. ` +
+              `If this context bears on what the model claims, it needs to come back as a finding in a later run.`
+            : ""),
+      );
+    }
     trace.sources.forEach((source) => { if (!finding.sourceIds.includes(source)) throw new Error(`Invalid researchTrace in ${item.file}: source '${source}' is not evidence for '${trace.finding}'`); });
 
     const decisionFile = decisions.get(trace.run);
@@ -327,7 +339,11 @@ function checkResearchTrace(items: Array<Stage | Step | Entity | Claim | Metric 
           `Cite the superseding decision, or revisit whether this record still holds.`,
       );
     }
-    const hash = crypto.createHash("sha256").update(JSON.stringify(handoff)).digest("hex");
+    // The same function the intake uses, not a second copy of the recipe. The
+    // two had drifted apart the moment the hash learned to ignore absent
+    // optional fields, and the failure was silent in the worst possible place:
+    // the live projection refusing a trace the intake validator was happy with.
+    const hash = handoffHash(handoff);
     if (decisionFile.reviewedHandoffHash !== hash) {
       throw new Error(
         `Invalid researchTrace in ${item.file}: research/decisions/${trace.run}.yaml reviewed an older version of ` +

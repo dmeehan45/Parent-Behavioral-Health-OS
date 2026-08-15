@@ -33,6 +33,7 @@ function decisionSkeleton({ handoff, hash }: LoadedHandoff) {
     `reviewedHandoffHash: ${hash}`,
     "reviewer: TODO who is accountable for this decision",
     "decidedAt: TODO today, as YYYY-MM-DD",
+    "decidedVia: review   # or 'conversation', if the reviewer decided in the chat",
     "decisions:",
   ];
   for (const finding of handoff.findings) {
@@ -41,6 +42,20 @@ function decisionSkeleton({ handoff, hash }: LoadedHandoff) {
       `    disposition: TODO ${allowed}`,
       "    # rationale: required for reject, defer, and needs-research",
       "    # editedRecommendation: required for accept-with-edits",
+    );
+  }
+  for (const candidate of handoff.candidates) {
+    lines.push(
+      `  - id: ${decisionId(handoff.run.id, candidate.id)}`,
+      `    disposition: TODO ${allowed}`,
+      `    # proposes a ${candidate.kind}; accepting composes a skeleton for you to name`,
+    );
+  }
+  if (handoff.notes.length) {
+    lines.push(
+      "notes:",
+      `  disposition: TODO noted | discard   # all ${handoff.notes.length} of them, in one line`,
+      "  # except: [note-id]   # the few going the other way",
     );
   }
   lines.push("```", "");
@@ -55,6 +70,14 @@ export function renderReview({ handoff, file, hash }: LoadedHandoff) {
     // claim to be either one.
     `> ${GENERATED_MARKER} \`${hash}\`. Derived from the handoff; do not edit by hand.`,
     "",
+    ...(handoff.run.kind === "reflection"
+      ? [
+          "> **A reflection**, not a research run: structured thinking about the model or about earlier runs" +
+            (handoff.run.reflectsOn?.length ? `, reflecting on ${handoff.run.reflectsOn.map((id) => `\`${id}\``).join(", ")}` : "") +
+            ". It is staging like any other handoff, and nothing in it is canonical until a person decides.",
+          "",
+        ]
+      : []),
     "## Question",
     "",
     handoff.run.question,
@@ -86,6 +109,53 @@ export function renderReview({ handoff, file, hash }: LoadedHandoff) {
       `Allowed response: ${allowed}.`,
       "",
     );
+  }
+  if (handoff.candidates.length) {
+    lines.push(
+      "## Proposed for the model",
+      "",
+      `${handoff.candidates.length} candidate(s). Each proposes that something should **exist** in the model, and each is ` +
+        "decided on its own. None carries a title: accepting one composes a skeleton with the references filled in and " +
+        "the naming left to you, because a name written by the analysis is how a fix gets recorded as a problem.",
+      "",
+    );
+    for (const candidate of handoff.candidates) {
+      lines.push(
+        `### ${candidate.id}`,
+        "",
+        `Proposes a **${candidate.kind}**.`,
+        "",
+        candidate.description,
+        "",
+        `- Where it bites: ${candidate.targets.length ? candidate.targets.map((id) => `\`${id}\``).join(", ") : "not stated"}`,
+        `- Rests on: ${candidate.restsOn.length ? candidate.restsOn.map((id) => `\`${id}\``).join(", ") : "nothing named"}`,
+        `- Why it ranks here: ${candidate.rationale ?? "not stated"}`,
+        `- Would weaken if: ${candidate.wouldWeakenIf ?? "not stated"}`,
+        "",
+        `**Decision \`${decisionId(handoff.run.id, candidate.id)}\`**`,
+        "",
+        `Allowed response: ${allowed}.`,
+        "",
+      );
+    }
+  }
+  if (handoff.notes.length) {
+    lines.push(
+      "## Context notes",
+      "",
+      `${handoff.notes.length} note(s). These change no claim and cannot be cited by \`researchTrace\`. ` +
+        "Read them as a set and disposition them in one line; anything here that needs its own judgement " +
+        "should have been proposed as a finding.",
+      "",
+    );
+    handoff.notes.forEach((note) => {
+      const sources = note.sourceIds.length ? note.sourceIds.map((id) => `\`${id}\``).join(", ") : "none";
+      lines.push(
+        `- **${note.id}** — ${note.statement}`,
+        `  Anchored to: ${note.anchors.map((id) => `\`${id}\``).join(", ")}. Sources: ${sources}.`,
+      );
+    });
+    lines.push("");
   }
   lines.push("## Open questions", "");
   if (!handoff.questions.length) lines.push("None.", "");

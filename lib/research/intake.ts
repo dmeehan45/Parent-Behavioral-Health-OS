@@ -1,10 +1,9 @@
-import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
 import { ZodError } from "zod";
 import { getRepository } from "@/lib/content/repository";
-import { decisionFileSchema, handoffSchema, type DecisionFile, type ResearchHandoff } from "./schema";
+import { decisionFileSchema, handoffHash, handoffSchema, type DecisionFile, type ResearchHandoff } from "./schema";
 
 export type LoadedHandoff = { handoff: ResearchHandoff; file: string; hash: string };
 export type LoadedDecisions = { decisions: DecisionFile; file: string };
@@ -67,9 +66,6 @@ function wordCount(value: string) {
   return value.trim().split(/\s+/).filter(Boolean).length;
 }
 
-export function handoffHash(handoff: ResearchHandoff) {
-  return crypto.createHash("sha256").update(JSON.stringify(handoff)).digest("hex");
-}
 
 /**
  * Parse every handoff and check it against itself.
@@ -89,7 +85,20 @@ export function loadHandoffs(root = process.cwd()): LoadedHandoff[] {
     requireFileName(HANDOFF_DIRECTORY, name, handoff.run.id, "run.id");
     unique(handoff.sources.map((source) => source.id), file, "sources.id");
     unique(handoff.findings.map((finding) => finding.id), file, "findings.id");
+    unique(handoff.notes.map((note) => note.id), file, "notes.id");
+    unique(handoff.candidates.map((candidate) => candidate.id), file, "candidates.id");
     unique(handoff.questions.map((question) => question.id), file, "questions.id");
+    // One namespace, because a decision file names IDs and the reviewer should
+    // never have to know which list an ID came from to know what it means.
+    unique(
+      [
+        ...handoff.findings.map((finding) => finding.id),
+        ...handoff.notes.map((note) => note.id),
+        ...handoff.candidates.map((candidate) => candidate.id),
+      ],
+      file,
+      "findings.id, notes.id and candidates.id",
+    );
 
     const identities = new Map<string, string>();
     for (const source of handoff.sources) {
@@ -107,6 +116,21 @@ export function loadHandoffs(root = process.cwd()): LoadedHandoff[] {
       if (["duplicate", "qualifying"].includes(finding.classification) && !finding.existingClaimCandidates?.length) throw new Error(`${file}: findings.${finding.id}.existingClaimCandidates: required for ${finding.classification} findings`);
       if (!finding.generalizedApplicability && finding.proposedClaim) throw new Error(`${file}: findings.${finding.id}.proposedClaim: out-of-scope findings cannot propose canonical Claims`);
     }
+    for (const note of handoff.notes) {
+      note.sourceIds.forEach((id) => { if (!sourceIds.has(id)) throw new Error(`${file}: notes.${note.id}.sourceIds: '${id}' does not exist`); });
+      if (note.note && wordCount(note.note) > 25) throw new Error(`${file}: notes.${note.id}.note: exceeds the 25-word quotation limit`);
+    }
+    for (const candidate of handoff.candidates) {
+      // The same rule a Problem file lives under: a problem that bites nowhere
+      // is not a problem with this system, so a candidate for one cannot be
+      // proposed without saying where.
+      if (candidate.kind === "problem" && !candidate.targets.length) {
+        throw new Error(`${file}: candidates.${candidate.id}.targets: a candidate problem has to say where it bites`);
+      }
+    }
+    if (handoff.run.reflectsOn?.length && handoff.run.kind !== "reflection") {
+      throw new Error(`${file}: run.reflectsOn is for a reflection; set run.kind: reflection`);
+    }
     return { handoff, file, hash: handoffHash(handoff) };
   });
   unique(loaded.map(({ handoff }) => handoff.run.id), HANDOFF_DIRECTORY, "run.id");
@@ -120,7 +144,7 @@ export function loadHandoffs(root = process.cwd()): LoadedHandoff[] {
  * handoffs there are: the previous shape re-read and re-validated the whole
  * repository per handoff file, which is quadratic once research accumulates.
  */
-export function checkHandoffTargets(handoffs: LoadedHandoff[]) {
+export function checkHandoffTargets(handoffs: LoadedHandoff[], questionIds?: Set<string>) {
   if (!handoffs.length) return;
   const repo = getRepository();
   const targets = new Set([...repo.stages, ...repo.steps, ...repo.entities, ...repo.claims, ...repo.metrics, ...repo.problems, ...repo.bets].map((item) => item.id));
@@ -129,6 +153,24 @@ export function checkHandoffTargets(handoffs: LoadedHandoff[]) {
     for (const finding of handoff.findings) {
       finding.suggestedTargets.forEach((id) => { if (!targets.has(id)) throw new Error(`${file}: findings.${finding.id}.suggestedTargets: '${id}' does not exist in content/`); });
       finding.existingClaimCandidates?.forEach((id) => { if (!claims.has(id)) throw new Error(`${file}: findings.${finding.id}.existingClaimCandidates: '${id}' does not exist in content/claims/`); });
+    }
+    // A note's anchor may be a canonical record or a queued question — context
+    // gathered for something nobody has answered yet is exactly as useful as
+    // context about something already modelled, and refusing the second kind
+    // would push a run to invent a record to hang it on.
+    for (const candidate of handoff.candidates) {
+      candidate.targets.forEach((id) => {
+        if (!targets.has(id)) throw new Error(`${file}: candidates.${candidate.id}.targets: '${id}' does not exist in content/`);
+      });
+    }
+    for (const note of handoff.notes) {
+      note.anchors.forEach((id) => {
+        if (targets.has(id) || questionIds?.has(id)) return;
+        throw new Error(
+          `${file}: notes.${note.id}.anchors: '${id}' is neither a record in content/ nor a question in research/questions/. ` +
+            `A note has to be context for something, or nothing will ever find it again.`,
+        );
+      });
     }
   }
 }
@@ -258,6 +300,22 @@ export function loadDecisions(root = process.cwd()): LoadedDecisions[] {
   });
 }
 
+/**
+ * A reflection thinks about earlier runs, so those runs have to exist.
+ *
+ * Separate from parsing for the same reason target checking is: a handoff is
+ * checked against itself first, then against the others.
+ */
+export function checkReflections(handoffs: LoadedHandoff[]) {
+  const ids = new Set(handoffs.map(({ handoff }) => handoff.run.id));
+  for (const { handoff, file } of handoffs) {
+    for (const id of handoff.run.reflectsOn ?? []) {
+      if (id === handoff.run.id) throw new Error(`${file}: run.reflectsOn: a run cannot reflect on itself`);
+      if (!ids.has(id)) throw new Error(`${file}: run.reflectsOn: '${id}' is not a run in ${HANDOFF_DIRECTORY}/`);
+    }
+  }
+}
+
 export function validateDecisions(handoffs: LoadedHandoff[], loaded: LoadedDecisions[]) {
   const byRun = new Map(handoffs.map((handoff) => [handoff.handoff.run.id, handoff]));
   for (const { decisions: record, file } of loaded) {
@@ -270,13 +328,34 @@ export function validateDecisions(handoffs: LoadedHandoff[], loaded: LoadedDecis
           `once the decisions below still hold.`,
       );
     }
-    const expected = new Set(handoff.handoff.findings.map((finding) => decisionId(record.runId, finding.id)));
+    // Candidates are decided one at a time alongside findings: proposing that
+    // something belongs in the model is a judgement, not context.
+    const expected = new Set([
+      ...handoff.handoff.findings.map((finding) => decisionId(record.runId, finding.id)),
+      ...handoff.handoff.candidates.map((candidate) => decisionId(record.runId, candidate.id)),
+    ]);
     unique(record.decisions.map((decision) => decision.id), file, "decisions.id");
     record.decisions.forEach((decision) => {
       if (!expected.has(decision.id)) throw new Error(`${file}: decisions.id '${decision.id}' is not a decision in ${handoff.file}`);
       if (["reject", "defer", "needs-research"].includes(decision.disposition) && !decision.rationale?.trim()) throw new Error(`${file}: decisions.${decision.id}.rationale is required for '${decision.disposition}'`);
       if (decision.disposition === "accept-with-edits" && !decision.editedRecommendation?.trim()) throw new Error(`${file}: decisions.${decision.id}.editedRecommendation is required for 'accept-with-edits'`);
     });
+
+    if (record.notes) {
+      const noteIds = new Set(handoff.handoff.notes.map((note) => note.id));
+      if (!noteIds.size) throw new Error(`${file}: notes: ${handoff.file} carries no notes to disposition`);
+      unique(record.notes.except, file, "notes.except");
+      record.notes.except.forEach((id) => {
+        if (noteIds.has(id)) return;
+        // The likeliest mistake is naming a finding here, which would quietly
+        // do nothing — a finding's disposition lives in `decisions`.
+        const isFinding = handoff.handoff.findings.some((finding) => finding.id === id);
+        throw new Error(
+          `${file}: notes.except: '${id}' is not a note in ${handoff.file}` +
+            (isFinding ? ` — it is a finding, and findings are dispositioned one at a time under 'decisions'` : ""),
+        );
+      });
+    }
   }
 }
 
@@ -289,15 +368,35 @@ export function validateDecisions(handoffs: LoadedHandoff[], loaded: LoadedDecis
  */
 export function reviewCoverage(handoffs: LoadedHandoff[], loaded: LoadedDecisions[]) {
   const decided = new Map(loaded.map((record) => [record.decisions.runId, new Set(record.decisions.decisions.map((decision) => decision.id))]));
+  const notedRun = new Set(loaded.filter((record) => record.decisions.notes).map((record) => record.decisions.runId));
   const undecided: string[] = [];
+  const unnotedRuns: string[] = [];
   let findings = 0;
+  let notes = 0;
+  let runsWithNotes = 0;
   for (const { handoff } of handoffs) {
     const answered = decided.get(handoff.run.id) ?? new Set<string>();
-    for (const finding of handoff.findings) {
+    for (const item of [...handoff.findings, ...handoff.candidates]) {
       findings += 1;
-      const id = decisionId(handoff.run.id, finding.id);
+      const id = decisionId(handoff.run.id, item.id);
       if (!answered.has(id)) undecided.push(id);
     }
+    // Notes are counted per run, not per note, because one line disposes of the
+    // whole set. Counting them individually would report a hundred notes as a
+    // hundred pieces of debt when they are one decision.
+    if (handoff.notes.length) {
+      notes += handoff.notes.length;
+      runsWithNotes += 1;
+      if (!notedRun.has(handoff.run.id)) unnotedRuns.push(handoff.run.id);
+    }
   }
-  return { findings, decided: findings - undecided.length, undecided };
+  return {
+    findings,
+    decided: findings - undecided.length,
+    undecided,
+    notes,
+    runsWithNotes,
+    notedRuns: runsWithNotes - unnotedRuns.length,
+    unnotedRuns,
+  };
 }

@@ -10,6 +10,7 @@ import {
   CONFIDENCE_MEANING,
   PROBLEM_TITLE_RULE,
   applySteps,
+  composeCandidate,
   composeProblem,
   hasNowhereToLand,
   problemMaterial,
@@ -19,9 +20,10 @@ import {
   type ClaimKind,
   type ConfidenceLevel,
 } from "@/lib/research/apply";
-import type { ReviewFinding, ReviewRun } from "@/lib/research/view";
+import type { ReviewCandidate, ReviewFinding, ReviewRun } from "@/lib/research/view";
 
 type Item = { run: ReviewRun; finding: ReviewFinding };
+type CandidateItem = { run: ReviewRun; candidate: ReviewCandidate };
 
 /**
  * Turning an accepted decision into a change to the model.
@@ -36,7 +38,8 @@ type Item = { run: ReviewRun; finding: ReviewFinding };
  * hand is the part that is easy to get wrong — the `researchTrace` that proves
  * the change was authorized, which content validation checks and refuses.
  */
-export function ApplyWorkspace({ items }: { items: Item[] }) {
+export function ApplyWorkspace({ items, candidates = [] }: { items: Item[]; candidates?: CandidateItem[] }) {
+  const [names, setNames] = useState<Record<string, string>>({});
   const [choices, setChoices] = useState<Record<string, ApplyChoice>>(() =>
     Object.fromEntries(
       items.map(({ finding }) => [
@@ -72,11 +75,50 @@ export function ApplyWorkspace({ items }: { items: Item[] }) {
         </div>
       </header>
 
-      {items.length === 0 ? (
+      {items.length === 0 && candidates.length === 0 ? (
         <p className="empty-note">
           Nothing accepted is waiting to be applied. <Link href="/review">Back to research</Link>.
         </p>
       ) : null}
+
+      {candidates.map(({ run, candidate }) => {
+        const title = names[candidate.decisionId] ?? "";
+        const step = composeCandidate(run, { ...candidate, targets: candidate.targets.map((target) => target.id) }, { id: candidate.decisionId }, title);
+        return (
+          <article className="review-finding" key={candidate.decisionId}>
+            <div className="card-badges">
+              <Badge tone="accent">accepted</Badge>
+              <Badge tone="quiet">proposes a {candidate.kind}</Badge>
+            </div>
+            <h2 className="review-statement">{candidate.description}</h2>
+            <p className="small muted">{PROBLEM_TITLE_RULE}</p>
+            <div className="field">
+              <label htmlFor={`name-${candidate.decisionId}`}>
+                {candidate.kind === "problem" ? "Name the trouble" : "Write the question"}
+              </label>
+              <input
+                id={`name-${candidate.decisionId}`}
+                value={title}
+                placeholder={candidate.kind === "problem" ? "A clinician can finish onboarding and still have no work" : "What makes …?"}
+                onChange={(event) => {
+                  setNames((current) => ({ ...current, [candidate.decisionId]: event.target.value }));
+                  setCopied(undefined);
+                }}
+              />
+            </div>
+            <p className="small muted">{step.explanation}</p>
+            <pre className="apply-body">
+              <code>{step.body}</code>
+            </pre>
+            <p className="small muted">
+              Save as <code>{step.path}</code>.
+            </p>
+            <button type="button" className="button" onClick={() => copy(candidate.decisionId, step.body)}>
+              {copied === candidate.decisionId ? "Copied" : "Copy"}
+            </button>
+          </article>
+        );
+      })}
 
       {items.map(({ run, finding }) => {
         const choice = choices[finding.decisionId];

@@ -8,10 +8,24 @@ import {
   stepCoverage,
 } from "@/lib/model/coverage";
 import type { Repository } from "@/lib/content/repository";
-import type { LoadedHandoff } from "./intake";
+import type { LoadedDecisions, LoadedHandoff } from "./intake";
 import type { LoadedQuestion } from "./questions";
 
-export type GapKind = "unmeasured" | "unevidenced" | "unproven" | "unsupplied" | "thin" | "raised";
+export type GapKind =
+  | "unmeasured"
+  | "unevidenced"
+  | "unproven"
+  | "unsupplied"
+  | "thin"
+  | "raised"
+  // The intake side of the ledger. Everything above measures where the model is
+  // thin; these measure where the intake has run ahead of it, which is the
+  // failure that arrives with volume. Bloat is exactly saturation nobody can
+  // see: context piling up in staging, correctly gated, changing nothing.
+  | "undecided"
+  | "unapplied"
+  | "unconverted"
+  | "saturated";
 
 export type Gap = {
   kind: GapKind;
@@ -24,7 +38,38 @@ export type Gap = {
   suggestedQuestion: string;
 };
 
-const GAP_ORDER: Record<GapKind, number> = { raised: 0, unevidenced: 1, unsupplied: 2, unproven: 3, unmeasured: 4, thin: 5 };
+/**
+ * What to look at first.
+ *
+ * Work already owed outranks work merely available: a decision waiting, an
+ * acceptance that never landed, and a candidate nobody converted are all
+ * somebody's unfinished sentence, and they come before any invitation to go and
+ * research something new. `saturated` sits with them because it is the same
+ * shape — evidence gathered and not yet turned into anything the model says.
+ */
+const GAP_ORDER: Record<GapKind, number> = {
+  undecided: 0,
+  unapplied: 1,
+  unconverted: 2,
+  saturated: 3,
+  raised: 4,
+  unevidenced: 5,
+  unsupplied: 6,
+  unproven: 7,
+  unmeasured: 8,
+  thin: 9,
+};
+
+/**
+ * How much anchored context may accumulate on one record before it reads as a
+ * signal rather than as background.
+ *
+ * Deliberately low, and deliberately not tuned. The point is not a threshold
+ * that is correct — it is that a person notices when a record has attracted
+ * enough attention to be worth writing down properly, while the material is
+ * still small enough to read in one sitting.
+ */
+const SATURATION = 4;
 
 /**
  * Where the model is thin enough to be worth researching.
@@ -38,7 +83,12 @@ const GAP_ORDER: Record<GapKind, number> = { raised: 0, unevidenced: 1, unsuppli
  * a prompt for research: nothing here is written into `content/`, because
  * plausible-sounding filler is exactly what the model is not for.
  */
-export function findGaps(repo: Repository, handoffs: LoadedHandoff[], questions: LoadedQuestion[]): Gap[] {
+export function findGaps(
+  repo: Repository,
+  handoffs: LoadedHandoff[],
+  questions: LoadedQuestion[],
+  decisions: LoadedDecisions[] = [],
+): Gap[] {
   const gaps: Gap[] = [];
 
   for (const metric of repo.metrics) {
@@ -143,5 +193,115 @@ export function findGaps(repo: Repository, handoffs: LoadedHandoff[], questions:
     }
   }
 
+  gaps.push(...intakeGaps(repo, handoffs, decisions));
+
   return gaps.sort((a, b) => GAP_ORDER[a.kind] - GAP_ORDER[b.kind] || a.subject.localeCompare(b.subject));
+}
+
+/**
+ * Where the intake has run ahead of the model.
+ *
+ * The rest of this file reads `content/` and asks where the thinking is thin.
+ * That was the whole queue, and it could only ever say *go and find out more* —
+ * which is the wrong instruction for a repository taking in a lot of context.
+ * The opposite failure has no voice: findings nobody decided, acceptances that
+ * never became a change, candidates nobody converted, and records that have
+ * quietly attracted a pile of background while still claiming nothing.
+ *
+ * All four are answered by writing rather than by researching, which is why
+ * they sort above every invitation to research.
+ */
+function intakeGaps(repo: Repository, handoffs: LoadedHandoff[], decisions: LoadedDecisions[]): Gap[] {
+  const gaps: Gap[] = [];
+  const AUTHORIZING = ["accept", "accept-with-edits"];
+
+  const byRun = new Map(decisions.map((record) => [record.decisions.runId, record.decisions]));
+  const applied = new Set(
+    [...repo.stages, ...repo.steps, ...repo.entities, ...repo.claims, ...repo.metrics, ...repo.problems, ...repo.bets].flatMap(
+      (record) => (record.researchTrace ?? []).map((trace) => trace.decision),
+    ),
+  );
+
+  for (const { handoff } of handoffs) {
+    const record = byRun.get(handoff.run.id);
+    const dispositions = new Map((record?.decisions ?? []).map((decision) => [decision.id, decision.disposition]));
+
+    const undecided = [...handoff.findings, ...handoff.candidates].filter(
+      (item) => !dispositions.has(`decide-${handoff.run.id}-${item.id}`),
+    );
+    if (undecided.length) {
+      gaps.push({
+        kind: "undecided",
+        subject: handoff.run.id,
+        subjectKind: "run",
+        why: `${undecided.length} of ${handoff.findings.length + handoff.candidates.length} waiting on a person. Research nobody decides is research that changed nothing.`,
+        suggestedQuestion: `Decide the outstanding findings in '${handoff.run.id}'.`,
+      });
+    }
+
+    // Accepted and applied are different states, and the gap between them is
+    // the one this whole arrangement exists to prevent piling up.
+    const unapplied = handoff.findings.filter((finding) => {
+      const id = `decide-${handoff.run.id}-${finding.id}`;
+      return AUTHORIZING.includes(dispositions.get(id) ?? "") && !applied.has(id);
+    });
+    if (unapplied.length) {
+      gaps.push({
+        kind: "unapplied",
+        subject: handoff.run.id,
+        subjectKind: "run",
+        why: `${unapplied.length} accepted finding(s) no canonical record cites. Somebody authorized a change that was never made.`,
+        suggestedQuestion: `Apply the accepted findings from '${handoff.run.id}' at /review/apply.`,
+      });
+    }
+
+    const unconverted = handoff.candidates.filter((candidate) => {
+      const id = `decide-${handoff.run.id}-${candidate.id}`;
+      return AUTHORIZING.includes(dispositions.get(id) ?? "") && !applied.has(id);
+    });
+    if (unconverted.length) {
+      gaps.push({
+        kind: "unconverted",
+        subject: handoff.run.id,
+        subjectKind: "run",
+        why: `${unconverted.length} accepted proposal(s) nothing in the model answers to yet. Each needs a name and ten minutes.`,
+        suggestedQuestion: `Compose the accepted candidates from '${handoff.run.id}' at /review/apply.`,
+      });
+    }
+  }
+
+  // Context accumulating where a Claim or a Step should be written. Counted
+  // per record rather than per run, because saturation is a property of the
+  // thing being written about, not of who wrote about it.
+  const anchored = new Map<string, number>();
+  for (const { handoff } of handoffs) {
+    for (const note of handoff.notes) {
+      for (const anchor of note.anchors) anchored.set(anchor, (anchored.get(anchor) ?? 0) + 1);
+    }
+    for (const finding of handoff.findings) {
+      for (const target of finding.suggestedTargets) anchored.set(target, (anchored.get(target) ?? 0) + 1);
+    }
+  }
+  const records = new Map(
+    [...repo.stages, ...repo.steps, ...repo.entities, ...repo.claims, ...repo.metrics, ...repo.problems, ...repo.bets].map(
+      (record) => [record.id, record],
+    ),
+  );
+  for (const [id, count] of anchored) {
+    const record = records.get(id);
+    if (!record || count < SATURATION) continue;
+    // A record that has already been changed by research is not saturated: the
+    // context arrived and became something. This is about the pile that did not.
+    if (record.researchTrace?.length) continue;
+    const title = "title" in record ? record.title : "statement" in record ? record.statement : id;
+    gaps.push({
+      kind: "saturated",
+      subject: id,
+      subjectKind: "record",
+      why: `${count} pieces of research context anchor here and nothing has changed what it says. Enough has been gathered to write something down.`,
+      suggestedQuestion: `What does the accumulated context about ${String(title).toLowerCase()} let us now claim, and what is still missing?`,
+    });
+  }
+
+  return gaps;
 }

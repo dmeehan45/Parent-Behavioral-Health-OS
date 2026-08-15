@@ -65,6 +65,13 @@ export const RELATIONSHIPS: Record<string, Resolution> = {
     blockOnly: true,
     note: "Who acts on the number. Same reasoning as perspectives.actor: rendered where it is read, not drawn.",
   },
+  "metric.balancingSignals": {
+    blockOnly: true,
+    note:
+      "The other metrics to read alongside this one so it is not optimized alone. Deliberately not an edge: it is part " +
+      "of the measurement contract, read on the metric at the moment somebody is deciding what the number means, and " +
+      "drawing it would put metric-to-metric lines on the evidence lens where they answer nobody's question.",
+  },
   "bet.participant": {
     blockOnly: true,
     note:

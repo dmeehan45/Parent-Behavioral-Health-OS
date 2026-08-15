@@ -283,3 +283,103 @@ export function composeProblem(sources: ProblemSource[], title: string): ApplySt
     ].join("\n"),
   };
 }
+
+/**
+ * An accepted candidate, composed into the thing it proposed.
+ *
+ * The same discipline as `composeProblem`, arriving from the other direction. A
+ * candidate is somebody's structured analysis saying *this should be a Problem*
+ * — targets, what it rests on, why it ranks where it does, what would weaken
+ * it. All of that is carried. The title is not, because it does not exist: a
+ * candidate has a `description`, and turning a description into a name is the
+ * judgement that decides whether the model records a trouble or a fix.
+ *
+ * So the composed file arrives with everything except its first line, and the
+ * description sits in a comment beside the empty title, where the person naming
+ * it can read what they are naming.
+ */
+export function composeCandidate(
+  run: { id: string },
+  candidate: {
+    id: string;
+    kind: "problem" | "question";
+    description: string;
+    targets: string[];
+    restsOn: string[];
+    rationale?: string;
+    wouldWeakenIf?: string;
+  },
+  decision: { id: string },
+  title = "",
+): ApplyStep {
+  const named = title.trim();
+  const commented = (value: string) =>
+    value
+      .trim()
+      .split("\n")
+      .map((line) => `# ${line}`.trimEnd());
+
+  if (candidate.kind === "question") {
+    const id = problemIdFrom(named) || candidate.id;
+    return {
+      action: "create",
+      path: `research/questions/${id}.yaml`,
+      explanation:
+        "A queued question, composed from an accepted candidate. Write the question itself — the rest is carried from the analysis that proposed it.",
+      body: [
+        `id: ${id}`,
+        named ? `question: ${scalar(named)}` : "question: # the question, as a question, in one sentence",
+        `askedBy: ${scalar(`accepted from ${run.id}`)}`,
+        "createdAt: # today, as YYYY-MM-DD",
+        "status: open",
+        "priority: # high | medium | low",
+        ...(candidate.targets.length ? [`targets: [${candidate.targets.join(", ")}]`] : []),
+        "why: >",
+        ...candidate.description
+          .trim()
+          .split("\n")
+          .map((line) => `  ${line.trim()}`),
+        "",
+      ].join("\n"),
+    };
+  }
+
+  const id = problemIdFrom(named) || candidate.id;
+  return {
+    action: "create",
+    path: `content/problems/${id}.md`,
+    explanation:
+      "A Problem, composed from an accepted candidate. What it bites and what it rests on are carried; the name and the body are yours. " +
+      PROBLEM_TITLE_RULE,
+    body: [
+      "---",
+      `id: ${id}`,
+      named ? `title: ${scalar(named)}` : "title: # write the trouble here, in one sentence",
+      `targets: [${candidate.targets.join(", ")}]`,
+      "status: open",
+      ...(candidate.restsOn.length ? [`claims: [${candidate.restsOn.join(", ")}]`] : []),
+      "authority: proposed",
+      "provenance: { source: public-research, references: [] }",
+      "researchTrace:",
+      `  - run: ${run.id}`,
+      `    decision: ${decision.id}`,
+      `    finding: ${candidate.id}`,
+      "    stance: supports",
+      "    sources: []",
+      "---",
+      "",
+      "# What happens today",
+      "",
+      // The proposer's own words, as a comment. Not prose in the file: a
+      // description written to be judged is not a description written to be
+      // read as the model's account of itself.
+      ...commented(candidate.description),
+      "",
+      ...(candidate.rationale ? ["# Why it matters", "", ...commented(candidate.rationale), ""] : ["# Why it matters", "", "<!-- What it costs, and to whom. -->", ""]),
+      "# Open questions",
+      "",
+      ...(candidate.wouldWeakenIf ? commented(`This would weaken if: ${candidate.wouldWeakenIf}`) : ["<!-- What you would need to know to be sure. -->"]),
+      "",
+    ].join("\n"),
+  };
+}

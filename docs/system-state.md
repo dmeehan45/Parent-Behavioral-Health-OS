@@ -1,6 +1,8 @@
 # The system as it stands
 
-**Written:** 2026-08-14, against `main` at this revision.
+**Written:** 2026-08-14, against `main` at this revision. Sections 6 and 7
+carry inline notes recording what [`context-intake-plan.md`](context-intake-plan.md)
+has since changed; the diagnoses themselves are unedited.
 
 Every other document here describes a contract, a workflow, or a decision made
 on one day. None of them says what the whole thing currently *is* — what has
@@ -140,8 +142,9 @@ Not deliberately — these are the gaps:
 | Research handoffs | 2 — one real, one worked example |
 | Reviewer decision files | 1, carrying 5 dispositions |
 | `researchTrace` citations in `content/` | 5 records |
-| Documentation | ~330 KB across 19 files |
-| …of which dated point-in-time reviews | 146 KB (~44%) |
+| Documentation | ~365 KB across 18 files |
+| …of which dated point-in-time reviews | 146 KB (~40%) |
+| Documents describing how to contribute | 1 contract, 3 guides, all linking to it |
 
 ## 6. Where this is overbuilt
 
@@ -154,16 +157,22 @@ example. The first real run then passed through all of them cleanly — which is
 one data point that the gates are workable, and also the run that showed the
 ceremony around them costs four pull requests per question.
 
+*Addressed — see the note under this section's heading.*
+
 **There are four places that tell a contributor how to contribute** — `AGENTS.md`
 (26 KB), `CONTRIBUTING.md`, `docs/authoring.md`, and `README.md`. This audit
 found them disagreeing three separate ways: the loop diagram
 (`Question` vs `Problem`), the pre-PR check list (7, 10, or 11 commands), and the
 experiment-section count (five in three files, six in the schema). All three are
-now fixed, and all three will drift again, because four descriptions of one
-contract is three too many. The research side now has the same shape: four
-documents (`research-workflow.md`, `research-routine.md`,
-`conversational-research.md`, `research-source-quality.md`) describe one
-workflow, and each new run so far has added one.
+now fixed, and all three would have drifted again, because four descriptions of
+one contract is three too many. The research side had grown the same shape —
+four documents describing one workflow, one added per run.
+
+*Addressed.* `AGENTS.md` now states the rule that governs this — a contract
+statement lives in exactly one file, everywhere else links — and owns the loop
+diagram, the check list, the section tables and the branch rule. `CONTRIBUTING.md`
+routes instead of restating. The four research documents are two:
+`research-workflow.md` for mechanics and `research-practice.md` for craft.
 
 **Nearly half the documentation is a snapshot rather than a contract.** Four
 dated reviews total 146 KB. They are good documents. But a reader cannot tell
@@ -186,6 +195,12 @@ helping good context arrive.** Every one of the gates above is a filter. Nothing
 in the system widens the intake. That asymmetry is why the research half has
 been built for months and carried nothing.
 
+> **Mostly addressed.** [`context-intake-plan.md`](context-intake-plan.md)
+> answers five of the six findings below, and its changes are in. The diagnosis
+> is kept unedited because it is the reasoning, and because the first finding —
+> the one about model surface area — is not a tooling problem and has not moved.
+> Each finding says underneath it what is now true.
+
 Concretely:
 
 **Context can only land where the model has a place for it.** This is the real
@@ -198,6 +213,14 @@ evidence audit says must exist before any Metric is usable. That content has to
 go in prose today, where nothing can validate it, project it, or read it back.
 **You widen the funnel by widening the model, not by building an importer.**
 
+*Half addressed.* Metrics now have the eight fields — `startEvent`, `endEvent`,
+`denominator`, `horizon`, `missingness`, `confounders`, `balancingSignals`,
+`permittedUse` — so measurement research has somewhere to land, and a Metric
+claiming data without a stated clock is refused. **The larger half has not
+moved:** `family-demand` still has no Steps, six of ten lifecycle
+transformations are still unmodelled, and no amount of intake tooling changes
+that. This remains the binding constraint.
+
 **One handoff per run, hand-authored, one finding at a time.** The contract takes
 `web`, `publication`, `repository` and `session` sources and a list of findings.
 There is no path for the cheap, high-volume kind of context: a document set, an
@@ -205,13 +228,27 @@ interview corpus, a competitor scan, a literature sweep. Nothing is wrong with
 the contract — it was designed for a conversational agent on a GitHub connector,
 and it fits that actor exactly. It is simply the only door.
 
+*Addressed.* It is still one file per run and still the only door, which is
+right. What changed is what fits through it: a handoff now carries **notes**
+alongside findings — anchored context that changes no claim — so a document
+set, a literature sweep or a competitor scan enters at the cost of reading
+rather than the cost of judging.
+
 **The reviewer is the entire throughput, and the same bar is applied to
-everything.** `/review` decides one finding at a time, and `docs/research-routine.md`
+everything.** `/review` decides one finding at a time, and `research-workflow.md`
 is explicit that the answer to volume is to slow down rather than lower the bar.
 That is right for **belief**. It is applied uniformly to things that are not
 belief: that a source exists, that a definition is standard, that a competitor
 does X. There is no cheap lane for context that changes no claim, so the
 expensive lane is the only lane and it is one person wide.
+
+*Addressed.* Notes are dispositioned as a set in one line, so the reviewer's
+per-item attention is spent only on findings, which are the only things that
+can change belief. And the reviewer no longer has to be at `/review` to spend
+it: a person may decide in the conversation the research happened in, with the
+agent recording the decision file over the hash CI printed. Both lanes carry
+identical guarantees, because everything enforced lives in the file rather than
+in the surface. A run went from four pull requests to two.
 
 **Reviewer decisions have no durable home.** Nine canonical records cite
 decisions as prose — "Adversarial review decisions D4 and D7, 2026-08-14". Those
@@ -220,16 +257,32 @@ there is no equivalent for reviewer-authored direction, even though D1–D8 are
 what actually shaped the current topology. `docs/decisions/` holds one ADR, and
 it is about tooling.
 
+*Not addressed.* Still true, and now the oldest unanswered finding in this
+document.
+
 **Large structured thinking cannot enter as structure.** The deep dive ranks
 eight candidate Problems across five dimensions with falsification prompts for
 the top three. It is 45 KB of exactly the material this system exists to hold,
 and it sits in Markdown that nothing reads. The gap finder cannot see it, the
 map cannot draw it, `/review` cannot order it.
 
+*Addressed, and unused.* `run.kind: reflection` carries structured thinking
+about the model, and **candidates** propose that something should exist — with
+targets, what it rests on, why it ranks where it does, and what would weaken
+it, but never a title. `/review` orders them, `/review/apply` composes the
+skeleton, and the queue counts the accepted ones nobody converted. Converting
+the deep dive's eight is now content work waiting on a person.
+
 **The gap finder only measures thinness, never saturation.** It reports
 `unmeasured`, `unevidenced`, `unproven`, `unsupplied`, `thin`. It cannot report
 "forty sources bear on this and no Claim has been written," because it reads
 `content/` and coverage, never the staging layer's volume.
+
+*Addressed.* Four kinds joined it — `undecided`, `unapplied`, `unconverted`
+and `saturated` — reading the research view alongside the projection, and
+sorted above every invitation to research because they are answered by writing.
+"Several pieces of context anchor here and nothing has changed what it says" is
+now a sentence the queue prints.
 
 ### Where the balance is right, and should not be touched
 

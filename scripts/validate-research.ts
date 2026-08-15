@@ -1,6 +1,7 @@
 import {
   checkForRepeatedFindings,
   checkHandoffTargets,
+  checkReflections,
   checkSupersedes,
   loadDecisions,
   loadHandoffs,
@@ -23,6 +24,7 @@ run(() => {
   const questions = loadQuestions();
 
   checkForRepeatedFindings(handoffs);
+  checkReflections(handoffs);
   checkAnsweredQuestions(handoffs, questions);
   validateDecisions(handoffs, decisions);
   checkSupersedes(handoffs, decisions);
@@ -31,13 +33,20 @@ run(() => {
   // the packet is derived and CI renders it onto the pull request.
   if (process.argv.includes("--check-reviews")) checkCommittedPackets(handoffs);
 
-  checkHandoffTargets(handoffs);
+  checkHandoffTargets(handoffs, new Set(questions.map(({ question }) => question.id)));
 
   const coverage = reviewCoverage(handoffs, decisions);
   console.log(`Validated ${handoffs.length} research handoff(s), ${decisions.length} decision file(s), and ${questions.length} queued question(s).`);
   console.log(`Reviewed ${coverage.decided} of ${coverage.findings} finding(s).`);
   if (coverage.undecided.length) {
     console.log(`Awaiting a reviewer at /review: ${coverage.undecided.join(", ")}`);
+  }
+  // Notes are reported as a batch, because that is how they are decided. A run
+  // whose context is waiting is different from one whose findings are waiting,
+  // and collapsing them would hide the cheap work behind the expensive work.
+  if (coverage.notes) {
+    console.log(`Noted ${coverage.notedRuns} of ${coverage.runsWithNotes} run(s) carrying ${coverage.notes} context note(s).`);
+    if (coverage.unnotedRuns.length) console.log(`Context awaiting a reviewer: ${coverage.unnotedRuns.join(", ")}`);
   }
 
   // Reported, never fatal. A later run re-reading a source to qualify what it

@@ -11,7 +11,7 @@ import {
 import { OpenEnds } from "@/components/model/open-ends";
 import { ResearchAbout } from "@/components/research/research-about";
 import { openEnds } from "@/lib/model/open-ends";
-import { researchAboutRecord } from "@/lib/research/glance";
+import { notesAboutRecord, researchAboutRecord } from "@/lib/research/glance";
 import type { ModelGraph, ModelNode } from "@/lib/model/types";
 
 /**
@@ -33,6 +33,7 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
   // handoff from moving the map's revision — and `researchAboutRecord` is the
   // reason an unreviewed file cannot take a stage page down with it.
   const research = researchAboutRecord(node.contentId);
+  const notes = notesAboutRecord(node.contentId);
   // Authority is the guardrail that keeps a proposal from reading as policy, so
   // what the word means cannot live in a `title` a touch reader never sees. The
   // map has the legend for this; a record page has nowhere else to put it.
@@ -105,7 +106,7 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
         </section>
       ) : null}
 
-      <ResearchAbout items={research} />
+      <ResearchAbout items={research} notes={notes} />
 
       <OpenEnds ends={openEnds(graph, node)} />
 

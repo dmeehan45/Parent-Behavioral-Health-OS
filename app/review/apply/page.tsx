@@ -10,6 +10,13 @@ export const metadata = {
 };
 
 export default function ApplyPage() {
-  const accepted = allFindings(projectReview().runs).filter(({ finding }) => finding.state === "accepted");
-  return <ApplyWorkspace items={accepted} />;
+  const runs = projectReview().runs;
+  const accepted = allFindings(runs).filter(({ finding }) => finding.state === "accepted");
+  // An accepted candidate is authorized and has changed nothing, which is the
+  // same debt an accepted finding carries — so it belongs on the same page. The
+  // difference is what composing it produces: a skeleton to name, not a Claim.
+  const candidates = runs.flatMap((run) =>
+    run.candidates.filter((candidate) => candidate.state === "accepted").map((candidate) => ({ run, candidate })),
+  );
+  return <ApplyWorkspace items={accepted} candidates={candidates} />;
 }

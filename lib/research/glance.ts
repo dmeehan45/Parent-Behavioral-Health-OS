@@ -1,6 +1,6 @@
 import { loadDecisions, loadHandoffs, reviewCoverage } from "./intake";
 import { projectReview } from "./projection";
-import { researchAbout, type ReviewFinding, type ReviewRun } from "./view";
+import { notesAbout, researchAbout, type ReviewFinding, type ReviewNote, type ReviewRun } from "./view";
 
 /**
  * Research, read from surfaces that are not the research page.
@@ -35,6 +35,23 @@ export function reviewDebt(): number {
 export function researchAboutRecord(nodeId: string): Array<{ run: ReviewRun; finding: ReviewFinding }> {
   try {
     return researchAbout(projectReview().runs, nodeId);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Context anchored to this record.
+ *
+ * This is where a note is *for*. A note is cheap to accept precisely because it
+ * is not going to change what the model claims — which would make it worthless
+ * if it then sat in a staging file nobody opened. Anchoring puts it in front of
+ * the person reading the record it bears on, which is the only reader who was
+ * ever going to want it.
+ */
+export function notesAboutRecord(nodeId: string): Array<{ run: ReviewRun; note: ReviewNote }> {
+  try {
+    return notesAbout(projectReview().runs, nodeId);
   } catch {
     return [];
   }

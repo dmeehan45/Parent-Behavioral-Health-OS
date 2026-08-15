@@ -35,9 +35,40 @@ test("a reference or accepted research trace satisfies the objective evidence ga
     checkContentQuality([
       record({ authority: "validated", provenance: { source: "public-research", references: ["source-a"] } }),
       record({ kind: "observed", confidence: "high", researchTrace: [{ decision: "accepted" }] }),
-      record({ file: "content/metrics/example.md", dataStatus: "partially-available", researchTrace: [{}] }),
+      record({
+        file: "content/metrics/example.md",
+        dataStatus: "partially-available",
+        researchTrace: [{}],
+        startEvent: "the match is accepted",
+        endEvent: "the first encounter completes",
+      }),
     ]),
   );
+});
+
+/**
+ * The contradiction this exists for: `time-to-first-session` said its decision
+ * was about the accepted-match-to-encounter transition while its prose described
+ * a clock starting at match readiness. Two different measurements, agreeing by
+ * coincidence, in two places nothing could compare — because one of them was a
+ * sentence.
+ *
+ * Only checked once a Metric claims data. A measure nobody collects is allowed
+ * to be undefined, and most of them here are.
+ */
+test("a metric claiming data has to say what the number is measured between", () => {
+  const claiming = (extra: object) =>
+    record({ file: "content/metrics/example.md", dataStatus: "available", researchTrace: [{}], ...extra });
+
+  assert.throws(() => checkContentQuality([claiming({})]), /Undefined measurement/);
+  assert.throws(() => checkContentQuality([claiming({ startEvent: "the match is accepted" })]), /Undefined measurement/);
+  assert.doesNotThrow(() =>
+    checkContentQuality([claiming({ startEvent: "the match is accepted", endEvent: "the first encounter completes" })]),
+  );
+
+  // An unmeasured metric stays free to be undefined — that is honest, and it is
+  // the state every metric in the repository is currently in.
+  assert.doesNotThrow(() => checkContentQuality([record({ file: "content/metrics/example.md", dataStatus: "unknown" })]));
 });
 
 test("seed filler cannot masquerade as described step content", () => {

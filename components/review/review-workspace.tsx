@@ -49,32 +49,36 @@ export function ReviewWorkspace({
   const [reviewer, setReviewer] = useState(run.reviewer ?? "");
   const [drafts, setDrafts] = useState<Record<string, Draft>>(() =>
     Object.fromEntries(
-      run.findings.map((finding) => [
-        finding.decisionId,
-        finding.decision
+      [...run.findings, ...run.candidates].map((item) => [
+        item.decisionId,
+        item.decision
           ? {
-              disposition: finding.decision.disposition as Disposition,
-              rationale: finding.decision.rationale ?? "",
-              editedRecommendation: finding.decision.editedRecommendation ?? "",
-              supersedes: finding.decision.supersedes ?? "",
+              disposition: item.decision.disposition as Disposition,
+              rationale: item.decision.rationale ?? "",
+              editedRecommendation: item.decision.editedRecommendation ?? "",
+              supersedes: ("supersedes" in item.decision ? item.decision.supersedes : undefined) ?? "",
             }
           : { ...EMPTY },
       ]),
     ),
   );
   const [copied, setCopied] = useState(false);
+  // Notes get one control for the whole set, which is the entire point of them.
+  // Per-note state here would rebuild the expensive lane for the cheap material.
+  const [notesDisposition, setNotesDisposition] = useState<"noted" | "discard" | "">(run.notesDecision?.disposition ?? "");
 
   const update = (id: string, patch: Partial<Draft>) => {
     setDrafts((current) => ({ ...current, [id]: { ...(current[id] ?? EMPTY), ...patch } }));
     setCopied(false);
   };
 
-  const answered = run.findings.filter((finding) => drafts[finding.decisionId]?.disposition);
+  const decidable = [...run.findings, ...run.candidates];
+  const answered = decidable.filter((item) => drafts[item.decisionId]?.disposition);
 
   // The same rules the validator enforces, said before the file is written
   // rather than after it is committed.
-  const incomplete = answered.filter((finding) => {
-    const draft = drafts[finding.decisionId];
+  const incomplete = answered.filter((item) => {
+    const draft = drafts[item.decisionId];
     const disposition = draft?.disposition;
     if (!disposition) return false;
     if (requiresRationale(disposition) && !draft.rationale.trim()) return true;
@@ -95,19 +99,24 @@ export function ReviewWorkspace({
       // Without it a decision has no position in time and the research surface
       // can only ever show a set, never a sequence.
       `decidedAt: ${new Date().toISOString().slice(0, 10)}`,
+      // This page is one of two lanes. Stamping which one produced the file
+      // costs nothing here and is the only way a later audit can tell them
+      // apart — the guarantees are identical, so nothing else distinguishes them.
+      "decidedVia: review",
       "decisions:",
     ];
-    for (const finding of run.findings) {
-      const draft = drafts[finding.decisionId];
+    for (const item of [...run.findings, ...run.candidates]) {
+      const draft = drafts[item.decisionId];
       if (!draft?.disposition) continue;
-      lines.push(`  - id: ${finding.decisionId}`, `    disposition: ${draft.disposition}`);
+      lines.push(`  - id: ${item.decisionId}`, `    disposition: ${draft.disposition}`);
       if (draft.rationale.trim()) lines.push(`    rationale: ${scalar(draft.rationale.trim())}`);
       if (draft.editedRecommendation.trim()) lines.push(`    editedRecommendation: ${scalar(draft.editedRecommendation.trim())}`);
       if (draft.supersedes) lines.push(`    supersedes: ${draft.supersedes}`);
     }
     if (answered.length === 0) lines.push("  []");
+    if (run.notes.length && notesDisposition) lines.push("notes:", `  disposition: ${notesDisposition}`);
     return `${lines.join("\n")}\n`;
-  }, [answered.length, drafts, reviewer, run.findings, run.hash, run.id]);
+  }, [answered.length, drafts, notesDisposition, reviewer, run.candidates, run.findings, run.hash, run.id, run.notes.length]);
 
   const copy = async () => {
     try {
@@ -161,6 +170,125 @@ export function ReviewWorkspace({
           />
         ))}
       </section>
+
+      {run.candidates.length ? (
+        <section className="review-candidates" aria-label="Proposed for the model">
+          <h2 className="field-label">
+            {run.candidates.length} proposal{run.candidates.length === 1 ? "" : "s"} for the model
+          </h2>
+          <p className="small muted">
+            Each proposes that something should <em>exist</em>. None carries a name — accepting one composes a skeleton
+            with the references filled in and the naming left to you, because a name written by the analysis is how a
+            fix gets recorded as a problem.
+          </p>
+          {run.candidates.map((candidate) => {
+            const draft = drafts[candidate.decisionId] ?? EMPTY;
+            return (
+              <article className="candidate-card" key={candidate.decisionId}>
+                <Badge tone="accent">{candidate.kind}</Badge>
+                <p>{candidate.description}</p>
+                {candidate.targets.length ? (
+                  <p className="small muted">
+                    Bites{" "}
+                    {candidate.targets.map((target, index) => (
+                      <span key={target.id}>
+                        {index > 0 ? ", " : ""}
+                        <Link href={target.href}>{target.title}</Link>
+                      </span>
+                    ))}
+                  </p>
+                ) : null}
+                {candidate.rationale ? <p className="small muted">Why it ranks here: {candidate.rationale}</p> : null}
+                {candidate.wouldWeakenIf ? (
+                  <p className="small muted">Would weaken if: {candidate.wouldWeakenIf}</p>
+                ) : null}
+                <div className="field">
+                  <label htmlFor={`candidate-${candidate.decisionId}`}>Decision</label>
+                  <select
+                    id={`candidate-${candidate.decisionId}`}
+                    value={draft.disposition ?? ""}
+                    onChange={(event) =>
+                      update(candidate.decisionId, { disposition: (event.target.value || undefined) as Disposition })
+                    }
+                  >
+                    <option value="">not yet decided</option>
+                    {DISPOSITIONS.map((disposition) => (
+                      <option key={disposition} value={disposition}>
+                        {disposition}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {draft.disposition && requiresRationale(draft.disposition) ? (
+                  <div className="field">
+                    <label htmlFor={`candidate-why-${candidate.decisionId}`}>Why</label>
+                    <textarea
+                      id={`candidate-why-${candidate.decisionId}`}
+                      value={draft.rationale}
+                      onChange={(event) => update(candidate.decisionId, { rationale: event.target.value })}
+                    />
+                  </div>
+                ) : null}
+                {draft.disposition && requiresEditedRecommendation(draft.disposition) ? (
+                  <div className="field">
+                    <label htmlFor={`candidate-edit-${candidate.decisionId}`}>What it should say instead</label>
+                    <textarea
+                      id={`candidate-edit-${candidate.decisionId}`}
+                      value={draft.editedRecommendation}
+                      onChange={(event) => update(candidate.decisionId, { editedRecommendation: event.target.value })}
+                    />
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
+        </section>
+      ) : null}
+
+      {run.notes.length ? (
+        <section className="review-notes" aria-label="Context notes">
+          <h2 className="field-label">
+            {run.notes.length} context note{run.notes.length === 1 ? "" : "s"} — decided as a set
+          </h2>
+          <p className="small muted">
+            These change no claim and can never be cited as evidence. Read them, then say once whether this run&rsquo;s
+            context is worth keeping. Anything here that needs its own judgement should have been a finding — say so
+            rather than accepting it as context.
+          </p>
+          <ul className="review-list">
+            {run.notes.map((note) => (
+              <li key={note.id}>
+                {note.statement}
+                <span className="small muted">
+                  {" "}
+                  — for{" "}
+                  {note.anchors.map((anchor, index) => (
+                    <span key={anchor.id}>
+                      {index > 0 ? ", " : ""}
+                      <Link href={anchor.href}>{anchor.title}</Link>
+                    </span>
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="field">
+            <label htmlFor="notes-disposition">Keep this context?</label>
+            <select
+              id="notes-disposition"
+              value={notesDisposition}
+              onChange={(event) => {
+                setNotesDisposition(event.target.value as "noted" | "discard" | "");
+                setCopied(false);
+              }}
+            >
+              <option value="">not yet decided</option>
+              <option value="noted">noted — keep all {run.notes.length}</option>
+              <option value="discard">discard — none of it is worth keeping</option>
+            </select>
+          </div>
+        </section>
+      ) : null}
 
       {run.openQuestions.length ? (
         <section className="review-open" aria-label="Open questions">
