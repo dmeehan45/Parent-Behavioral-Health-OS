@@ -44,6 +44,13 @@ function decisionSkeleton({ handoff, hash }: LoadedHandoff) {
       "    # editedRecommendation: required for accept-with-edits",
     );
   }
+  if (handoff.notes.length) {
+    lines.push(
+      "notes:",
+      `  disposition: TODO noted | discard   # all ${handoff.notes.length} of them, in one line`,
+      "  # except: [note-id]   # the few going the other way",
+    );
+  }
   lines.push("```", "");
   return lines;
 }
@@ -87,6 +94,24 @@ export function renderReview({ handoff, file, hash }: LoadedHandoff) {
       `Allowed response: ${allowed}.`,
       "",
     );
+  }
+  if (handoff.notes.length) {
+    lines.push(
+      "## Context notes",
+      "",
+      `${handoff.notes.length} note(s). These change no claim and cannot be cited by \`researchTrace\`. ` +
+        "Read them as a set and disposition them in one line; anything here that needs its own judgement " +
+        "should have been proposed as a finding.",
+      "",
+    );
+    handoff.notes.forEach((note) => {
+      const sources = note.sourceIds.length ? note.sourceIds.map((id) => `\`${id}\``).join(", ") : "none";
+      lines.push(
+        `- **${note.id}** — ${note.statement}`,
+        `  Anchored to: ${note.anchors.map((id) => `\`${id}\``).join(", ")}. Sources: ${sources}.`,
+      );
+    });
+    lines.push("");
   }
   lines.push("## Open questions", "");
   if (!handoff.questions.length) lines.push("None.", "");

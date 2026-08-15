@@ -137,6 +137,31 @@ export function projectReview(): ReviewIndex {
       return { ...partial, state: findingState(partial) };
     });
 
+    // A note's state comes from one line covering the whole set, plus the
+    // exceptions named against it. `except` flips whichever way the batch went,
+    // so one good note survives a discarded batch and one bad note can be
+    // dropped from a kept one.
+    const notesDecision = record?.notes;
+    const flipped = new Set(notesDecision?.except ?? []);
+    const notes = handoff.notes.map((note) => {
+      const kept = notesDecision ? (notesDecision.disposition === "noted") !== flipped.has(note.id) : undefined;
+      return {
+        id: note.id,
+        statement: note.statement,
+        sourceIds: note.sourceIds,
+        // An anchor may be a queued question rather than a canonical record.
+        // `titleOf` would call that unknown, which is exactly backwards: a note
+        // gathered for an open question is doing the job notes exist for.
+        anchors: note.anchors.map((anchor) =>
+          questionText.has(anchor)
+            ? { id: anchor, title: questionText.get(anchor) as string, href: `/review#${anchor}`, kind: "question" }
+            : { id: anchor, ...titleOf(anchor) },
+        ),
+        note: note.note,
+        state: kept === undefined ? ("awaiting" as const) : kept ? ("kept" as const) : ("discarded" as const),
+      };
+    });
+
     return {
       id: handoff.run.id,
       question: handoff.run.question,
@@ -150,6 +175,8 @@ export function projectReview(): ReviewIndex {
       answers: (handoff.run.answers ?? []).map((id) => ({ id, question: questionText.get(id) ?? id })),
       sources,
       findings,
+      notes,
+      notesDecision,
       openQuestions: handoff.questions,
       reviewer: record?.reviewer,
       decided: findings.filter((finding) => finding.decision).length,

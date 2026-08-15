@@ -1,6 +1,6 @@
 # Research review: example-public-research
 
-> Generated from handoff hash `94073564b95b46415a0433f5b0d2e34c1099e0ca1070a730ba81f580feb72f66`. Derived from the handoff; do not edit by hand.
+> Generated from handoff hash `c30fd2c910dc019c83e886f4b7f02c3f777b524b562b72f4d53923e7bdaf5171`. Derived from the handoff; do not edit by hand.
 
 ## Question
 
@@ -29,6 +29,13 @@ Unreviewed research should not change the canonical system map.
 
 Allowed response: accept | reject | defer | needs-research | accept-with-edits.
 
+## Context notes
+
+1 note(s). These change no claim and cannot be cited by `researchTrace`. Read them as a set and disposition them in one line; anything here that needs its own judgement should have been proposed as a finding.
+
+- **note-projection-is-derived** — The application renders a projection of content/, so a model change needs no application change.
+  Anchored to: `clinician-onboarding`. Sources: `source-project-readme`.
+
 ## Open questions
 
 - **question-review-owner:** Who is the accountable reviewer for a given intake pull request?
@@ -44,7 +51,7 @@ Copy this into `research/decisions/example-public-research.yaml`, replace every 
 ```yaml
 contractVersion: 1
 runId: example-public-research
-reviewedHandoffHash: 94073564b95b46415a0433f5b0d2e34c1099e0ca1070a730ba81f580feb72f66
+reviewedHandoffHash: c30fd2c910dc019c83e886f4b7f02c3f777b524b562b72f4d53923e7bdaf5171
 reviewer: TODO who is accountable for this decision
 decidedAt: TODO today, as YYYY-MM-DD
 decidedVia: review   # or 'conversation', if the reviewer decided in the chat
@@ -53,6 +60,9 @@ decisions:
     disposition: TODO accept | reject | defer | needs-research | accept-with-edits
     # rationale: required for reject, defer, and needs-research
     # editedRecommendation: required for accept-with-edits
+notes:
+  disposition: TODO noted | discard   # all 1 of them, in one line
+  # except: [note-id]   # the few going the other way
 ```
 
 ## Canonical change gate

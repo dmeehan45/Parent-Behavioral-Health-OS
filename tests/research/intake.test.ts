@@ -4,8 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import yaml from "js-yaml";
-import { handoffSchema } from "../../lib/research/schema";
-import { decisionId, handoffHash, loadDecisions, loadHandoffs, reviewCoverage, validateDecisions } from "../../lib/research/intake";
+import { handoffHash, handoffSchema } from "../../lib/research/schema";
+import { decisionId, loadDecisions, loadHandoffs, reviewCoverage, validateDecisions } from "../../lib/research/intake";
 import { checkCommittedPackets, packetIsCurrent, renderReview, writeReviews } from "../../lib/research/review";
 
 const CONTRACT = "research/contract/v1.example.yaml";

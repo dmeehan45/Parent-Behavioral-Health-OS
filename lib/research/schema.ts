@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { z } from "zod";
 const idSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "expected a lowercase kebab-case ID");
 
@@ -129,6 +130,42 @@ export const handoffSchema = z.object({
       }),
     )
     .min(1),
+  /**
+   * Context that changes no claim.
+   *
+   * A finding proposes something the model might come to believe, so it costs a
+   * reviewer's judgement one at a time. Most of what a research conversation
+   * produces is not that: a source that exists, a standard definition, a
+   * competitor's behaviour, the shape of a regulation. Charging the expensive
+   * lane for those is why the expensive lane was the only lane, and why volume
+   * had nowhere to go.
+   *
+   * Two rules make notes safe to accept in bulk:
+   *
+   * - **A note must be anchored.** At least one canonical record or queued
+   *   question it is context *for*. Unanchored context is how a context base
+   *   turns into a landfill: it accumulates, nothing retrieves it, and nobody
+   *   can say what it was for. Anchoring means a note is found later by the
+   *   person reading the thing it bears on.
+   * - **A note cannot become belief.** Nothing here may raise a claim's
+   *   confidence, and `researchTrace` cannot cite a note — it resolves finding
+   *   IDs, and a note is not one. Context that turns out to bear on what the
+   *   model claims re-enters as a finding in a later run, through the full gate.
+   */
+  notes: z
+    .array(
+      z.object({
+        id: idSchema,
+        statement: z.string().min(1).max(1000),
+        sourceIds: z.array(idSchema).default([]),
+        // The anchor is the whole bloat defence, so it is required in the
+        // schema rather than checked later: a note with nowhere to belong
+        // cannot be written down at all.
+        anchors: z.array(idSchema).min(1),
+        note: z.string().optional(),
+      }),
+    )
+    .default([]),
   questions: z.array(z.object({ id: idSchema, question: z.string().min(1) })).default([]),
 });
 
@@ -161,6 +198,25 @@ export const decisionFileSchema = z.object({
   // /review is slower and does not), and a later audit of that trade needs to
   // know which was used.
   decidedVia: z.enum(["review", "conversation"]).optional(),
+  /**
+   * Notes are dispositioned as a set, in one line.
+   *
+   * That is the point of them. A reviewer reads the note list, decides whether
+   * this run's context is worth keeping, and says so once. `except` names the
+   * few going the other way, so a mostly-good batch does not force a per-item
+   * pass and one bad note does not sink a good batch.
+   *
+   * A note needing individual judgement is a finding wearing a note's clothes;
+   * the agent should have proposed it as one, and the reviewer should say so
+   * rather than reaching for a disposition that is not here.
+   */
+  notes: z
+    .object({
+      disposition: z.enum(["noted", "discard"]),
+      except: z.array(idSchema).default([]),
+      rationale: z.string().optional(),
+    })
+    .optional(),
   decisions: z.array(
     z.object({
       id: idSchema,
@@ -223,3 +279,53 @@ export type ResearchHandoff = z.infer<typeof handoffSchema>;
 export type DecisionFile = z.infer<typeof decisionFileSchema>;
 export type ResearchQuestion = z.infer<typeof questionSchema>;
 export type SafetyAllowlist = z.infer<typeof safetyAllowlistSchema>;
+
+/**
+ * What the handoff says, with what it does not say removed.
+ *
+ * Absent and empty optional values are dropped before hashing. That is not
+ * tidiness — it is what lets the contract grow.
+ *
+ * The hash is the reviewer's guarantee: a decision cites it, and if the handoff
+ * moves afterwards the decision stops authorizing anything. So it has to be
+ * sensitive to what a run *claims* and insensitive to the schema's own growth.
+ * Hashing the parsed object directly is not: adding `notes` with a `[]` default
+ * re-hashed every handoff ever written — including one a person had reviewed
+ * weeks earlier — and would have demanded a fresh review to re-assert something
+ * nobody had changed. Every future optional field would have done it again.
+ *
+ * With empties normalized away, a field nobody used hashes exactly as it did
+ * before it existed. Verified: the stored hash of the first real run is
+ * unchanged by the addition of notes.
+ *
+ * The invariant this leaves: **add fields, never reorder or rename them.** Key
+ * order still reaches the digest, so moving an existing field would invalidate
+ * history for nothing. No schema needs reordering.
+ */
+function saidOutLoud(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(saidOutLoud);
+  if (value && typeof value === "object" && !(value instanceof Date)) {
+    const spoken: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+      if (entry === undefined) continue;
+      if (Array.isArray(entry) && entry.length === 0) continue;
+      spoken[key] = saidOutLoud(entry);
+    }
+    return spoken;
+  }
+  return value;
+}
+
+/**
+ * Lives beside the contract, not beside the loader.
+ *
+ * `lib/content/repository.ts` checks this hash inside the live projection and
+ * `lib/research/intake.ts` checks it at validation. They had a copy each, which
+ * agreed until the recipe changed — and then disagreed in the worst direction:
+ * the map refused a trace the validator had passed. One definition, imported by
+ * both, and the loader cannot import the intake because the intake reads the
+ * loader.
+ */
+export function handoffHash(handoff: ResearchHandoff) {
+  return createHash("sha256").update(JSON.stringify(saidOutLoud(handoff))).digest("hex");
+}

@@ -143,6 +143,14 @@ in your ear, and this lane is explicitly the trade in the other direction.
 
 ### 3. Notes: a cheaper unit than a finding
 
+*Landed.* One thing had to be fixed on the way, and it is worth knowing about:
+adding a single optional field re-hashed every handoff ever written, because the
+hash was taken over the parsed object and a `[]` default is not nothing. A
+decision a person had made weeks earlier stopped authorizing anything. Absent
+and empty values are now normalized away before hashing, which restores every
+existing hash exactly and makes all future optional fields safe — with one
+invariant left behind: **add fields, never reorder them.**
+
 **Change.** The handoff contract gains an optional `notes` list alongside
 `findings`. A note is atomic context that changes no claim: a source that
 exists, a standard definition, a competitor behaviour, a regulation's shape,

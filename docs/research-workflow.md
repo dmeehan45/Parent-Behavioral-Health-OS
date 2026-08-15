@@ -99,6 +99,51 @@ derived packet wherever it is rendered, and the `run` field of every
 `researchTrace` that cites it. Validation enforces the naming rather than
 letting a file drift away from the ID inside it.
 
+## Two kinds of output: findings and notes
+
+Choosing correctly between them is most of what makes a run cheap to review.
+
+A **finding** proposes something the model might come to believe. It costs the
+reviewer a judgement, one at a time, and it is the only thing that can end up
+cited in a `researchTrace`.
+
+A **note** is context that changes no claim: a source worth knowing about, a
+standard definition, how something is usually done, the shape of a regulation,
+what a competitor does. Most of what a research conversation produces is this.
+
+```yaml
+notes:
+  - id: note-telehealth-consent-varies-by-state
+    statement: Consent requirements for telebehavioral care differ materially by state.
+    sourceIds: [source-hhs-telebehavioral-guidance]
+    anchors: [care-initiation, define-matching-quality]
+```
+
+Two rules make notes safe to accept in bulk, and both are enforced:
+
+- **A note must be anchored** to at least one canonical record or queued
+  question — the thing it is context *for*. Unanchored context is how a context
+  base turns into a landfill: it accumulates, nothing retrieves it, and nobody
+  can later say what it was for. An anchored note reaches the record page it
+  bears on, and the brief of the next run over that territory.
+- **A note cannot become belief.** `researchTrace` resolves finding IDs, and a
+  note is not one; validation says so by name if anybody tries. Context that
+  turns out to bear on what the model claims comes back as a finding in a later
+  run, through the full gate.
+
+The reviewer dispositions the whole set in one line:
+
+```yaml
+notes:
+  disposition: noted      # or discard
+  except: [note-id]       # the few going the other way
+```
+
+**When in doubt, propose a finding.** A note that turns out to need its own
+judgement is a finding filed wrong, and the reviewer should say so rather than
+accepting it as context. The cheap lane is for material that is genuinely cheap;
+using it to slip a claim past a judgement is the one way to abuse it.
+
 ## Two lanes for deciding
 
 **The decision file is the gate, not the page that produced it.** Everything
@@ -180,6 +225,12 @@ a convenience, not a requirement.
   evidence stance, and review classification. Matching is advisory: `duplicate`
   or `qualifying` records name candidate Claims, but automation never merges,
   discards, or promotes them.
+- **Notes** are the other half of what a run produces — see below. Optional,
+  anchored, dispositioned as a set, and never citable as evidence.
+- Adding an optional field to this contract does not change the hash of a
+  handoff that does not use it, so a review already given stays valid. Absent
+  and empty values are normalized away before hashing. The corollary: **add
+  fields, never reorder or rename them.**
 - `evidenceQuality` is deliberately coarse and must not be read as a truth score:
   primary evidence can be weak or indirect, and a strong recent synthesis can
   be more decision-relevant than one primary study.

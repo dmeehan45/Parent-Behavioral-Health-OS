@@ -171,10 +171,24 @@ export type ReviewRun = {
   answers: Array<{ id: string; question: string }>;
   sources: ReviewSource[];
   findings: ReviewFinding[];
+  notes: ReviewNote[];
+  /** How the reviewer dispositioned this run's notes, as a set. */
+  notesDecision?: { disposition: "noted" | "discard"; except: string[]; rationale?: string };
   openQuestions: Array<{ id: string; question: string }>;
   reviewer?: string;
   decided: number;
   total: number;
+};
+
+/** Context that changes no claim, anchored to what it is context for. */
+export type ReviewNote = {
+  id: string;
+  statement: string;
+  sourceIds: string[];
+  anchors: Array<{ id: string; title: string; href: string; kind: string }>;
+  note?: string;
+  /** `kept` once a reviewer has said so; `discarded` if they said the opposite. */
+  state: "awaiting" | "kept" | "discarded";
 };
 
 /** A question waiting to be researched, or a gap the model has in itself. */
@@ -216,5 +230,21 @@ export function researchAbout(runs: ReviewRun[], nodeId: string) {
     ({ finding }) =>
       finding.suggestedTargets.some((target) => target.id === nodeId) ||
       finding.appliedIn.some((record) => record.id === nodeId),
+  );
+}
+
+/**
+ * Context anchored to this record.
+ *
+ * Discarded notes are excluded and notes still awaiting a reviewer are not —
+ * an undecided note is ordinary staging, the same as an undecided finding, and
+ * the record page labels it as such. A note a reviewer threw out should stop
+ * appearing, which is what makes `discard` worth having.
+ */
+export function notesAbout(runs: ReviewRun[], nodeId: string) {
+  return runs.flatMap((run) =>
+    run.notes
+      .filter((note) => note.state !== "discarded" && note.anchors.some((anchor) => anchor.id === nodeId))
+      .map((note) => ({ run, note })),
   );
 }

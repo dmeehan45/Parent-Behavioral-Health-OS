@@ -198,6 +198,21 @@ Four consequences worth knowing before you touch any of it:
   what earlier runs established. Restating an earlier finding exactly is a
   validation error, because a routine running twice a day would otherwise
   resurface the same sentence forever.
+- **A finding is not the only thing a run produces.** A finding proposes
+  something the model might come to believe and costs a judgement each. A
+  **note** is context that changes no claim, dispositioned as a set, and it is
+  how volume gets in without the reviewer paying per item. Two rules keep it
+  honest: a note must be **anchored** to a record or a queued question, and a
+  note can never be cited by `researchTrace`. When in doubt propose a finding —
+  a note needing its own judgement is a finding filed wrong.
+- **Adding an optional field to a research contract must not invalidate a
+  review.** Absent and empty values are normalized away before a handoff is
+  hashed, so a field nobody used hashes as it did before it existed. The
+  corollary is a rule: **add fields, never reorder or rename them.** Key order
+  still reaches the digest. `handoffHash` lives in `lib/research/schema.ts`
+  beside the contract, because the loader and the intake both check it and a
+  second copy of the recipe once let the live map refuse a trace that validation
+  had passed.
 - **The decision file is the gate, not the surface that produced it.** A person
   may decide at `/review` — a reading surface, not a form, where the evidence,
   the prior art, and what a finding would change sit next to the decision — or

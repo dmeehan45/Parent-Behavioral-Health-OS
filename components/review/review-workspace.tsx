@@ -63,6 +63,9 @@ export function ReviewWorkspace({
     ),
   );
   const [copied, setCopied] = useState(false);
+  // Notes get one control for the whole set, which is the entire point of them.
+  // Per-note state here would rebuild the expensive lane for the cheap material.
+  const [notesDisposition, setNotesDisposition] = useState<"noted" | "discard" | "">(run.notesDecision?.disposition ?? "");
 
   const update = (id: string, patch: Partial<Draft>) => {
     setDrafts((current) => ({ ...current, [id]: { ...(current[id] ?? EMPTY), ...patch } }));
@@ -110,8 +113,9 @@ export function ReviewWorkspace({
       if (draft.supersedes) lines.push(`    supersedes: ${draft.supersedes}`);
     }
     if (answered.length === 0) lines.push("  []");
+    if (run.notes.length && notesDisposition) lines.push("notes:", `  disposition: ${notesDisposition}`);
     return `${lines.join("\n")}\n`;
-  }, [answered.length, drafts, reviewer, run.findings, run.hash, run.id]);
+  }, [answered.length, drafts, notesDisposition, reviewer, run.findings, run.hash, run.id, run.notes.length]);
 
   const copy = async () => {
     try {
@@ -165,6 +169,51 @@ export function ReviewWorkspace({
           />
         ))}
       </section>
+
+      {run.notes.length ? (
+        <section className="review-notes" aria-label="Context notes">
+          <h2 className="field-label">
+            {run.notes.length} context note{run.notes.length === 1 ? "" : "s"} — decided as a set
+          </h2>
+          <p className="small muted">
+            These change no claim and can never be cited as evidence. Read them, then say once whether this run&rsquo;s
+            context is worth keeping. Anything here that needs its own judgement should have been a finding — say so
+            rather than accepting it as context.
+          </p>
+          <ul className="review-list">
+            {run.notes.map((note) => (
+              <li key={note.id}>
+                {note.statement}
+                <span className="small muted">
+                  {" "}
+                  — for{" "}
+                  {note.anchors.map((anchor, index) => (
+                    <span key={anchor.id}>
+                      {index > 0 ? ", " : ""}
+                      <Link href={anchor.href}>{anchor.title}</Link>
+                    </span>
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="field">
+            <label htmlFor="notes-disposition">Keep this context?</label>
+            <select
+              id="notes-disposition"
+              value={notesDisposition}
+              onChange={(event) => {
+                setNotesDisposition(event.target.value as "noted" | "discard" | "");
+                setCopied(false);
+              }}
+            >
+              <option value="">not yet decided</option>
+              <option value="noted">noted — keep all {run.notes.length}</option>
+              <option value="discard">discard — none of it is worth keeping</option>
+            </select>
+          </div>
+        </section>
+      ) : null}
 
       {run.openQuestions.length ? (
         <section className="review-open" aria-label="Open questions">
