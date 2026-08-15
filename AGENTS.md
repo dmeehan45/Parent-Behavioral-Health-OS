@@ -182,6 +182,13 @@ Four consequences worth knowing before you touch any of it:
 
 - **`research/` never moves the map's revision.** `contentRevision()` hashes
   `content/` only. Staging churn must not make every open map re-fetch.
+- **The queue counts what is owed, not only what is thin.** `findGaps` reports
+  `undecided`, `unapplied`, `unconverted` and `saturated` above every invitation
+  to go and research something, because those are answered by writing rather
+  than by researching. `saturated` — several pieces of context anchored to a
+  record that still claims nothing — is the anti-bloat instrument: a context
+  base growing correctly and changing nothing looks fine from the inside until
+  something counts it.
 - **An intake commits the handoff and nothing else.** Everything a reviewer
   reads is derived from that one file, and the actor this workflow is written
   for — a conversational agent on a GitHub connector — writes files through the

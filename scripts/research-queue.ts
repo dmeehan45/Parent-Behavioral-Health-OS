@@ -1,5 +1,5 @@
 import { getRepository } from "../lib/content/repository";
-import { findGaps } from "../lib/research/gaps";
+import { findGaps, type GapKind } from "../lib/research/gaps";
 import { loadDecisions, loadHandoffs, reviewCoverage } from "../lib/research/intake";
 import { buildQueue, checkAnsweredQuestions, loadQuestions, nextUp } from "../lib/research/questions";
 import { run } from "./report";
@@ -19,7 +19,7 @@ run(() => {
 
   const queue = buildQueue(questions, handoffs);
   const open = nextUp(queue);
-  const gaps = findGaps(getRepository(), handoffs, questions);
+  const gaps = findGaps(getRepository(), handoffs, questions, decisions);
 
   // `--top` prints the one identifier a run should brief on, and nothing else.
   //
@@ -53,21 +53,42 @@ run(() => {
     console.log("");
   }
 
-  console.log("# Gaps in the model itself\n");
-  if (!gaps.length) console.log("  None found.\n");
-  for (const gap of gaps.slice(0, 12)) {
-    console.log(`  ${gap.kind}  ${gap.subjectKind} ${gap.subject}`);
-    console.log(`      ${gap.why}`);
-    console.log(`      ask: ${gap.suggestedQuestion}`);
-    console.log("");
+  // Two lists, not one, because they ask for different work. Owed work is
+  // answered by writing; a thin part of the model is answered by researching.
+  // Printing them together made the queue read as one long invitation to go and
+  // find out more, which is the wrong instruction for a repository whose intake
+  // can outrun it.
+  const OWED: GapKind[] = ["undecided", "unapplied", "unconverted", "saturated"];
+  const owed = gaps.filter((gap) => OWED.includes(gap.kind));
+  const thin = gaps.filter((gap) => !OWED.includes(gap.kind));
+
+  const print = (list: typeof gaps, limit: number) => {
+    for (const gap of list.slice(0, limit)) {
+      console.log(`  ${gap.kind}  ${gap.subjectKind} ${gap.subject}`);
+      console.log(`      ${gap.why}`);
+      console.log(`      ask: ${gap.suggestedQuestion}`);
+      console.log("");
+    }
+    if (list.length > limit) console.log(`  ...and ${list.length - limit} more.\n`);
+  };
+
+  if (owed.length) {
+    console.log("# Already owed — these are answered by writing, not researching\n");
+    print(owed, 12);
   }
-  if (gaps.length > 12) console.log(`  ...and ${gaps.length - 12} more.\n`);
+
+  console.log("# Gaps in the model itself\n");
+  if (!thin.length) console.log("  None found.\n");
+  print(thin, 12);
 
   const coverage = reviewCoverage(handoffs, decisions);
   console.log("# Review debt\n");
-  console.log(`  ${coverage.decided} of ${coverage.findings} finding(s) reviewed.`);
+  console.log(`  ${coverage.decided} of ${coverage.findings} finding(s) and candidate(s) reviewed.`);
   if (coverage.undecided.length) {
-    console.log(`  Waiting on a reviewer at /review: ${coverage.undecided.length} finding(s).`);
+    console.log(`  Waiting on a reviewer at /review: ${coverage.undecided.length}.`);
+  }
+  if (coverage.notes) {
+    console.log(`  ${coverage.notes} context note(s) across ${coverage.runsWithNotes} run(s); ${coverage.notedRuns} dispositioned.`);
   }
   console.log("");
   console.log("Next: npm run research:brief -- <question-id>\n");

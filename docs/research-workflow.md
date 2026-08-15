@@ -444,10 +444,24 @@ scan section above says.
 
 ### If it gets noisy
 
-The failure mode to watch is review debt: findings arriving faster than anyone
-decides them. `npm run research:queue` and `npm run validate:research` both
-print it, and `/review` shows which runs are waiting.
+The failure mode to watch is the intake running ahead of the model. It has four
+shapes, and `npm run research:queue` prints all of them above the model's own
+thin spots, under **already owed**:
 
-If it grows, slow the routine down rather than lowering the bar for accepting a
-finding. The bottleneck is a person reading carefully, and that is the part
-worth protecting.
+| | |
+| --- | --- |
+| `undecided` | Findings and candidates waiting on a person |
+| `unapplied` | Accepted findings no canonical record cites — somebody authorized a change that was never made |
+| `unconverted` | Accepted candidates nothing in the model answers to yet |
+| `saturated` | A record several pieces of context anchor to, that still claims nothing |
+
+They sort first because they are **answered by writing, not by researching**.
+Everything below them invites a run; these invite a sentence. `saturated` is the
+anti-bloat instrument in particular: context accumulating correctly, gated
+correctly, and changing nothing is exactly what a growing context base looks
+like from the inside, and it is invisible until something counts it.
+
+If the debt grows, slow the routine down rather than lowering the bar for
+accepting a finding. The bottleneck is a person reading carefully, and that is
+the part worth protecting — which is why notes exist, so that the reading a
+person does is reading that needed their judgement.

@@ -236,7 +236,7 @@ export function projectReview(): ReviewIndex {
       detail: item.why ?? `Asked by ${item.askedBy}.`,
       blocking: awaiting.get(item.id) ?? [],
     })),
-    ...findGaps(repo, handoffs, questions).map((gap) => ({
+    ...findGaps(repo, handoffs, questions, decisions).map((gap) => ({
       kind: "gap" as const,
       id: `${gap.kind}-${gap.subject}`,
       question: gap.suggestedQuestion,

@@ -235,6 +235,8 @@ rule stands.
 
 ### 5. The gap finder learns saturation
 
+*Landed.*
+
 **Change.** `findGaps` currently measures thinness — `unmeasured`,
 `unevidenced`, `unproven`, `unsupplied`, `thin`, `raised`. It cannot see the
 opposite failure: context arriving faster than it becomes model. Add gap
