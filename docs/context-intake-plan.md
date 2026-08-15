@@ -1,10 +1,16 @@
 # Widening the intake: how a lot of context gets in without burying anyone
 
-> **Status: plan, not yet landed.** Six changes, each independently valuable,
-> each its own pull request from `main`. When one lands, mark it here the way
-> [`context-flow-plan.md`](context-flow-plan.md) marks its six — that document
-> is this one's template, and its "landed, kept for the reasoning" header is
-> the state this file should eventually reach.
+> **Status: all six landed; two pieces of content work remain.** Each change is
+> marked below. What is deliberately *not* done is the judgement half of two of
+> them: converting the deep dive's eight candidate Problems (change 4), and
+> deciding which clock `time-to-first-session` runs (change 6). Both are a
+> person's sentences, and the infrastructure now exists to receive them.
+>
+> Kept for the reasoning, the way [`context-flow-plan.md`](context-flow-plan.md)
+> is. Three things were learned building it that the plan did not predict, and
+> each is recorded with its change: the handoff hash was sensitive to the
+> schema's own growth, two copies of that hash recipe had already drifted, and
+> the rule that a candidate carries no title was enforced only by accident.
 
 ## The workflow this is for
 
@@ -266,6 +272,14 @@ it, and Git is the archive. No saturation-driven automation of any kind: the
 gap invites a person to write the Claim, it does not write one.
 
 ### 6. Metrics get a measurement contract
+
+*Landed, except the content decision.* The fields exist, coverage counts them,
+and a Metric claiming `available` data without a `startEvent` and `endEvent` is
+now refused. **`time-to-first-session` is deliberately untouched:** which clock
+it runs is the accountable decision the deep dive queued and the evidence audit
+put first, and filling those two fields while nobody was looking is exactly the
+move this repository asks nobody to make. The field is now there to record the
+decision in.
 
 **Change.** The Metric schema gains the optional structured fields its own
 definitions keep needing and putting in prose: `startEvent`, `endEvent`,

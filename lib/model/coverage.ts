@@ -134,6 +134,17 @@ export function metricCoverage(metric: Metric): Coverage {
     ["Decision owner", metric.decisionOwner],
     ["Decision informed", metric.decision],
     ["Data status", metric.dataStatus],
+    // The measurement contract. Counted so a Metric that names its decision but
+    // not its clock reads as the half-defined thing it is, rather than looking
+    // finished because the fields it does fill are the visible ones.
+    ["Start event", metric.startEvent],
+    ["End event", metric.endEvent],
+    ["Denominator", metric.denominator],
+    ["Time horizon", metric.horizon],
+    ["Missing data", metric.missingness],
+    ["Confounders", metric.confounders],
+    ["Balancing signals", metric.balancingSignals],
+    ["Permitted use", metric.permittedUse],
     ["Provenance", metric.provenance?.source],
     ["Definition", metric.body],
   ]);

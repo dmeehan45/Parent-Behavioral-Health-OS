@@ -94,7 +94,43 @@ Create `content/metrics/<id>.md` with `id` and `title`. `dataStatus` explicitly 
 - `decisionOwner`: the Entity actor accountable for interpreting it; and
 - `decision`: the specific choice it can inform.
 
-These fields prevent a platform efficiency measure from being presented as success for a family or clinician. Before treating a consequential metric as actionable, keep its denominator or unit, time horizon, missingness, confounders, balancing risks, and uncertainty visible in its definition or as open research. Do not invent those details merely to fill coverage.
+These fields prevent a platform efficiency measure from being presented as success for a family or clinician.
+
+### The measurement contract
+
+Eight further optional fields say what would have to be true for a number here
+to mean anything:
+
+```yaml
+startEvent: the match is accepted
+endEvent: the first encounter completes
+denominator: accepted matches in the cohort, including those that never met
+horizon: 90 days from acceptance
+missingness: encounters completed outside the platform are not observed
+confounders: [clinician capacity, family availability, coverage delays]
+balancingSignals: [clinician-effort-to-activate]
+permittedUse: >
+  Locating where initiation stalls. Not for comparing individual clinicians.
+```
+
+They are fields rather than prose because prose cannot be cross-checked.
+`time-to-first-session` said its `decision` was about the
+accepted-match-to-encounter transition while its definition described a clock
+starting at match readiness — two different measurements, agreeing by
+coincidence, in two places nothing could compare. That is the repository's own
+rule applied to itself: a literal in the prose means the model is missing a
+field.
+
+All eight are optional, and every Metric here currently omits them, which is
+honest — a measure nobody collects is allowed to be undefined. **Once a Metric
+claims `dataStatus: available` or `partially-available`, `startEvent` and
+`endEvent` are required**, because a number that exists without a stated clock
+is a number nobody can check. Deciding which clock a metric runs is an
+accountable decision, not a gap to fill in passing.
+
+Do not invent these details to raise coverage. Before treating a consequential
+metric as actionable, its denominator, horizon, missingness, confounders,
+balancing risks, and uncertainty should be visible here or as open research.
 
 ## Name a Problem
 

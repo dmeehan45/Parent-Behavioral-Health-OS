@@ -652,6 +652,26 @@ export function projectModel(): ModelGraph {
           })),
           ...proseBlock("Decision informed", metric.decision),
           ...proseBlock("Decision owner", metric.decisionOwner && (entityById.get(metric.decisionOwner)?.title ?? metric.decisionOwner)),
+          // The measurement contract, as one block rather than eight. Read
+          // together or not at all: a start event without an end event, or a
+          // denominator without a horizon, is half a definition, and eight
+          // separate rows would let each half look complete on its own.
+          ...listBlock(
+            "How it is measured",
+            [
+              metric.startEvent && `Starts at: ${metric.startEvent}`,
+              metric.endEvent && `Ends at: ${metric.endEvent}`,
+              metric.denominator && `Denominator: ${metric.denominator}`,
+              metric.horizon && `Time horizon: ${metric.horizon}`,
+              metric.missingness && `Missing data: ${metric.missingness}`,
+              metric.confounders?.length && `Confounders: ${metric.confounders.join("; ")}`,
+              metric.permittedUse && `Permitted use: ${metric.permittedUse}`,
+            ].filter(Boolean) as string[],
+          ),
+          ...linksBlock(
+            "Read alongside",
+            (metric.balancingSignals ?? []).map((id) => link("metric", id, metrics.find((other) => other.id === id)?.title ?? id)),
+          ),
           ...linksBlock("Measures", targets),
           ...linksBlock(
             "Bets aimed at this",

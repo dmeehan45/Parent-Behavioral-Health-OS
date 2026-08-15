@@ -46,7 +46,33 @@ export const metricSchema = z.object({
     role: z.enum(["primary", "balancing", "operator"]),
   })).optional(),
   decisionOwner: idSchema.optional(), decision: z.string().min(1).optional(),
-  dataStatus: z.enum(["unknown", "available", "partially-available", "not-measured"]).optional(), ...common
+  dataStatus: z.enum(["unknown", "available", "partially-available", "not-measured"]).optional(),
+  /**
+   * The measurement contract: what would have to be true for a number here to
+   * mean anything.
+   *
+   * These are the fields the audits keep asking for and prose keeps swallowing.
+   * `time-to-first-session` said its decision was about the accepted-match-to-
+   * encounter transition while its body described a clock starting at match
+   * readiness — two different measurements, agreeing by coincidence in two
+   * places nothing could compare. A field the projection reads and validation
+   * can cross-check is the repository's own answer to that: a literal in the
+   * prose means the model is missing a field.
+   *
+   * All optional. A Metric that does not know its denominator says so by
+   * omission, which is honest and is what coverage is for. Nothing here
+   * computes anything, and none of it makes a Metric more true.
+   */
+  startEvent: z.string().min(1).optional(),
+  endEvent: z.string().min(1).optional(),
+  denominator: z.string().min(1).optional(),
+  horizon: z.string().min(1).optional(),
+  missingness: z.string().min(1).optional(),
+  confounders: z.array(z.string().min(1)).optional(),
+  balancingSignals: z.array(idSchema).optional(),
+  /** What this number may and may not be used to decide. */
+  permittedUse: z.string().min(1).optional(),
+  ...common
 });
 // A Problem is where the machine is thought to break. `targets` is required
 // because a problem that bites nowhere is not a problem with this system, and

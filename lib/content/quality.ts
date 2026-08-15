@@ -4,6 +4,8 @@ type EvidenceRecord = {
   confidence?: "low" | "medium" | "high";
   kind?: "reported" | "observed" | "inference" | "assumption" | "hypothesis";
   dataStatus?: "unknown" | "available" | "partially-available" | "not-measured";
+  startEvent?: string;
+  endEvent?: string;
   provenance?: { source?: string; references: string[] };
   researchTrace?: unknown[];
   purpose?: string;
@@ -56,6 +58,20 @@ export function checkContentQuality(records: EvidenceRecord[]) {
       throw new Error(
         `Unsupported data status in ${record.file}: '${record.dataStatus}' requires a provenance reference or an ` +
           `accepted researchTrace showing what data exists.`,
+      );
+    }
+
+    // A Metric claiming it has data, without saying what the number measures
+    // between. `time-to-first-session` is the case this exists for: its decision
+    // named the accepted-match-to-encounter transition while its prose described
+    // a clock starting at match readiness, and nothing could compare the two
+    // because one of them was a sentence. Only checked once a Metric claims
+    // data, because a measure nobody collects is allowed to be undefined.
+    if (["available", "partially-available"].includes(record.dataStatus ?? "") && !(record.startEvent && record.endEvent)) {
+      throw new Error(
+        `Undefined measurement in ${record.file}: dataStatus '${record.dataStatus}' claims a number exists, but ` +
+          `startEvent and endEvent do not both say what it is measured between. Name both, or set dataStatus to ` +
+          `'unknown' until somebody has decided which clock this is.`,
       );
     }
 
