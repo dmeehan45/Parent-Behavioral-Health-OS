@@ -146,7 +146,12 @@ export const handoffSchema = z.object({
         uncertainty: z.string().optional(),
       }),
     )
-    .min(1),
+    // Not `.min(1)`: a reflection proposes rather than establishes, and the
+    // first real one — eight candidate Problems carried out of a review
+    // document — had no findings at all and could not be written down. A run
+    // still has to produce something; that check moved to the whole handoff,
+    // below, where it can count candidates too.
+    .default([]),
   /**
    * Context that changes no claim.
    *
@@ -232,6 +237,18 @@ export const handoffSchema = z.object({
     )
     .default([]),
   questions: z.array(z.object({ id: idSchema, question: z.string().min(1) })).default([]),
+}).superRefine((handoff, context) => {
+  // A run has to have produced something. Notes alone are not enough: context
+  // nobody proposes anything about is a reading list, and the intake exists to
+  // move the model rather than to accumulate background.
+  if (!handoff.findings.length && !handoff.candidates.length) {
+    context.addIssue({
+      code: "custom",
+      path: ["findings"],
+      message:
+        "a run has to produce at least one finding or candidate — notes alone are context with nothing proposed about it",
+    });
+  }
 });
 
 export const dispositionSchema = z.enum(["accept", "reject", "defer", "needs-research", "accept-with-edits"]);
