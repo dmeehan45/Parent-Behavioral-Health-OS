@@ -439,6 +439,7 @@ npm run validate:projection # references the projection would silently ignore
 npm run validate:research  # research handoffs, decisions, and generated packets
 npm run test:research      # the intake contract itself
 npm run test:prototype     # the build packet, and what it refuses to compose
+npm run test:model         # the projection contract: edges, flow continuity, conformance
 npm run scan:safety        # credentials, contact details, confidentiality markers
 npm run lint
 npm run lint:design        # brand values outside the token layer

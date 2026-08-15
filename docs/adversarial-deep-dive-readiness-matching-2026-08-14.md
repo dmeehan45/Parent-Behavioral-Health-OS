@@ -4,6 +4,16 @@
 **Status:** decision packet; repository analysis only, not accepted research or canonical model truth  
 **Focus:** clinician onboarding/readiness, family-patient matching, and the transition from an accepted match to continued care
 
+> **Status: live backlog, not yet acted on.** Everything below still stands
+> against the current model — none of the five reviewer decisions in the decision
+> queue has been recorded, neither recommended prototype has been built, and none
+> of the eight candidate Problems has become a canonical Problem. `content/`
+> holds one Problem and one Bet, both about clinician activation.
+>
+> This is the largest piece of unconverted thinking in the repository. Treat it
+> as the queue it is: the next canonical Problem most likely already has a
+> candidate framing on this page.
+
 ## Executive conclusion
 
 The earlier review separated administrative onboarding, match proposal, mutual acceptance, a first encounter, and continuation. That fixed a structural collapse, but it did not yet establish what makes any transition *good*.

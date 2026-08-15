@@ -72,7 +72,7 @@ answer:
 **Not yet — do not start building.**
 ```
 
-What it needs is the shape of the experiment, written in the Bet itself as five
+What it needs is the shape of the experiment, written in the Bet itself as six
 optional sections. They are what the person accountable for the Bet approves,
 and they are a canonical part of it rather than a note in a plan:
 
@@ -131,7 +131,7 @@ a person can assert conformance.** Nothing reads the prototype's source and
 decides whether it implements a scope — that is semantics, which deterministic
 tooling here does not resolve.
 
-Refine any of the five sections and the stamp no longer matches. Validation says
+Refine any of the six sections and the stamp no longer matches. Validation says
 which section moved and what to do:
 
 ```text
@@ -192,13 +192,13 @@ when repository context supports one recommendation.
 
 ### Required human checkpoint
 
-Before implementation, the person approves or corrects the same five things —
-the learning decision, the participant and in-scope flow, the consequential
-assumptions and exclusions, the observable signal and safeguards, and the
-planned fidelity.
+Before implementation, the person approves or corrects the same six things —
+the learning decision, the participant and in-scope flow, what is deliberately
+excluded, the consequential assumptions, the observable signal and safeguards,
+and the planned fidelity.
 
 **That approval is a pull request against the Bet**, not a message in a
-conversation. The five sections go into `content/bets/<id>.md` and are reviewed
+conversation. The six sections go into `content/bets/<id>.md` and are reviewed
 like any other change, so the approval has the same history, provenance and
 resistance to drift as everything else here — and the next person to open the
 Bet can read what was agreed without asking anybody.

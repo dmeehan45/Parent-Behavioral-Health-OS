@@ -5,6 +5,17 @@
 **Purpose:** expose questionable boundaries, unsupported linkages, missing mechanisms,
 and evidence needs before the team treats the map as an answer.
 
+> **Status: dated review, partly superseded by the model it reviewed.** The
+> findings below describe `content/` as it stood on 2026-08-14 and are kept
+> unedited, because the reasoning is the part worth re-reading. **[Accountable
+> response](#accountable-response-and-implementation-disposition)** records what
+> was decided; **[What has moved since](#what-has-moved-since)** at the end
+> records what is now factually different, and which findings are still live.
+>
+> Read the head of this document as history. The three counts in the executive
+> conclusion — 14 Steps, no Steps in Matching or Care Initiation, and
+> `first-successful-family` — are all out of date.
+
 ## Executive conclusion
 
 The current artifact is a coherent early model of **clinician acquisition and
@@ -689,3 +700,58 @@ relevant sections above.
 - **Metrics:** `candidate-yield`, `clinician-effort-to-activate`,
   `operating-effort-per-activation`, `selection-accuracy`, `time-to-activation`,
   `time-to-first-match`, `time-to-first-session`.
+
+## What has moved since
+
+Recorded 2026-08-14, after the dispositions above landed. The review's body is
+unedited; this section is the delta, so nothing above is mistaken for the
+current model.
+
+### Factually out of date
+
+| The review says | The model now says |
+| --- | --- |
+| 14 Steps, 12 of them clinician supply or onboarding | 18 Steps: `clinician-supply` 5, `clinician-onboarding` 6, `matching` 2, `care-initiation` 3, `practice-operations` 1, `retention-growth` 1 |
+| Matching, Care Initiation and Quality & Outcomes have no Steps | Matching and Care Initiation have Steps. **Quality & Outcomes still has none**, and `family-demand` still has none |
+| `first-successful-family` collapses matching and care initiation | That Step no longer exists. It was split into `propose-match`, `review-match`, `plan-first-encounter`, `complete-first-encounter` and `confirm-care-continuation` |
+| The map jumps from `become-match-ready` straight into a combined Step | Onboarding ends at `match-ready`; the handoff into matching is a separate declared transition, and `checkFlowContinuity` now refuses a state one Step consumes that no `next` reaches |
+| 11 Entities inspected | 12. `practice-management-platform` was added as the explicit builder/operator actor |
+
+The coverage appendix above therefore lists the 2026-08-14 inventory, not this
+one.
+
+### Still true, and still the largest gaps
+
+Four of the five headline findings survive the changes that were made:
+
+- **Finding 1 — the title and the modelled work disagree.** Assessment,
+  formulation, care planning, documentation, communication, consent, safety,
+  measurement and transitions are still absent.
+  `docs/care-delivery-lifecycle-contrast.md` lists 10 candidate transformations
+  and marks 6 of them *not modeled*; that count has not changed.
+- **Finding 3 — the parent is a source of demand, not an actor.** `family-demand`
+  still has zero Steps, so no Step produces a Family in `match-ready` and
+  `propose-match` consumes a state nothing supplies. The interface says so as an
+  open end, and `npm run research:queue` reports it as an `unsupplied` gap. This
+  is the single gap named independently by this review, the deep dive, the
+  lifecycle contrast, and the live gap finder.
+- **Finding 5 — the evidence layer is thinner than the loops it draws.** Both
+  Claims are still low-confidence author hypotheses, all seven Metrics still say
+  `dataStatus: unknown`, and no canonical record carries a `researchTrace`.
+- **The completion assessment stands in full.** No parent, clinician, clinical,
+  equity, or privacy participant has been consulted. Three high-priority
+  research questions have been open and unanswered since the day this review was
+  written, and no handoff other than the intake example exists.
+
+Finding 2 — topology asserted more strongly than the process model supports — is
+partly addressed: six of eight Stages now have Steps, and flow continuity is
+checked. Stage edges still carry no provenance contract, which the
+[evidence-quality audit](evidence-quality-audit-2026-08-14.md) records separately.
+
+### D1–D8, re-read
+
+The disposition table above is unchanged and still accurate: every row's "still
+open" column describes work that has not happened. D3 (reconstruct the care
+lifecycle), D5 (family/patient/authority), and D6 (define quality before using
+it as feedback) are gated on the three queued research questions and on
+qualified review, neither of which has started.

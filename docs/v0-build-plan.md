@@ -211,8 +211,9 @@ We will prove the V0 by installing dependencies, validating all content referenc
 
 ## What changed after V0
 
-The shipped system has moved past this plan in four ways. They are recorded here
+The shipped system has moved past this plan in five ways. They are recorded here
 so nothing above is mistaken for current fact.
+[`system-state.md`](system-state.md) describes where the whole thing stands now.
 
 **Problem became a primitive.** V0 let a Bet attach straight to a Stage, with the
 problem written as prose inside the Bet. The chain is now
@@ -240,6 +241,17 @@ are `force-dynamic` rather than prerendered.
 
 **Reading order was inverted.** Records used to open with coverage, freshness, and
 counts. Every surface now reads: what this is, what it says, where it came from.
+
+**A whole learning loop was built around the map, which V0 did not anticipate at
+all.** V0 ended at "a contributor can add a Bet." There is now a staging layer
+(`research/`) that no agent can promote, a human review surface at `/review`, an
+apply composer that refuses to write judgement, two composed briefs
+(`research:brief`, `prototype:brief`), six experiment sections inside the Bet
+that say what trying it would settle, and a conformance stamp that goes stale
+when the experiment is refined. `docs/context-flow-plan.md` records why each
+join is shaped that way. None of that existed when the acceptance checklist
+above was ticked, which is why the checklist reads as complete against a much
+smaller system.
 
 Everything V0 ruled out — database, auth, CMS, graph database, agent framework,
 PHI — is still ruled out.
