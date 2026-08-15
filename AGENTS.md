@@ -23,6 +23,28 @@ they are not a second source of truth.
 If you find yourself adding a literal ID or a literal count to a component, the
 model is missing a field. Add the field instead.
 
+## The same rule, for documentation
+
+**A contract statement lives in exactly one file. Everywhere else links to it.**
+
+This file is the contract: the loop diagram, the check list, the section tables,
+the branch rule, and every rule about the model and its projection live here and
+nowhere else. `CONTRIBUTING.md` routes; `docs/authoring.md` teaches primitives;
+`docs/research-workflow.md` is intake mechanics and `docs/research-practice.md`
+the research craft; `docs/prototype-workflow.md` turns a Bet into software. Each
+has one job.
+
+This is the same rule as the one above, applied to prose instead of components.
+It exists because a planning-file audit found four documents describing
+contribution and disagreeing three ways — the loop diagram, the pre-PR check
+list, and how many experiment sections a Bet has. Each was fixed by editing
+every copy, which is the fix that does not last. If a rule needs restating to be
+findable, the link is the restatement.
+
+Adding a document is a real decision: prefer a section in the file that already
+owns the topic. Two runs in a row added a research document, which is how four
+became the number.
+
 ## How the projection works
 
 `lib/model/` is the single boundary between canonical content and the interface.
@@ -135,16 +157,18 @@ This is deliberate, and it is the rule most likely to feel like an extra step:
 ## Research is staging, and only a person promotes it
 
 Research from a chat — Claude, ChatGPT, anything — enters as a handoff under
-`research/`, never as an edit to `content/`. `docs/research-workflow.md` covers
-one run; `docs/research-routine.md` covers running it on a schedule.
+`research/`, never as an edit to `content/`. `docs/research-workflow.md` is the
+mechanics, one run and on a schedule; `docs/research-practice.md` is the craft.
 
-When research is conducted through conversation, also follow
-`docs/conversational-research.md`. The agent is responsible for helping the user
-learn along with the repository: orient from the current model before external
-research, pressure-test findings before handoff, and close reviewed/applied work
-with a learning checkpoint before moving to the next question. Do not rely on
-chat history as the source of current understanding; reconstruct it from the
-repository and let the user correct the framing.
+Read the practice document before researching. The agent is responsible for
+helping the user learn along with the repository: orient from the current model
+before external research, pressure-test findings before handoff, and close
+reviewed/applied work with a learning checkpoint before moving to the next
+question. Do not rely on chat history as the source of current understanding;
+reconstruct it from the repository and let the user correct the framing. The
+same file governs source selection and evidence appraisal — recency in
+proportion to how fast the subject changes, directness, study strength,
+triangulation, and a bar that rises with the decision a finding could support.
 
 The rule that matters here: **an agent cannot change what the model claims.**
 A canonical record cites research through `researchTrace`, and that citation

@@ -3,12 +3,11 @@
 This workflow turns research from Claude, ChatGPT, or another agent into a small,
 reviewable proposal without making chat history or unreviewed research canonical.
 
-Running it on a schedule is described in `docs/research-routine.md`.
-Source selection and evidence appraisal are governed by
-`docs/research-source-quality.md`; agents should read it before researching.
-When the run happens in conversation with a person, follow
-`docs/conversational-research.md` as well: orient together before researching and
-close with a learning checkpoint before moving to the next question.
+This file is the mechanics: the files, the commands, the pull requests, and the
+gates. The craft that runs inside them — researching with a person, and judging
+what you find — is [`research-practice.md`](research-practice.md). Read it
+before a run. Running the same workflow on a schedule is
+[at the end of this file](#running-it-on-a-schedule).
 
 ## Happy path
 
@@ -88,11 +87,11 @@ close with a learning checkpoint before moving to the next question.
    belief this is, and how confident you are. Never copy the research staging
    record into canonical prose wholesale.
 7. For a human-guided run, close with the learning checkpoint from
-   `docs/conversational-research.md` before selecting another research problem.
-   Briefly cover what changed, what became clearer, what was narrowed or ruled
-   out, what remains unknown, which new questions may be worth queueing, and the
-   current model in plain language. Ask the user whether that matches their
-   understanding.
+   [`research-practice.md`](research-practice.md) before selecting another
+   research problem. Briefly cover what changed, what became clearer, what was
+   narrowed or ruled out, what remains unknown, which new questions may be worth
+   queueing, and the current model in plain language. Ask the user whether that
+   matches their understanding.
 
    Do not automatically turn every unknown into a queued question. Propose only
    the few that would materially deepen the model or unblock a decision, and
@@ -229,3 +228,66 @@ regex-shaped could, and the check does not pretend otherwise.
 
 The architecture rationale and complete trust boundary are recorded in
 `docs/decisions/0001-git-native-research-intake.md`.
+
+## Running it on a schedule
+
+Everything above describes one run. Running it twice a day is the same workflow
+at a cadence — it needs no provider API, no agent framework, and no runner
+holding a model key.
+
+`.github/workflows/research-routine.yml` runs `npm run research:queue`, briefs
+the top of that queue, and keeps one issue up to date with both. It calls no
+model and holds no secret: it publishes the queue so a person or an agent has
+something to open. The brief is folded *into* the issue rather than named as a
+command, because the agent that reads the issue cannot run one — the same reason
+the intake asks for a handoff and nothing else.
+
+Everything else is a conversation. Twice a day, in Claude, ChatGPT, or anything
+else wired to this repository:
+
+> Read the research routine issue. Take the top item, read the brief folded
+> underneath it, and follow it.
+
+A run that starts from that issue has already had step 0.
+
+### How runs stay separate
+
+A twice-daily agent researching the same public sources will resurface the same
+statement forever unless something stops it. Three mechanisms, in the order they
+act — all three described above, collected here because the schedule is what
+makes them matter:
+
+- **Prevention — the brief.** Every previous statement, every source already
+  read, and every reviewer decision go into the next run before it starts.
+  Repeats mostly do not get produced.
+- **Detection — validation.** An exact restatement of an earlier run's finding
+  is an error, naming the run that said it first. Only exact restatement is
+  enforced; judging whether two differently-worded findings are the same claim
+  is semantics, and that judgement is the reviewer's.
+- **Resolution — supersedes.** A later decision retires an earlier one, and the
+  authorization goes with it.
+
+### What the routine cannot do
+
+It cannot decide anything. Every path to `content/` runs through a decision file
+a person wrote, enforced at content validation *and* inside `projectModel()`. An
+agent with full write access to this repository still cannot change what the
+model claims.
+
+It cannot judge whether research is good. Validation checks shape, references,
+safety declarations, and provenance. Whether a finding is true, well-evidenced,
+and worth acting on is a human judgement the tooling deliberately declines to
+make.
+
+It cannot catch confidential material written as ordinary prose, as the safety
+scan section above says.
+
+### If it gets noisy
+
+The failure mode to watch is review debt: findings arriving faster than anyone
+decides them. `npm run research:queue` and `npm run validate:research` both
+print it, and `/review` shows which runs are waiting.
+
+If it grows, slow the routine down rather than lowering the bar for accepting a
+finding. The bottleneck is a person reading carefully, and that is the part
+worth protecting.

@@ -75,6 +75,8 @@ that order; 5 reads the states 2–4 create; 6 is independent.
 
 ### 1. One statement, one home
 
+*Landed.*
+
 **Change.** Give every contributor-facing document exactly one job, and make
 duplicated contract statements links instead of copies:
 
@@ -84,15 +86,17 @@ duplicated contract statements links instead of copies:
 | `AGENTS.md` | **The contract** — the rules and their reasoning, for human and AI contributors alike. The only home of the loop diagram, the check list, and the section tables |
 | `CONTRIBUTING.md` | Process mechanics: the three kinds of contribution, branching, PR shape. Links to the contract, restates none of it |
 | `docs/authoring.md` | How to write each primitive |
-| `docs/research-workflow.md` | Intake mechanics — one run, and the schedule. **Absorbs `research-routine.md`**, which is the same workflow at a cadence |
-| `docs/research-practice.md` | The craft — **merges `conversational-research.md` and `research-source-quality.md`**: how to research with a person, and how to judge evidence |
+| `docs/research-workflow.md` | Intake mechanics — one run, and the schedule. **Absorbed `research-routine.md`**, which is the same workflow at a cadence |
+| `docs/research-practice.md` | The craft — **merged `conversational-research.md` and `research-source-quality.md`**: how to research with a person, and how to judge evidence |
 | `docs/prototype-workflow.md` | One Bet becoming a prototype |
 
 Add the rule itself to `AGENTS.md`, because it is the only thing that stops the
 next drift: **a contract statement lives in exactly one file; everywhere else
 links to it.** The planning-file audit found three statements that had drifted
 across four files; each was fixed by editing every copy, which is the fix that
-does not last.
+does not last. It carries a second clause worth keeping: adding a document is a
+real decision, and a section in the file that already owns the topic is usually
+the right answer.
 
 **What it unlocks.** Each future run stops growing the documentation surface —
 the first real run added two files; under this shape it would have added

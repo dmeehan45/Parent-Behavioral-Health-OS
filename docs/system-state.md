@@ -159,11 +159,15 @@ ceremony around them costs four pull requests per question.
 found them disagreeing three separate ways: the loop diagram
 (`Question` vs `Problem`), the pre-PR check list (7, 10, or 11 commands), and the
 experiment-section count (five in three files, six in the schema). All three are
-now fixed, and all three will drift again, because four descriptions of one
-contract is three too many. The research side now has the same shape: four
-documents (`research-workflow.md`, `research-routine.md`,
-`conversational-research.md`, `research-source-quality.md`) describe one
-workflow, and each new run so far has added one.
+now fixed, and all three would have drifted again, because four descriptions of
+one contract is three too many. The research side had grown the same shape —
+four documents describing one workflow, one added per run.
+
+*Addressed.* `AGENTS.md` now states the rule that governs this — a contract
+statement lives in exactly one file, everywhere else links — and owns the loop
+diagram, the check list, the section tables and the branch rule. `CONTRIBUTING.md`
+routes instead of restating. The four research documents are two:
+`research-workflow.md` for mechanics and `research-practice.md` for craft.
 
 **Nearly half the documentation is a snapshot rather than a contract.** Four
 dated reviews total 146 KB. They are good documents. But a reader cannot tell
@@ -206,7 +210,7 @@ the contract — it was designed for a conversational agent on a GitHub connecto
 and it fits that actor exactly. It is simply the only door.
 
 **The reviewer is the entire throughput, and the same bar is applied to
-everything.** `/review` decides one finding at a time, and `docs/research-routine.md`
+everything.** `/review` decides one finding at a time, and `research-workflow.md`
 is explicit that the answer to volume is to slow down rather than lower the bar.
 That is right for **belief**. It is applied uniformly to things that are not
 belief: that a source exists, that a definition is standard, that a competitor

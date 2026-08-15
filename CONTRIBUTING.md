@@ -1,27 +1,38 @@
 # Contributing
 
-There are three kinds of contribution here, and they are equally welcome:
+This file is the door: what kinds of contribution exist, where each one is
+documented, and what does not belong here.
 
-1. **Model contributions** — a stage, step, entity, claim, metric, problem, or
-   bet in `content/`. This is systems thinking, and it requires no application
-   code. Naming a Problem is a complete contribution: it does not need a
-   proposed answer, and a Problem nobody has answered yet is the most useful
-   thing on the map.
-2. **Software contributions** — the projection in `app/`, `components/`, `lib/`,
-   or a prototype under `app/prototypes/`.
+**[`AGENTS.md`](AGENTS.md) is the contract.** Every rule about how the model
+works, what the checks are, how to branch, and how to write a commit lives
+there, once, and applies to human and AI contributors alike. This file links to
+it rather than restating it — a rule written down twice drifts, and this
+repository has already spent an audit fixing three that did.
+
+## Three kinds of contribution, equally welcome
+
+1. **Model** — a stage, step, entity, claim, metric, problem, or bet in
+   `content/`. This is systems thinking, and it requires no application code.
+   Naming a Problem is a complete contribution: it does not need a proposed
+   answer, and a Problem nobody has answered yet is the most useful thing on the
+   map. → [`docs/authoring.md`](docs/authoring.md)
+2. **Software** — the projection in `app/`, `components/`, `lib/`, or a
+   prototype under `app/prototypes/`. → [`AGENTS.md`](AGENTS.md) for the
+   projection rules, [`docs/prototype-workflow.md`](docs/prototype-workflow.md)
+   for turning a Bet into working software.
 3. **Research intake** — an untrusted, reviewable handoff under `research/` that
    may inform a later model contribution but never changes the map by itself.
+   → [`docs/research-workflow.md`](docs/research-workflow.md) for the mechanics,
+   [`docs/research-practice.md`](docs/research-practice.md) for the craft.
 
-`docs/authoring.md` is the practical guide for the first kind. This file covers
-the process around both.
+Research never edits `content/`. A person decides what it means, and only an
+accepted decision authorizes a later, separate model change. Both a
+conversational GitHub connector and a coding agent use the same files; no
+transcript, provider credential, or private material belongs here.
 
-For provider-neutral research intake, follow `docs/research-workflow.md`. Both a
-conversational GitHub connector and a coding agent use the same files and npm
-commands; no transcript, provider credential, or private material belongs here.
-`docs/research-routine.md` describes running that workflow on a schedule.
-
-Research never edits `content/`. A person decides what it means at `/review`,
-and only an accepted decision authorizes a later, separate model change.
+Not sure where a contribution fits, or what is worth doing?
+[`docs/system-state.md`](docs/system-state.md) says where the model is currently
+thin, and `npm run research:queue` says the same thing live.
 
 ## Setup
 
@@ -33,62 +44,21 @@ npm run dev
 
 Open <http://localhost:3000/map>.
 
-## The loop
-
-```text
-Map → Problem → Bet → Prototype → Learn → Update Map
-```
-
-A Bet answers exactly one Problem, and a Problem names the Stages and Steps it
-bites. Where a Bet lands in the machine is derived from its Problem, so nothing
-states the same trouble twice.
-
 Edit one small file in `content/`, save, and the application reflects it. If a
 change to `content/` requires editing a React component to show up, that is a
 bug in the projection — please open an issue.
 
 ## Before you open a pull request
 
-```bash
-npm run validate:content
-npm run validate:projection
-npm run validate:research
-npm run test:research
-npm run test:prototype
-npm run test:model
-npm run scan:safety
-npm run lint
-npm run lint:design
-npm run typecheck
-npm run build
-npm run test:responsive
-```
+Run the checks listed in
+[**AGENTS.md → Before opening a pull request**](AGENTS.md#before-opening-a-pull-request).
+CI runs every one of them. `test:responsive` needs a browser once:
+`npx playwright install chromium`.
 
-CI runs every one of these on every pull request. `test:responsive` needs a
-browser once: `npx playwright install chromium`.
-
-## Branch from `main`, and target `main`
-
-One rule, and it is enforced: **a pull request is based on `main`**.
-
-A pull request based on another feature branch does not follow that branch onto
-`main` when it merges. It stays open, still pointed at a branch nobody is
-developing any more, and merging it then pushes the work *down* into that dead
-branch. Every check stays green and GitHub reports the pull request as merged,
-while `main` never receives a line of it.
-
-This has happened twice here, to PRs #3–#7 and again to #12–#14, and both times
-it took a hand-written recovery pull request to undo. The `Pull request shape`
-check now fails a pull request based on anything other than `main`.
-
-If a change genuinely cannot be reviewed without an unmerged one, stack it and
-add the **`stacked`** label. The check then passes and prints the rule that
-makes stacking safe: **merge a stack top down**, starting with the pull request
-furthest from `main`. Merging bottom up lands only the first one.
-
-Splitting work into several pull requests does not require stacking. Branch each
-one from `main` and accept that the diffs overlap — an overlapping diff is a far
-smaller cost than a stranded merge.
+Branch from `main` and target `main` — the reasoning, and the two times this
+repository paid for getting it wrong, are in
+[**AGENTS.md → Branch from `main`**](AGENTS.md#branch-from-main-and-target-main).
+The `Pull request shape` check enforces it.
 
 ## What belongs in a model change
 
