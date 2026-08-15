@@ -86,8 +86,9 @@ export function renderReview({ handoff, file, hash }: LoadedHandoff) {
     "",
     handoff.run.synthesis,
     "",
-    "## Proposed changes and evidence",
-    "",
+    // Only when there are findings. A reflection proposing eight candidates and
+    // establishing nothing rendered this heading over empty space.
+    ...(handoff.findings.length ? ["## Proposed changes and evidence", ""] : []),
   ];
   for (const finding of handoff.findings) {
     lines.push(

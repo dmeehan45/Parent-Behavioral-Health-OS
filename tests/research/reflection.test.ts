@@ -167,6 +167,56 @@ test("a candidate question composes a queued question, not a Problem", () => {
   assert.match(step.body, /question: # the question/);
 });
 
+/**
+ * The bug the first real reflection found.
+ *
+ * `findings` was `.min(1)`, so a run that proposes rather than establishes
+ * could not be written down at all — and the first reflection, eight candidate
+ * Problems carried out of a review document, had no findings by its nature.
+ * A run still has to produce something; candidates count.
+ */
+test("a reflection may carry candidates and no findings", () => {
+  const parsed = handoffSchema.safeParse({
+    ...(yaml.load(handoffText) as { findings: unknown[] }),
+    findings: [],
+    candidates: [CANDIDATE],
+  });
+  assert.equal(parsed.success, true, parsed.success ? "" : JSON.stringify(parsed.error.issues));
+});
+
+test("a run that establishes nothing and proposes nothing is refused", () => {
+  const parsed = handoffSchema.safeParse({ ...(yaml.load(handoffText) as object), findings: [], candidates: [] });
+  assert.equal(parsed.success, false);
+  assert.match(JSON.stringify(parsed.success ? [] : parsed.error.issues), /at least one finding or candidate/);
+});
+
+// A candidate problem composes into a Problem, whose targets may only be
+// Stages and Steps. Catching it at intake means a reviewer never accepts
+// something that cannot then be written.
+test("a candidate problem can only bite a Stage or a Step", () => {
+  const targeting = (id: string) =>
+    scratch({
+      "research/handoffs/example-public-research.yaml": withCandidates(
+        `candidates:\n  - id: candidate-mistargeted\n    kind: problem\n    description: ${JSON.stringify(CANDIDATE.description)}\n    targets: [${id}]\n`,
+      ),
+    });
+
+  assert.doesNotThrow(() => checkHandoffTargets(loadHandoffs(targeting("become-match-ready"))));
+  const reported = message(() => checkHandoffTargets(loadHandoffs(targeting("time-to-first-match"))));
+  assert.match(reported, /not a Stage or Step/);
+});
+
+// `restsOn` composes into a Problem's `claims`, so anything else would produce
+// a file that fails content validation after the reviewer had already accepted.
+test("what a candidate rests on has to be a Claim", () => {
+  const root = scratch({
+    "research/handoffs/example-public-research.yaml": withCandidates(
+      `candidates:\n  - id: candidate-rests\n    kind: problem\n    description: ${JSON.stringify(CANDIDATE.description)}\n    targets: [clinician-onboarding]\n    restsOn: [time-to-first-match]\n`,
+    ),
+  });
+  assert.match(message(() => checkHandoffTargets(loadHandoffs(root))), /restsOn.*content\/claims/);
+});
+
 test("the packet reads a reflection as one, and asks for a decision per candidate", () => {
   const handoff = handoffSchema.parse({
     ...(yaml.load(handoffText) as object),

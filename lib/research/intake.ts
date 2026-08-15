@@ -149,6 +149,7 @@ export function checkHandoffTargets(handoffs: LoadedHandoff[], questionIds?: Set
   const repo = getRepository();
   const targets = new Set([...repo.stages, ...repo.steps, ...repo.entities, ...repo.claims, ...repo.metrics, ...repo.problems, ...repo.bets].map((item) => item.id));
   const claims = new Set(repo.claims.map((claim) => claim.id));
+  const problemTargets = new Set([...repo.stages, ...repo.steps].map((item) => item.id));
   for (const { handoff, file } of handoffs) {
     for (const finding of handoff.findings) {
       finding.suggestedTargets.forEach((id) => { if (!targets.has(id)) throw new Error(`${file}: findings.${finding.id}.suggestedTargets: '${id}' does not exist in content/`); });
@@ -161,6 +162,19 @@ export function checkHandoffTargets(handoffs: LoadedHandoff[], questionIds?: Set
     for (const candidate of handoff.candidates) {
       candidate.targets.forEach((id) => {
         if (!targets.has(id)) throw new Error(`${file}: candidates.${candidate.id}.targets: '${id}' does not exist in content/`);
+        // A candidate problem composes into a Problem, whose targets may only
+        // be Stages and Steps. Catching it here rather than at compose time
+        // means the reviewer never accepts something that cannot be written.
+        if (candidate.kind === "problem" && !problemTargets.has(id)) {
+          throw new Error(
+            `${file}: candidates.${candidate.id}.targets: '${id}' is not a Stage or Step. ` +
+              `A Problem bites somewhere in the flow, so a candidate for one can only target those.`,
+          );
+        }
+      });
+      // `restsOn` composes into a Problem's `claims`, so it has to be claims.
+      candidate.restsOn.forEach((id) => {
+        if (!claims.has(id)) throw new Error(`${file}: candidates.${candidate.id}.restsOn: '${id}' does not exist in content/claims/`);
       });
     }
     for (const note of handoff.notes) {

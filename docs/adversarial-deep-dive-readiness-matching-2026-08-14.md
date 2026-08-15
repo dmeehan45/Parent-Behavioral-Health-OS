@@ -4,15 +4,21 @@
 **Status:** decision packet; repository analysis only, not accepted research or canonical model truth  
 **Focus:** clinician onboarding/readiness, family-patient matching, and the transition from an accepted match to continued care
 
-> **Status: live backlog, not yet acted on.** Everything below still stands
-> against the current model — none of the five reviewer decisions in the decision
-> queue has been recorded, neither recommended prototype has been built, and none
-> of the eight candidate Problems has become a canonical Problem. `content/`
-> holds one Problem and one Bet, both about clinician activation.
+> **Status: live backlog. The candidate Problems are now decidable; the rest is
+> not yet acted on.**
 >
-> This is the largest piece of unconverted thinking in the repository. Treat it
-> as the queue it is: the next canonical Problem most likely already has a
-> candidate framing on this page.
+> The [candidate Problem portfolio](#candidate-problem-portfolio) has been
+> carried into `research/handoffs/2026-08-15-candidate-problems-readiness-and-matching.yaml`
+> as a reflection: all eight, with this document's own ranking and falsification
+> text attached, waiting on a person at `/review`. Nothing was rewritten and
+> nothing was named — accepting one composes a skeleton whose title is still
+> yours to write. **This page stays the reasoning; the handoff is the queue.**
+> If the two ever disagree, this one is right and the handoff is stale.
+>
+> Everything else here still stands against the current model: none of the five
+> reviewer decisions in the decision queue has been recorded, and neither
+> recommended prototype has been built. `content/` holds one Problem and one Bet,
+> both about clinician activation.
 
 ## Executive conclusion
 

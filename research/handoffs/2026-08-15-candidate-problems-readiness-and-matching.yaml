@@ -1,0 +1,139 @@
+contractVersion: 1
+run:
+  id: 2026-08-15-candidate-problems-readiness-and-matching
+  kind: reflection
+  question: "Which of the readiness, matching, and first-care-transition troubles named in the 2026-08-14 adversarial deep dive should the model record as canonical Problems?"
+  synthesis: >
+    A conversion, not an analysis. The adversarial deep dive of 2026-08-14 ranked eight candidate Problems across
+    harm, breadth, uncertainty, prototypeability and learning value, and wrote falsification prompts for its top
+    three. That work is already done and already reviewed prose; what it has never had is a form anything can order,
+    count, or decide. It sits in a 45 KB Markdown file that the queue cannot see, the map cannot draw, and /review
+    cannot rank, which is why it has stayed unconverted since the day it was written. This reflection carries each
+    candidate across verbatim, with the deep dive's own ranking and reasoning attached, so that a person can accept
+    or reject them one at a time at whatever pace suits. Nothing here is new thinking. No candidate is named, no
+    target was inferred beyond the stages and steps the deep dive itself discusses, and nothing rests on a Claim
+    that the deep dive did not already rest on — which is none of them. The deep dive is explicit that these are
+    candidate framings and not canonical Problems, and accepting one still composes only a skeleton for a person
+    to write.
+  createdAt: 2026-08-15
+  preparedBy:
+    kind: coding-agent
+    provider: Anthropic
+  provenance:
+    method: repository-reflection
+    context: >
+      Structured re-expression of an existing repository document. No external sources were read, no new evidence
+      was gathered, and no ranking was recomputed. Scores and the "why it ranks here" reasoning are the deep dive's;
+      falsification text is carried where the deep dive supplied it, and marked absent where it did not.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+sources:
+  - id: source-readiness-matching-deep-dive
+    identity: repo-adversarial-deep-dive-readiness-matching-2026-08-14
+    kind: repository
+    title: "Adversarial deep dive: readiness, matching, and the first care transition"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: docs/adversarial-deep-dive-readiness-matching-2026-08-14.md
+    access: available
+    publishedAt: 2026-08-14
+candidates:
+  - id: candidate-readiness-declared-from-presence
+    kind: problem
+    description: >
+      A clinician can be declared match-ready because fields are present while uncertainty, stale capacity,
+      misunderstanding, or support needs remain invisible.
+    targets: [clinician-onboarding, become-match-ready]
+    rationale: >
+      Ranked 1 of 8. Harm 4, breadth 4, uncertainty 4, prototypeability 5, learning value 5. Directly precedes
+      current prototype focus and can be tested without claiming clinical competence.
+    wouldWeakenIf: >
+      Observed onboarding shows presence checks closely precede first use, clinicians reliably understand and
+      correct inputs, availability is fresh, support needs are visible, and readiness defects are rare or caused
+      elsewhere.
+
+  - id: candidate-proposal-without-enough-to-decide
+    kind: problem
+    description: >
+      A family and clinician can receive a proposal without enough understandable, current, actor-appropriate
+      information to make an informed independent decision.
+    targets: [matching, propose-match, review-match]
+    rationale: >
+      Ranked 2 of 8. Harm 5, breadth 4, uncertainty 5, prototypeability 5, learning value 5. Central matching
+      experience with a clear end-user interaction and strong counterexamples.
+    wouldWeakenIf: >
+      Families and clinicians consistently report having sufficient, understandable, current information; declines
+      are low-burden and safe; explanations do not change decisions; and failures are dominated by supply rather
+      than decision support.
+
+  - id: candidate-failure-loses-the-reason
+    kind: problem
+    description: >
+      When a proposal or first transition fails, the system does not preserve enough reason and changed context to
+      choose the next useful action without repeated work.
+    targets: [matching, care-initiation, review-match, confirm-care-continuation]
+    rationale: >
+      Ranked 3 of 8. Harm 4, breadth 5, uncertainty 4, prototypeability 5, learning value 5. Crosses decline,
+      expiry, cancellation, non-continuation, burden, and operational repair.
+    wouldWeakenIf: >
+      Current recovery already preserves structured reason and changed facts, repeat explanation is rare, and
+      operators can reliably route the next action without additional family or clinician burden.
+
+  - id: candidate-no-viable-proposal-disappears
+    kind: problem
+    description: >
+      Families who receive no viable proposal disappear from matching quality measures, making constrained access
+      look better than it is.
+    targets: [family-demand, matching, quality-outcomes]
+    rationale: >
+      Ranked 4 of 8. Harm 5, breadth 3, uncertainty 4, prototypeability 3, learning value 5. High equity/access
+      importance; needs operational denominator and governance before a UI prototype proves much. The deep dive
+      supplied no falsification prompt for this one.
+
+  - id: candidate-time-metrics-combine-clocks
+    kind: problem
+    description: >
+      Current time metrics combine different actor clocks and terminal states, so they cannot locate whether
+      readiness, supply, choice, or initiation caused waiting.
+    targets: [matching, care-initiation, quality-outcomes]
+    rationale: >
+      Ranked 5 of 8. Harm 3, breadth 5, uncertainty 2, prototypeability 3, learning value 4. Mechanically evident
+      and important for learning, but primarily an instrumentation/analysis problem. Bears directly on
+      time-to-first-match and time-to-first-session, whose measurement contracts are unfilled. The deep dive
+      supplied no falsification prompt for this one.
+
+  - id: candidate-acceptance-optimized-as-success
+    kind: problem
+    description: >
+      Match acceptance and care continuation can be optimized as success even when choice was constrained or
+      transition elsewhere was appropriate.
+    targets: [matching, care-initiation, confirm-care-continuation, quality-outcomes]
+    rationale: >
+      Ranked 6 of 8. Harm 5, breadth 4, uncertainty 5, prototypeability 3, learning value 4. Material incentive
+      risk; needs direct and clinical evidence before product behavior is chosen. The deep dive supplied no
+      falsification prompt for this one.
+
+  - id: candidate-quality-feedback-encodes-case-mix
+    kind: problem
+    description: >
+      Clinician-level selection or quality feedback can encode case mix, matching, support, and missing follow-up
+      as individual performance.
+    targets: [clinician-supply, select-clinician, quality-outcomes]
+    rationale: >
+      Ranked 7 of 8. Harm 5, breadth 3, uncertainty 5, prototypeability 1, learning value 4. High harm, but
+      deliberately not an early prototype target; requires measurement and governance work. The deep dive supplied
+      no falsification prompt for this one.
+
+  - id: candidate-family-collapses-participants
+    kind: problem
+    description: >
+      Parent, patient, and caregiver participation are collapsed into "family", so matching acceptance may hide
+      disagreement or changing authority.
+    targets: [family-demand, matching, propose-match, review-match, care-initiation]
+    rationale: >
+      Ranked 8 of 8. Harm 5, breadth 3, uncertainty 5, prototypeability 2, learning value 4. Foundational, but
+      qualified and lived-experience input is needed before prototyping a universal interaction. The queued
+      question define-family-patient-caregiver-authority already covers this ground. The deep dive supplied no
+      falsification prompt for this one.
