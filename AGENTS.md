@@ -205,6 +205,14 @@ Four consequences worth knowing before you touch any of it:
   honest: a note must be **anchored** to a record or a queued question, and a
   note can never be cited by `researchTrace`. When in doubt propose a finding —
   a note needing its own judgement is a finding filed wrong.
+- **A reflection is a run that thinks rather than reads.** `run.kind:
+  reflection` carries structured thinking about the model or about earlier runs,
+  and may propose **candidates**: that something should *exist*, as a Problem or
+  a queued question. A candidate carries no title and the schema is strict, so
+  writing one is an error rather than a silently dropped field — naming is the
+  judgement that separates recording a trouble from recording a fix, and
+  accepting a candidate composes a skeleton with the name left blank. Candidates
+  are decided one at a time; only notes are decided as a set.
 - **Adding an optional field to a research contract must not invalidate a
   review.** Absent and empty values are normalized away before a handoff is
   hashed, so a field nobody used hashes as it did before it existed. The

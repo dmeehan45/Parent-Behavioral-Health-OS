@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import yaml from "js-yaml";
-import crypto from "node:crypto";
 import { ZodType, ZodError } from "zod";
 import {
   mapSchema,

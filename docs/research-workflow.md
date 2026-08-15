@@ -144,6 +144,59 @@ judgement is a finding filed wrong, and the reviewer should say so rather than
 accepting it as context. The cheap lane is for material that is genuinely cheap;
 using it to slip a claim past a judgement is the one way to abuse it.
 
+## Reflections: thinking about the model, not reading about it
+
+A research run goes and reads things. A **reflection** is structured thinking
+*about* the model or about earlier runs — the learning checkpoint's durable
+form, when a session produced something worth keeping, and the door for a large
+piece of analysis that would otherwise sit in a Markdown file no surface can
+read.
+
+```yaml
+run:
+  kind: reflection
+  reflectsOn: [2026-08-14-what-makes-clinician-onboarding-high-quality]
+```
+
+It is a handoff and nothing more: same packet, same `/review`, same decision
+file, same gate. Its sources may be internal — earlier runs, repository
+documents, a prototype session — through the `repository` source kind.
+
+What a reflection can carry that a research run usually does not is
+**candidates**: proposals that something should *exist* in the model.
+
+```yaml
+candidates:
+  - id: candidate-readiness-is-presence
+    kind: problem                       # or question
+    description: >
+      A clinician can be declared match-ready because fields are present, while
+      uncertainty, stale capacity, misunderstanding, or support needs remain
+      invisible.
+    targets: [clinician-onboarding, become-match-ready]
+    restsOn: [claim-selection-predicts-quality]
+    rationale: Directly precedes the current prototype focus.
+    wouldWeakenIf: Observed onboarding shows readiness defects are rare.
+```
+
+**A candidate carries no title, and cannot.** The schema is strict, so writing
+one is an error rather than a field silently dropped. Naming is the judgement
+that decides whether the model records a trouble or a fix, and it stays the
+person's sentence — accepting a candidate composes a skeleton at
+`/review/apply` with targets, evidence and trace filled in and the name blank,
+the proposer's own words sitting beside it as a comment.
+
+Candidates are decided **one at a time**, like findings, because proposing that
+something belongs in the model is a judgement rather than context. A candidate
+problem must say where it bites, for the same reason a Problem file must.
+
+**The first reflection to write is a migration.** The
+[readiness/matching deep dive](adversarial-deep-dive-readiness-matching-2026-08-14.md)
+ranks eight candidate Problems with falsification prompts. As prose they are
+invisible to the queue, to `/review` and to the map. As a reflection they are
+eight things a person can decide at whatever pace they like — and the
+conversion copies structure somebody already wrote, inventing nothing.
+
 ## Two lanes for deciding
 
 **The decision file is the gate, not the page that produced it.** Everything

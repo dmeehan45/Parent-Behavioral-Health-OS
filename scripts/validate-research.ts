@@ -1,6 +1,7 @@
 import {
   checkForRepeatedFindings,
   checkHandoffTargets,
+  checkReflections,
   checkSupersedes,
   loadDecisions,
   loadHandoffs,
@@ -23,6 +24,7 @@ run(() => {
   const questions = loadQuestions();
 
   checkForRepeatedFindings(handoffs);
+  checkReflections(handoffs);
   checkAnsweredQuestions(handoffs, questions);
   validateDecisions(handoffs, decisions);
   checkSupersedes(handoffs, decisions);

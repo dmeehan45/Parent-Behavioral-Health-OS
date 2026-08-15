@@ -137,6 +137,26 @@ export function projectReview(): ReviewIndex {
       return { ...partial, state: findingState(partial) };
     });
 
+    const candidates = handoff.candidates.map((candidate) => {
+      const id = decisionId(handoff.run.id, candidate.id);
+      const partial = {
+        id: candidate.id,
+        decisionId: id,
+        kind: candidate.kind,
+        description: candidate.description,
+        targets: candidate.targets.map((target) => ({ id: target, ...titleOf(target) })),
+        restsOn: candidate.restsOn,
+        rationale: candidate.rationale,
+        wouldWeakenIf: candidate.wouldWeakenIf,
+        decision: byDecisionId.get(id),
+        appliedIn: appliedBy.get(id) ?? [],
+      };
+      // The same three states a finding has, and for the same reason: accepted
+      // and applied are different, and a candidate accepted months ago that
+      // never became a Problem is exactly the debt this distinction exists for.
+      return { ...partial, state: findingState({ ...partial, appliedIn: partial.appliedIn }) };
+    });
+
     // A note's state comes from one line covering the whole set, plus the
     // exceptions named against it. `except` flips whichever way the batch went,
     // so one good note survives a discarded batch and one bad note can be
@@ -173,14 +193,20 @@ export function projectReview(): ReviewIndex {
       file,
       decisionFile: `research/decisions/${handoff.run.id}.yaml`,
       answers: (handoff.run.answers ?? []).map((id) => ({ id, question: questionText.get(id) ?? id })),
+      kind: handoff.run.kind ?? "research",
+      reflectsOn: handoff.run.reflectsOn ?? [],
       sources,
       findings,
+      candidates,
       notes,
       notesDecision,
       openQuestions: handoff.questions,
       reviewer: record?.reviewer,
-      decided: findings.filter((finding) => finding.decision).length,
-      total: findings.length,
+      // Candidates count here too: they are decided one at a time, so a
+      // reflection carrying eight undecided candidates is eight pieces of work
+      // and should not read as "reviewed" because its findings were.
+      decided: [...findings, ...candidates].filter((item) => item.decision).length,
+      total: findings.length + candidates.length,
     };
   });
 

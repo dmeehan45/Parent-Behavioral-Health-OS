@@ -181,6 +181,13 @@ re-enters as a finding in a later run, through the full gate.
 
 ### 4. Reflection runs: large structured thinking enters as structure
 
+*Landed*, except the deep-dive migration itself, which is content work rather
+than infrastructure and wants a person's eye on each of the eight. One thing
+was learned building it: Zod strips unknown keys, so the rule that a candidate
+carries no title was enforced by accident — a `title:` parsed cleanly and was
+silently discarded, leaving the author believing they had named it. The
+candidate schema is strict now, so writing one is an error that says so.
+
 **Change.** A handoff may declare `run.kind: reflection` (default:
 `research`). A reflection is the conversational agent's structured thinking
 *about* the model or about prior runs — the learning checkpoint's durable

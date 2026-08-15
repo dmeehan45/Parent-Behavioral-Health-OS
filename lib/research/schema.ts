@@ -67,6 +67,23 @@ export const handoffSchema = z.object({
     // not change the hash of any handoff written before it existed, and so a
     // run that followed its own nose is still a valid run.
     answers: z.array(idSchema).optional(),
+    /**
+     * What kind of run this is. Absent means `research`.
+     *
+     * A **research** run goes and reads things. A **reflection** is the
+     * conversational agent's structured thinking *about* the model or about
+     * earlier runs — the learning checkpoint's durable form, when a session
+     * produced something worth keeping, and the door for a large piece of
+     * structured analysis that would otherwise sit in a Markdown file no
+     * surface can read.
+     *
+     * Optional rather than defaulted, deliberately: a default writes a value
+     * into every handoff, which would move the hash of every review already
+     * given. See `handoffHash`.
+     */
+    kind: z.enum(["research", "reflection"]).optional(),
+    /** Earlier runs a reflection is thinking about. */
+    reflectsOn: z.array(idSchema).optional(),
   }),
   sources: z
     .array(
@@ -163,6 +180,54 @@ export const handoffSchema = z.object({
         // cannot be written down at all.
         anchors: z.array(idSchema).min(1),
         note: z.string().optional(),
+      }),
+    )
+    .default([]),
+  /**
+   * Proposals for what should exist in the model.
+   *
+   * A finding says *this appears to be true*. A candidate says *this should be
+   * a Problem*, or *this should be a queued question* — which is a different
+   * kind of claim, and the one a big piece of structured analysis is mostly
+   * made of. The readiness/matching deep dive ranks eight candidate Problems
+   * across five dimensions; as prose it is invisible to the queue, to `/review`
+   * and to the map, and converting it by hand is why it has sat unconverted.
+   *
+   * A candidate carries everything except the name. `description` says what the
+   * trouble is; `title` does not exist here, and cannot. Accepting one hands a
+   * person the same skeleton `/review/apply` already composes for a Problem,
+   * with targets, claims and trace carried and every word of the body theirs to
+   * write. A Problem generated from research would be invented content wearing
+   * the clothes of evidence, and that stays true however well-structured the
+   * research was.
+   *
+   * Each is dispositioned individually, like a finding: proposing that
+   * something belongs in the model is a judgement, not context.
+   */
+  candidates: z
+    .array(
+      // Strict, and this is the enforcement rather than a nicety: Zod strips
+      // unknown keys by default, so a candidate that wrote `title:` would parse
+      // cleanly with the title silently discarded. The author would believe
+      // they had named it, the reviewer would never see the name, and the rule
+      // that a candidate carries no title would be true by accident. Here an
+      // unrecognized key is an error that says so.
+      z.strictObject({
+        id: idSchema,
+        kind: z.enum(["problem", "question"]),
+        /**
+         * What the trouble is, in the proposer's words — never a finished
+         * title. Long enough that a person can judge it; the naming is theirs.
+         */
+        description: z.string().min(20).max(2000),
+        /** Where it bites. Required for a problem, since a Problem's own targets are. */
+        targets: z.array(idSchema).default([]),
+        /** Findings in this run, or claims in the model, that it rests on. */
+        restsOn: z.array(idSchema).default([]),
+        /** Why it ranks where it does, if the analysis said. */
+        rationale: z.string().max(2000).optional(),
+        /** What would weaken it. A candidate nobody can disprove is not a proposal. */
+        wouldWeakenIf: z.string().max(2000).optional(),
       }),
     )
     .default([]),

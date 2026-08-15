@@ -3240,18 +3240,28 @@ p:last-child {
 }
 
 .review-findings,
+.review-candidates,
+.review-notes,
 .review-open,
 .review-output {
   margin: 0 0 32px;
 }
 
-.review-finding {
+.review-finding,
+.candidate-card {
   padding: 20px;
   margin: 0 0 16px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-sm);
+}
+
+/* A candidate is a proposal rather than evidence, so it reads as the same kind
+   of card with a lighter weight — not as a second, competing surface. */
+.candidate-card p {
+  margin: 12px 0;
+  max-width: 62ch;
 }
 
 .review-statement {
