@@ -33,6 +33,7 @@ function decisionSkeleton({ handoff, hash }: LoadedHandoff) {
     `reviewedHandoffHash: ${hash}`,
     "reviewer: TODO who is accountable for this decision",
     "decidedAt: TODO today, as YYYY-MM-DD",
+    "decidedVia: review   # or 'conversation', if the reviewer decided in the chat",
     "decisions:",
   ];
   for (const finding of handoff.findings) {

@@ -95,6 +95,10 @@ export function ReviewWorkspace({
       // Without it a decision has no position in time and the research surface
       // can only ever show a set, never a sequence.
       `decidedAt: ${new Date().toISOString().slice(0, 10)}`,
+      // This page is one of two lanes. Stamping which one produced the file
+      // costs nothing here and is the only way a later audit can tell them
+      // apart — the guarantees are identical, so nothing else distinguishes them.
+      "decidedVia: review",
       "decisions:",
     ];
     for (const finding of run.findings) {

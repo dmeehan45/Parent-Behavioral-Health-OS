@@ -136,6 +136,43 @@ test("a packet carries a decision skeleton that fails validation until it is ans
   assert.match(message(() => loadDecisions(root)), /reviewer|disposition/);
 });
 
+// Two lanes produce a decision file: /review, and a person deciding in the
+// conversation with the agent recording it. The guarantees live in the file, so
+// both must validate identically — a lane that were privileged here would make
+// the cheap one second-class, which is the whole thing this is not.
+test("a decision validates from either lane, and neither is required", () => {
+  const decision = (via: string) =>
+    [
+      "contractVersion: 1",
+      "runId: example-public-research",
+      `reviewedHandoffHash: ${loaded.hash}`,
+      "reviewer: A Named Person",
+      "decidedAt: 2026-08-14",
+      via,
+      "decisions:",
+      `  - id: ${decisionId(example.run.id, example.findings[0].id)}`,
+      "    disposition: accept",
+      "",
+    ].join("\n");
+
+  for (const via of ["decidedVia: review", "decidedVia: conversation", "# lane not recorded"]) {
+    const root = scratch({
+      "research/handoffs/example-public-research.yaml": handoffText,
+      "research/decisions/example-public-research.yaml": decision(via),
+    });
+    const [loadedDecision] = loadDecisions(root);
+    assert.equal(loadedDecision.decisions.decisions[0].disposition, "accept", via);
+    assert.doesNotThrow(() => validateDecisions(loadHandoffs(root), loadDecisions(root)), via);
+  }
+
+  // A lane nobody defined is a typo, not a third way of deciding.
+  const bogus = scratch({
+    "research/handoffs/example-public-research.yaml": handoffText,
+    "research/decisions/example-public-research.yaml": decision("decidedVia: slack"),
+  });
+  assert.notEqual(message(() => loadDecisions(bogus)), "");
+});
+
 // The bug this pins: intake required the generated packet to be committed, and
 // the actor intake is written for cannot run a generator. Every pull request a
 // GitHub connector opened failed on a file it had no way to produce. A handoff

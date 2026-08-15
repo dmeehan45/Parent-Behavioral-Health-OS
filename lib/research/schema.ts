@@ -149,6 +149,18 @@ export const decisionFileSchema = z.object({
   // existed stay valid — but the composer fills it in, because "what has
   // happened since I last looked" is unanswerable without it.
   decidedAt: z.coerce.date().optional(),
+  // Which surface the reviewer decided on. `review` is the /review page;
+  // `conversation` is a person deciding in the chat the research happened in,
+  // with the agent recording what they said.
+  //
+  // This is provenance, never a gate. Everything the repository actually
+  // enforces — hash currency, a named reviewer, supersession — is checked in
+  // this file, so both surfaces carry identical guarantees and neither is
+  // privileged here. It is recorded because the two lanes trade differently
+  // (the conversational one is cheaper and hears the researcher's framing;
+  // /review is slower and does not), and a later audit of that trade needs to
+  // know which was used.
+  decidedVia: z.enum(["review", "conversation"]).optional(),
   decisions: z.array(
     z.object({
       id: idSchema,

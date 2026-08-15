@@ -70,22 +70,16 @@ before a run. Running the same workflow on a schedule is
    for reading locally. Committing it is optional; if you do, CI checks that it
    still matches the handoff, because a packet is generated and never
    hand-edited.
-5. The accountable reviewer decides, at **`/review`**. The page puts each
-   finding next to its evidence, what earlier runs concluded from the same
-   sources, and what it would change in the model, then hands back a complete
-   decision file to save as `research/decisions/<run-id>.yaml`. Run
-   `npm run validate:research` again.
-
-   The packet comment on the intake pull request carries the same skeleton in
-   text, for reviewing from GitHub without running the app. Either way a partial
+5. The accountable reviewer decides — **in one of two lanes**, described below.
+   Either way the output is `research/decisions/<run-id>.yaml`, and a partial
    review is valid: the validator reports what is still outstanding rather than
-   failing.
-6. After this intake PR is reviewed, create a separate model-change PR from
-   `main`. **`/review/apply`** composes each accepted decision into the file to
-   create or the frontmatter to add, with the `researchTrace` already filled in.
-   It composes what is derivable and asks you for what is not: what kind of
-   belief this is, and how confident you are. Never copy the research staging
-   record into canonical prose wholesale.
+   failing. Run `npm run validate:research` again.
+6. **`/review/apply`** composes each accepted decision into the file to create
+   or the frontmatter to add, with the `researchTrace` already filled in. It
+   composes what is derivable and asks you for what is not: what kind of belief
+   this is, and how confident you are. Never copy the research staging record
+   into canonical prose wholesale. The decision and the apply may share one pull
+   request — see below.
 7. For a human-guided run, close with the learning checkpoint from
    [`research-practice.md`](research-practice.md) before selecting another
    research problem. Briefly cover what changed, what became clearer, what was
@@ -104,6 +98,68 @@ it: `research/handoffs/<run-id>.yaml`, `research/decisions/<run-id>.yaml`, the
 derived packet wherever it is rendered, and the `run` field of every
 `researchTrace` that cites it. Validation enforces the naming rather than
 letting a file drift away from the ID inside it.
+
+## Two lanes for deciding
+
+**The decision file is the gate, not the page that produced it.** Everything
+this repository actually enforces — that the hash matches the current handoff,
+that a named person is accountable, that a superseded decision stops
+authorizing — is checked in the file. So a decision carries identical
+guarantees whichever way it was written, and there are two ways.
+
+**At `/review`.** The page puts each finding next to its evidence, what earlier
+runs concluded from the same sources, and what it would change in the model,
+then hands back the complete file. The packet comment on the intake pull
+request carries the same skeleton in text, for reviewing from GitHub without
+running the app.
+
+**In the conversation.** When the person who will decide is already in the chat
+that produced the research, they can decide there: the agent presents each
+finding, the person says accept, reject, defer, or accept-with-edits and how to
+narrow it, and the agent writes the decision file naming them, over the hash CI
+printed on the intake pull request. The person's words are the decision; the
+agent is doing the clerical half.
+
+Record which lane with `decidedVia: review | conversation`. It is optional
+provenance and gates nothing — it exists because the two lanes trade
+differently, and the trade should stay visible.
+
+**Which to use.** The conversational lane is much cheaper and it is the right
+default for a run the reviewer participated in. `/review` is the better lane
+when the reviewer was *not* in the conversation, when a run is contested or
+consequential, or when the findings need reading without the researcher's
+framing in your ear — which is a real advantage, and the reason the page is not
+going anywhere.
+
+Neither lane changes what a decision is. An agent may never supply a
+disposition the person did not state, may never name them as reviewer without
+their say, and may never decide by default or by silence. If the person has not
+said what they think about a finding, it has no decision and the validator will
+say so.
+
+### One pull request or two
+
+The handoff is always its own pull request. Staging has to land before anybody
+decides about it, which is what makes the decision auditable — a handoff and its
+decision arriving together is indistinguishable from a decision written to fit
+whatever the research happened to say.
+
+After that, **the decision and the model change may share one pull request.**
+The decision authorizes; the apply cites it in `researchTrace`; content
+validation checks the citation against the decision in the same tree, so they
+are consistent or the pull request is red. Two files, one review, one merge.
+
+That takes a run from four pull requests to two:
+
+```text
+1. handoff                        → CI renders the packet and prints the hash
+2. decision + applied model change → validated together
+```
+
+Split them when the decision needs its own discussion, when the apply touches
+more than the decision authorized, or when you want the decisions recorded
+before anybody has time to write the model change. The two-file pull request is
+a convenience, not a requirement.
 
 ## Contract summary
 

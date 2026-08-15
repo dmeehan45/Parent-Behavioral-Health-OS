@@ -198,10 +198,18 @@ Four consequences worth knowing before you touch any of it:
   what earlier runs established. Restating an earlier finding exactly is a
   validation error, because a routine running twice a day would otherwise
   resurface the same sentence forever.
-- **`/review` is the one human step.** It is a reading surface, not a form: the
-  evidence, the prior art, and what a finding would change all sit next to the
-  decision. Do not add a way to skip it, and do not add server-side writes to
-  make it "complete" — it hands back a decision file, and Git records it.
+- **The decision file is the gate, not the surface that produced it.** A person
+  may decide at `/review` — a reading surface, not a form, where the evidence,
+  the prior art, and what a finding would change sit next to the decision — or
+  in the conversation the research happened in, with the agent recording what
+  they said over the hash CI printed on the intake pull request. Everything
+  enforced lives in the file, so both lanes carry the same guarantees;
+  `decidedVia` records which was used, and gates nothing.
+
+  What an agent may never do is supply a disposition the person did not state,
+  name them as reviewer without their say, or treat silence as assent. Do not
+  add a way to skip the person, and do not add server-side writes to make
+  `/review` "complete" — it hands back a decision file, and Git records it.
 
 ### Where research appears, and where it deliberately does not
 

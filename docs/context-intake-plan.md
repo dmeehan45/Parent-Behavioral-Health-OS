@@ -109,6 +109,8 @@ avoid. The rule is cultural, stated once, in the contract.
 
 ### 2. Name the conversational review lane
 
+*Landed.*
+
 **Change.** Document what the first run already did, as the intended cheap
 lane rather than an improvisation. In `research-workflow.md`:
 
