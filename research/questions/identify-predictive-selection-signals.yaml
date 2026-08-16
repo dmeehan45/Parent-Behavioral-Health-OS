@@ -1,0 +1,9 @@
+id: identify-predictive-selection-signals
+question: "Which observable pre-selection signals and assessment methods predict later clinician quality dimensions, for whom and under what conditions, and which commonly used proxies add little valid information or introduce bias?"
+askedBy: accountable-reviewer-2026-08-16
+createdAt: 2026-08-16
+status: open
+priority: high
+targets: [screen-candidates, select-clinician, quality-outcomes]
+why: >
+  The supply model currently assumes selection judgments predict later quality but has low confidence and no validated signal set. Research should distinguish predictive evidence from pedigree, charisma, self-reported specialization, years of experience, prior volume, and other plausible but potentially weak proxies, while allowing proprietary platform data to test prospective prediction rather than historical resemblance.
