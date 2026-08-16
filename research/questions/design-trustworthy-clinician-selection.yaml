@@ -1,0 +1,9 @@
+id: design-trustworthy-clinician-selection
+question: "How should clinician qualification, structured evaluation, and selection be sequenced to minimize candidate and operator burden without weakening decision quality, while giving clinicians a process that feels reliable, fair, clear, and worth continuing through?"
+askedBy: accountable-reviewer-2026-08-16
+createdAt: 2026-08-16
+status: open
+priority: high
+targets: [screen-candidates, select-clinician, selection-complete, clinician-supply]
+why: >
+  Selection is a two-sided experience. The platform is evaluating clinicians while clinicians are evaluating the platform's reliability, trustworthiness, personality fit, and ease of interaction. The model needs an evidence-based sequence for cheap qualification, deeper evaluation, and selection that protects predictive quality and candidate trust instead of optimizing only for speed or reviewer effort.

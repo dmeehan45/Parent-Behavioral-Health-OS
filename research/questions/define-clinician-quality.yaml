@@ -1,0 +1,9 @@
+id: define-clinician-quality
+question: "What dimensions constitute high-quality clinician performance, which are reasonably attributable to the clinician rather than case mix, matching, or operating environment, and how should external evidence be combined with proprietary platform signals without defining quality circularly?"
+askedBy: accountable-reviewer-2026-08-16
+createdAt: 2026-08-16
+status: open
+priority: high
+targets: [clinician-supply, select-clinician, quality-outcomes, clinician]
+why: >
+  Selection accuracy cannot be defined until the later outcome it is meant to predict is clear. A scaled platform may also learn from clinicians already operating in the system, but look-alike attributes, retention, availability, or other platform-favored signals must not silently become the definition of clinical quality. The model needs separable quality dimensions, attribution limits, and a disciplined role for proprietary observational data.
