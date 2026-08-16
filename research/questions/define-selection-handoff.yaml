@@ -1,0 +1,9 @@
+id: define-selection-handoff
+question: "What context learned during clinician sourcing, qualification, and selection should persist into contracting, onboarding, matching, and later evaluation, with what provenance, confidence, shelf life, and permitted downstream use?"
+askedBy: accountable-reviewer-2026-08-16
+createdAt: 2026-08-16
+status: open
+priority: high
+targets: [select-clinician, selection-complete, clinician-onboarding, clinician]
+why: >
+  The system should not make a selected clinician repeat information or lose useful evidence at the transition into contracting and onboarding. Verified facts, selection evidence, uncertainties, match-relevant attributes, practice preferences, and operating context have different confidence and downstream uses and should not be collapsed into a permanent clinician score.
