@@ -1,0 +1,203 @@
+contractVersion: 1
+run:
+  id: 2026-08-16-define-clinician-quality
+  question: >
+    What dimensions constitute high-quality clinician performance, which are reasonably attributable to the clinician rather than case mix, matching, or operating environment, and how should external evidence be combined with proprietary platform signals without defining quality circularly?
+  synthesis: >
+    The evidence does not support treating clinician quality as one stable rank. A more defensible model is a multidimensional, uncertainty-bearing performance profile. Patient improvement, relational effectiveness, patient experience, and operational outcomes capture different constructs; clinician effects coexist with case-mix and clinic effects; and therapists can show different strengths across problem or outcome domains. A scaled platform can learn from its own longitudinal data, but the stronger pattern is to define outcomes independently, risk-adjust historical performance, estimate domain-specific strengths with explicit uncertainty, and test whether those signals improve future decisions. Resemblance to historically successful clinicians, retention, availability, or other platform-favored operating metrics is not by itself evidence of clinical quality.
+  createdAt: 2026-08-16
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: public-research
+    context: >
+      Synthesized after an orientation and deep-research conversation about clinician quality in a scaled behavioral-health platform. Public evidence was re-checked for traceability before intake. Raw conversation and private company material are excluded.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+  answers: [define-clinician-quality]
+sources:
+  - id: source-apa-evidence-based-practice
+    identity: apa-evidence-based-practice-policy
+    kind: web
+    title: "Policy statement on evidence-based practice in psychology"
+    locator:
+      url: https://www.apa.org/practice/guidelines/evidence-based-statement.html
+    access: available
+    publishedAt: 2021-04-21
+  - id: source-therapist-effect-review-2026
+    identity: therapist-effect-review-2026
+    kind: publication
+    title: "The therapist effect in adult psychotherapy: a systematic scoping review of reviews"
+    locator:
+      doi: 10.1080/10503307.2026.2683003
+    access: available
+  - id: source-mahon-therapist-clinic-variance
+    identity: mahon-therapist-clinic-variance-2023
+    kind: publication
+    title: "The variability of client, therapist and clinic in psychotherapy outcomes: A three-level hierarchical model"
+    locator:
+      doi: 10.1002/capr.12652
+    access: available
+    publishedAt: 2023-04-25
+  - id: source-kilcullen-case-mix-2026
+    identity: kilcullen-case-mix-therapist-effects-2026
+    kind: publication
+    title: "Therapist effects, case-mix factors, and treatment characteristics in university counseling centers"
+    locator:
+      doi: 10.1037/cou0000862
+    access: available
+    publishedAt: 2026-07-01
+  - id: source-janse-multiple-outcomes-2024
+    identity: janse-disentangling-therapist-effect-2024
+    kind: publication
+    title: "Disentangling the Therapist Effect: Clustering Therapists by Using Different Treatment Outcomes"
+    locator:
+      doi: 10.1007/s10488-024-01365-3
+    access: available
+    publishedAt: 2024-03-21
+  - id: source-constantino-matching-rct-2021
+    identity: constantino-measurement-based-matching-rct-2021
+    kind: publication
+    title: "Effect of Matching Therapists to Patients vs Assignment as Usual on Adult Psychotherapy Outcomes: A Randomized Clinical Trial"
+    locator:
+      doi: 10.1001/jamapsychiatry.2021.1221
+    access: available
+    publishedAt: 2021-06-09
+  - id: source-alliance-therapist-effects-2021
+    identity: alliance-therapist-effects-meta-analysis-2021
+    kind: publication
+    title: "Examining therapist effects in the alliance-outcome relationship: A multilevel meta-analysis"
+    locator:
+      doi: 10.1037/ccp0000637
+    access: available
+  - id: source-rom-review-2023
+    identity: routine-outcome-monitoring-review-2023
+    kind: publication
+    title: "Routine Outcome Monitoring and Feedback: Research Review and Recommendations"
+    locator:
+      doi: 10.1080/10503307.2023.2181114
+    access: available
+  - id: source-ahrq-outpatient-mental-health
+    identity: ahrq-cahps-outpatient-mental-health-survey
+    kind: web
+    title: "CAHPS Mental Health Surveys"
+    locator:
+      url: https://www.ahrq.gov/cahps/surveys-guidance/mental-health/index.html
+    access: available
+findings:
+  - id: finding-clinician-quality-is-multidimensional
+    statement: >
+      Clinician quality is better represented as a multidimensional performance profile than as a single rank: patient improvement, relational and interpersonal effectiveness, evidence-based adaptive practice, and patient-reported experience describe distinct aspects of care, and therapist performance can differ across outcome types.
+    sourceIds:
+      - source-apa-evidence-based-practice
+      - source-therapist-effect-review-2026
+      - source-janse-multiple-outcomes-2024
+      - source-ahrq-outpatient-mental-health
+    suggestedTargets: [clinician-supply, select-clinician, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The evidence base is strongest for adult psychotherapy and does not establish one universally correct dimension set for parent-focused or family behavioral health. Patient experience measures also include system-level influences that are not solely clinician-attributable.
+  - id: finding-clinician-outcomes-require-attribution
+    statement: >
+      Observed patient outcomes should not be treated as direct clinician quality without case-mix and operating-context adjustment because patient severity and other case characteristics change therapist estimates, while clinic-level effects remain after therapist effects are modeled.
+    sourceIds:
+      - source-mahon-therapist-clinic-variance
+      - source-kilcullen-case-mix-2026
+    suggestedTargets: [select-clinician, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      Existing studies adjust for selected observed variables rather than proving that all relevant confounding has been removed. The necessary case-mix variables may differ substantially for children, caregivers, family systems, acuity, and access constraints.
+  - id: finding-clinician-strengths-can-be-contextual
+    statement: >
+      Clinician effectiveness can be conditional on the problem or outcome domain rather than globally high or low; historical multidimensional performance profiles identify distinct therapist strengths and weaknesses, and a randomized trial found better outcomes when patients were assigned using empirically derived domain-specific therapist strengths.
+    sourceIds:
+      - source-janse-multiple-outcomes-2024
+      - source-constantino-matching-rct-2021
+    suggestedTargets: [select-clinician, matching, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The randomized evidence comes from adult outpatient psychotherapy in one community system. It supports contextual performance as a useful signal but does not establish that the same domains, thresholds, or matching logic transfer directly to parent-focused care.
+  - id: finding-performance-estimates-need-reliability-context
+    statement: >
+      Clinician-level performance estimates should carry case count, outcome coverage, risk-adjustment method, and uncertainty rather than being treated as equally reliable; published therapist-effect and matching studies use minimum historical case thresholds and interval estimates, but they do not establish one universal minimum sample size.
+    sourceIds:
+      - source-mahon-therapist-clinic-variance
+      - source-constantino-matching-rct-2021
+    suggestedTargets: [select-clinician, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      Minimum episode counts in these studies are study-design choices, not validated platform thresholds. Reliability will depend on outcome prevalence, domain granularity, missingness, case mix, and the consequence of the decision being made.
+  - id: finding-performance-dimensions-do-not-collapse
+    statement: >
+      Therapist performance across symptom change, dropout, treatment duration, referrals, and client satisfaction does not move as one dimension, so collapsing clinical outcomes and platform-operating outcomes into a single quality score can obscure materially different performance profiles.
+    sourceIds:
+      - source-janse-multiple-outcomes-2024
+    suggestedTargets: [select-clinician, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The study is exploratory and observational. It supports keeping dimensions separable; it does not establish which operational dimensions should be optimized or how they should be weighted in a marketplace.
+  - id: finding-proprietary-data-should-predict-not-define-quality
+    statement: >
+      A scaled platform can use proprietary longitudinal data to estimate clinician-specific strengths, but the defensible pattern is to define outcomes independently, risk-adjust historical performance, quantify domain-specific clinician effects with uncertainty, and test whether those signals prospectively improve later decisions; similarity to historically successful clinicians is not itself evidence of quality.
+    sourceIds:
+      - source-constantino-matching-rct-2021
+      - source-mahon-therapist-clinic-variance
+      - source-kilcullen-case-mix-2026
+    suggestedTargets: [select-clinician, quality-outcomes]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The prospective trial tested outcome-based matching, not pre-selection look-alike models. Applying this pattern to clinician qualification requires separate validation and fairness analysis because historical platform data can encode prior selection, access, matching, support, and follow-up biases.
+notes:
+  - id: note-interpersonal-skills-are-promising
+    statement: >
+      A 2026 review of reviews found the evidence for specific therapist characteristics mixed, with interpersonal qualities and skills showing the most consistent associations with outcomes.
+    sourceIds: [source-therapist-effect-review-2026]
+    anchors: [identify-predictive-selection-signals]
+  - id: note-alliance-has-therapist-contribution
+    statement: >
+      A multilevel meta-analysis supports a therapist contribution to the alliance-outcome relationship after accounting for several measured covariates.
+    sourceIds: [source-alliance-therapist-effects-2021]
+    anchors: [identify-predictive-selection-signals, quality-outcomes]
+  - id: note-routine-outcome-monitoring-can-generate-useful-signal
+    statement: >
+      Routine outcome monitoring and feedback can improve average psychotherapy outcomes and provides a practical mechanism for generating longitudinal patient-reported signal, but using the process is not itself proof that an individual clinician is high quality.
+    sourceIds: [source-rom-review-2023]
+    anchors: [quality-outcomes, identify-predictive-selection-signals]
+  - id: note-patient-experience-is-measurable-but-not-pure-attribution
+    statement: >
+      AHRQ outpatient mental-health experience measures include clinician communication, perceived improvement, treatment options, access barriers, and between-appointment help, offering a measurement menu whose items vary in how directly they can be attributed to the clinician.
+    sourceIds: [source-ahrq-outpatient-mental-health]
+    anchors: [quality-outcomes, define-clinician-quality]
+questions:
+  - id: question-safety-as-clinician-quality
+    question: How should safety and clinical appropriateness be measured at clinician level when serious adverse events are rare and attribution is difficult?
+  - id: question-parent-family-case-mix
+    question: Which case-mix variables are necessary to compare clinician outcomes fairly in parent, child, and family behavioral health rather than adult outpatient psychotherapy?
+  - id: question-performance-reliability-threshold
+    question: What episode counts and outcome coverage are required for sufficiently reliable clinician-level estimates by problem or population domain on this platform?
+  - id: question-missing-outcome-bias
+    question: How should missing outcomes, early attrition, and selective follow-up be handled so clinician performance estimates do not reward easier-to-observe or easier-to-retain cases?
+  - id: question-proprietary-model-fairness
+    question: How should proprietary clinician prediction models be audited for historical selection, access, matching, and support bias before they influence qualification or selection?
