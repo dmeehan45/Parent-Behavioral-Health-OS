@@ -23,7 +23,7 @@ sources:
   - id: source-apa-evidence-based-practice
     identity: apa-evidence-based-practice-policy
     kind: web
-    title: Policy statement on evidence-based practice in psychology
+    title: "Policy statement on evidence-based practice in psychology"
     locator:
       url: https://www.apa.org/practice/guidelines/evidence-based-statement.html
     access: available
@@ -31,14 +31,14 @@ sources:
   - id: source-therapist-effect-review-2026
     identity: therapist-effect-review-2026
     kind: publication
-    title: The therapist effect in adult psychotherapy: a systematic scoping review of reviews
+    title: "The therapist effect in adult psychotherapy: a systematic scoping review of reviews"
     locator:
       doi: 10.1080/10503307.2026.2683003
     access: available
   - id: source-mahon-therapist-clinic-variance
     identity: mahon-therapist-clinic-variance-2023
     kind: publication
-    title: The variability of client, therapist and clinic in psychotherapy outcomes: A three-level hierarchical model
+    title: "The variability of client, therapist and clinic in psychotherapy outcomes: A three-level hierarchical model"
     locator:
       doi: 10.1002/capr.12652
     access: available
@@ -46,7 +46,7 @@ sources:
   - id: source-kilcullen-case-mix-2026
     identity: kilcullen-case-mix-therapist-effects-2026
     kind: publication
-    title: Therapist effects, case-mix factors, and treatment characteristics in university counseling centers
+    title: "Therapist effects, case-mix factors, and treatment characteristics in university counseling centers"
     locator:
       doi: 10.1037/cou0000862
     access: available
@@ -54,7 +54,7 @@ sources:
   - id: source-janse-multiple-outcomes-2024
     identity: janse-disentangling-therapist-effect-2024
     kind: publication
-    title: Disentangling the Therapist Effect: Clustering Therapists by Using Different Treatment Outcomes
+    title: "Disentangling the Therapist Effect: Clustering Therapists by Using Different Treatment Outcomes"
     locator:
       doi: 10.1007/s10488-024-01365-3
     access: available
@@ -62,7 +62,7 @@ sources:
   - id: source-constantino-matching-rct-2021
     identity: constantino-measurement-based-matching-rct-2021
     kind: publication
-    title: Effect of Matching Therapists to Patients vs Assignment as Usual on Adult Psychotherapy Outcomes: A Randomized Clinical Trial
+    title: "Effect of Matching Therapists to Patients vs Assignment as Usual on Adult Psychotherapy Outcomes: A Randomized Clinical Trial"
     locator:
       doi: 10.1001/jamapsychiatry.2021.1221
     access: available
@@ -70,21 +70,21 @@ sources:
   - id: source-alliance-therapist-effects-2021
     identity: alliance-therapist-effects-meta-analysis-2021
     kind: publication
-    title: Examining therapist effects in the alliance-outcome relationship: A multilevel meta-analysis
+    title: "Examining therapist effects in the alliance-outcome relationship: A multilevel meta-analysis"
     locator:
       doi: 10.1037/ccp0000637
     access: available
   - id: source-rom-review-2023
     identity: routine-outcome-monitoring-review-2023
     kind: publication
-    title: Routine Outcome Monitoring and Feedback: Research Review and Recommendations
+    title: "Routine Outcome Monitoring and Feedback: Research Review and Recommendations"
     locator:
       doi: 10.1080/10503307.2023.2181114
     access: available
   - id: source-ahrq-outpatient-mental-health
     identity: ahrq-cahps-outpatient-mental-health-survey
     kind: web
-    title: CAHPS Mental Health Surveys
+    title: "CAHPS Mental Health Surveys"
     locator:
       url: https://www.ahrq.gov/cahps/surveys-guidance/mental-health/index.html
     access: available
