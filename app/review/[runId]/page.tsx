@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { ConversationReviewBridge } from "@/components/review/conversation-review-bridge";
 import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { projectReview } from "@/lib/research/projection";
 
@@ -22,10 +23,18 @@ export default async function ReviewRunPage({ params }: { params: Params }) {
   if (!run) notFound();
 
   return (
-    <ReviewWorkspace
-      run={run}
-      supersedable={supersedable.filter((entry) => entry.run !== run.id)}
-      sourceUrl={sourceUrl}
-    />
+    <>
+      <ConversationReviewBridge
+        runId={run.id}
+        question={run.question}
+        findings={run.findings.length}
+        candidates={run.candidates.length}
+      />
+      <ReviewWorkspace
+        run={run}
+        supersedable={supersedable.filter((entry) => entry.run !== run.id)}
+        sourceUrl={sourceUrl}
+      />
+    </>
   );
 }
