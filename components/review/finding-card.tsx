@@ -143,7 +143,10 @@ export function FindingCard({
       </dl>
 
       <fieldset className="review-decision">
-        <legend className="field-label">Your decision</legend>
+        <legend className="field-label">Authorization, when you are ready</legend>
+        <p className="small muted">
+          Leave this undecided while the finding still needs interpretation or refinement. Work with it in conversation first; a disposition is the point where you authorize what happens next.
+        </p>
         <div className="review-options">
           {DISPOSITIONS.map((option) => (
             <label className={`review-option${disposition === option ? " selected" : ""}`} key={option}>
@@ -162,10 +165,12 @@ export function FindingCard({
           ))}
         </div>
 
-        {disposition && requiresRationale(disposition) ? (
+        {disposition ? (
           <div className="field">
             <label htmlFor={`${finding.decisionId}-rationale`}>
-              Why — a later run reads this, so say what would change your mind
+              {requiresRationale(disposition)
+                ? "Why — a later run reads this, so say what would change your mind"
+                : "Reviewer note or scope — optional"}
             </label>
             <textarea
               id={`${finding.decisionId}-rationale`}
@@ -174,12 +179,17 @@ export function FindingCard({
               value={draft.rationale}
               onChange={(event) => onChange({ rationale: event.target.value })}
             />
+            {!requiresRationale(disposition) ? (
+              <p className="small muted">
+                Preserve how you interpreted the finding, what you are not accepting, or the boundary that matters. This note travels with the decision; it does not itself rewrite the model.
+              </p>
+            ) : null}
           </div>
         ) : null}
 
         {disposition && requiresEditedRecommendation(disposition) ? (
           <div className="field">
-            <label htmlFor={`${finding.decisionId}-edit`}>What the model should say instead</label>
+            <label htmlFor={`${finding.decisionId}-edit`}>Replacement wording for canonical application</label>
             <textarea
               id={`${finding.decisionId}-edit`}
               className="text-input"
@@ -187,6 +197,9 @@ export function FindingCard({
               value={draft.editedRecommendation}
               onChange={(event) => onChange({ editedRecommendation: event.target.value })}
             />
+            <p className="small muted">
+              Use this only when the revised wording is already clear. If the idea itself still needs reshaping, leave it undecided and continue in conversation instead.
+            </p>
           </div>
         ) : null}
 
