@@ -1,0 +1,240 @@
+contractVersion: 1
+run:
+  id: 2026-08-17-design-trustworthy-clinician-selection
+  question: >
+    How should a clinician network with limited reviewer capacity sequence prospect generation, evidence capture, automated qualification, and human evaluation so that scarce human judgment is spent where it adds the most decision value, without weakening selection quality or clinician trust?
+  synthesis: >
+    The evidence supports a progressive selection system rather than either full manual review or an automated ranking pipeline. Cheap stages should establish true eligibility and collect comparable evidence; stronger structured assessments should be reserved for fewer candidates; and evidence should be combined with explicit rules rather than free-form reviewer intuition. Multiple-hurdle systems can save assessment cost but can also discard useful compensating evidence, so early knockout rules should be limited to noncompensable requirements or predictors validated for that exact use. Structured interviews are among the strongest general personnel-selection procedures in updated meta-analytic evidence, while mechanical combination of multiple signals generally predicts outcomes better than holistic expert synthesis. Candidate reactions are not cosmetic: fairness, job relevance, explanations, and opportunity to demonstrate capability influence organizational attractiveness and willingness to accept offers. Recent field evidence also suggests that AI can improve standardized information collection without replacing the human hiring decision, but the result is not yet generalizable to clinician selection. The resulting design implication for this operating system is to use automation primarily to gather, normalize, verify, and route evidence; reserve human review for consequential ambiguity and high-value cases; and audit every consequential screening rule for predictive validity, false negatives, group effects, and candidate burden.
+  createdAt: 2026-08-17
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: public-research
+    context: >
+      Conducted after the repository made scarce-review-time-without-comparable-evidence a canonical pre-contract Problem and after the predictive-signal research run established that static resume variables are weak or inconsistent general quality rankings. This run focuses on sequencing and allocation of review effort, not on redefining clinician quality or selecting a final prototype design.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+  answers: [design-trustworthy-clinician-selection]
+sources:
+  - id: source-selection-review-2023
+    identity: van-iddekinge-lievens-sackett-selection-review-2023
+    kind: publication
+    title: "Personnel selection: A review of ways to maximize validity, diversity, and the applicant experience"
+    locator:
+      doi: 10.1111/peps.12578
+    access: available
+    publishedAt: 2023-01-28
+  - id: source-selection-validity-revision-2022
+    identity: sackett-zhang-berry-lievens-validity-2022
+    kind: publication
+    title: "Revisiting meta-analytic estimates of validity in personnel selection: Addressing systematic overcorrection for restriction of range"
+    locator:
+      doi: 10.1037/apl0000994
+    access: available
+    publishedAt: 2022-11-01
+  - id: source-mechanical-combination-2013
+    identity: kuncel-mechanical-clinical-combination-2013
+    kind: publication
+    title: "Mechanical versus clinical data combination in selection and admissions decisions: a meta-analysis"
+    locator:
+      doi: 10.1037/a0034156
+    access: available
+    publishedAt: 2013-09-16
+  - id: source-multiple-hurdle-utility-2018
+    identity: ock-oswald-selection-utility-2018
+    kind: publication
+    title: "The Utility of Personnel Selection Decisions: Comparing Compensatory and Multiple-Hurdle Selection Models"
+    locator:
+      doi: 10.1027/1866-5888/a000205
+    access: available
+    publishedAt: 2018-11-02
+  - id: source-applicant-reactions-review-2017
+    identity: mccarthy-bauer-truxillo-applicant-reactions-2017
+    kind: publication
+    title: "Applicant Perspectives During Selection: A Review Addressing So What, What's New, and Where to Next"
+    locator:
+      doi: 10.1177/0149206316681846
+    access: available
+    publishedAt: 2017-01-19
+  - id: source-explanations-meta-2009
+    identity: truxillo-explanations-applicant-reactions-2009
+    kind: publication
+    title: "Effects of Explanations on Applicant Reactions: A meta-analytic review"
+    locator:
+      doi: 10.1111/j.1468-2389.2009.00478.x
+    access: available
+    publishedAt: 2009-11-12
+  - id: source-algorithm-fairness-2023
+    identity: lavanchy-reichert-narayanan-savani-algorithm-hiring-2023
+    kind: publication
+    title: "Applicants' Fairness Perceptions of Algorithm-Driven Hiring Procedures"
+    locator:
+      doi: 10.1007/s10551-022-05320-w
+    access: available
+    publishedAt: 2023-11-01
+  - id: source-ai-explanations-2025
+    identity: ai-human-selection-explanations-2025
+    kind: publication
+    title: "Rejected by an AI? Comparing job applicants' fairness perceptions of artificial intelligence and humans in personnel selection"
+    locator:
+      doi: 10.3389/frai.2025.1671997
+    access: available
+    publishedAt: 2025-11-01
+  - id: source-voice-ai-field-2026
+    identity: jabarian-henkel-voice-ai-field-experiment
+    kind: publication
+    title: "Voice AI in Firms: A Natural Field Experiment on Automated Job Interviews"
+    locator:
+      doi: 10.2139/ssrn.5395709
+    access: available
+    publishedAt: 2026-01-26
+  - id: source-eeoc-selection-guidance
+    identity: eeoc-employment-tests-selection-procedures
+    kind: web
+    title: "Employment Tests and Selection Procedures"
+    locator:
+      url: https://www.eeoc.gov/laws/guidance/employment-tests-and-selection-procedures
+    access: available
+  - id: source-opm-assessment-strategy
+    identity: opm-assessment-strategy
+    kind: web
+    title: "Designing an Assessment Strategy"
+    locator:
+      url: https://www.opm.gov/policy-data-oversight/assessment-and-selection/assessment-strategy/
+    access: available
+findings:
+  - id: finding-progressive-selection-needs-different-decision-modes
+    statement: >
+      A cost-efficient selection system should distinguish true eligibility gates from predictive assessments: inexpensive stages can reduce the pool before expensive evaluation, but treating every predictor as a knockout hurdle can reduce selection quality because useful evidence that could compensate for a weaker signal is discarded.
+    sourceIds:
+      - source-multiple-hurdle-utility-2018
+      - source-selection-review-2023
+      - source-opm-assessment-strategy
+    suggestedTargets: [scarce-review-time-without-comparable-evidence, screen-candidates, select-clinician]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The utility simulation is not clinician-specific and depends on predictor validity, assessment cost, and selectivity. It supports a cost-quality tradeoff rather than one universal sequence or cutoff.
+  - id: finding-structure-expensive-human-evaluation
+    statement: >
+      When human evaluation is used, it should be structured around job-relevant constructs, common prompts, and explicit scoring criteria rather than relying on an unstructured overall impression; updated meta-analytic evidence places structured interviews among the strongest general predictors of later job performance.
+    sourceIds:
+      - source-selection-validity-revision-2022
+      - source-selection-review-2023
+    suggestedTargets: [scarce-review-time-without-comparable-evidence, select-clinician]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      General personnel-selection validity does not establish which clinician-specific constructs or scenarios should be assessed. The earlier predictive-signal research remains necessary for choosing the content of a clinician evaluation.
+  - id: finding-explicit-combination-beats-holistic-synthesis
+    statement: >
+      Once multiple pieces of evidence have been collected, explicit mechanical combination generally predicts later performance better than holistic expert synthesis, so human review should not depend on reviewers privately re-weighting the same evidence into an overall feeling about the candidate.
+    sourceIds:
+      - source-mechanical-combination-2013
+    suggestedTargets: [scarce-review-time-without-comparable-evidence, screen-candidates, select-clinician]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Mechanical combination requires validated inputs and an appropriate criterion. This finding does not justify an opaque machine-learning score or eliminate human judgment when the available evidence is incomplete, novel, or incorrectly represented.
+  - id: finding-candidate-experience-affects-selection-outcomes
+    statement: >
+      Candidate experience is an operating outcome of the selection system rather than a cosmetic layer: perceived fairness and job relevance are associated with organizational attractiveness and offer-related intentions and behavior, and explanations can improve fairness perceptions even when the selection outcome is unfavorable.
+    sourceIds:
+      - source-applicant-reactions-review-2017
+      - source-explanations-meta-2009
+      - source-selection-review-2023
+    suggestedTargets: [attract-candidates, screen-candidates, select-clinician, scarce-review-time-without-comparable-evidence]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Most applicant-reaction research is not specific to independent behavioral-health clinicians considering network contracts. The direction is transferable, but the relative importance of speed, human contact, autonomy, and professional respect should be tested with this population.
+  - id: finding-automation-is-stronger-for-standardized-collection-than-unvalidated-rejection
+    statement: >
+      Current evidence provides a stronger basis for automating standardized information collection and routing than for delegating final selection to an opaque model: a large recent field experiment found AI-led interviews collected more hiring-relevant information and improved downstream hiring outcomes while humans retained the hiring decision, whereas applicant-perception studies show algorithm-only hiring can be viewed as less fair than human or human-assisted processes.
+    sourceIds:
+      - source-voice-ai-field-2026
+      - source-algorithm-fairness-2023
+      - source-ai-explanations-2025
+    suggestedTargets: [scarce-review-time-without-comparable-evidence, screen-candidates, select-clinician]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The field experiment is a working paper involving high-volume entry-level customer-service hiring in the Philippines, not clinician contracting. Studies of perceived algorithmic fairness also disagree by interface and context. The transferable claim is about standardization as a plausible automation benefit, not that an AI interviewer will improve clinician selection.
+  - id: finding-consequential-screening-needs-purpose-specific-validation
+    statement: >
+      A screening rule should be validated for the decision it actually makes, monitored for differential exclusion, and compared with less harmful alternatives when it has consequential effects; this is especially important for early-stage automation because candidates removed there may never generate downstream evidence that reveals a false negative.
+    sourceIds:
+      - source-eeoc-selection-guidance
+      - source-selection-review-2023
+    suggestedTargets: [scarce-review-time-without-comparable-evidence, screen-candidates, selection-accuracy]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Legal requirements vary by jurisdiction and employment or contracting status. The generalized operating principle is to validate consequential screening and monitor error and group effects rather than assuming that automation is neutral.
+  - id: finding-human-review-allocation-is-a-design-inference
+    statement: >
+      The evidence supports treating scarce human review as an information-allocation problem: the likely high-leverage cases are prospects for whom existing evidence is consequentially incomplete, contradictory, or close enough to a decision boundary that additional structured judgment could change the action, rather than every candidate who clears a basic screen.
+    sourceIds:
+      - source-multiple-hurdle-utility-2018
+      - source-mechanical-combination-2013
+      - source-selection-review-2023
+    suggestedTargets: [scarce-review-time-without-comparable-evidence, screen-candidates, select-clinician]
+    classification: new
+    evidenceStance: inference
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      This allocation rule is an inference from selection utility and evidence-combination research, not a directly validated clinician-selection policy. The platform should test whether an uncertainty-and-value-based review queue improves selection accuracy per reviewer hour versus simpler ranking or FIFO approaches.
+notes:
+  - id: note-hard-gates-versus-predictive-signals
+    statement: >
+      The emerging workflow should distinguish noncompensable requirements such as true eligibility constraints from predictive signals whose weaknesses may be offset by stronger evidence elsewhere. The interface should make that difference visible rather than representing every criterion as an equal checklist item.
+    sourceIds: [source-multiple-hurdle-utility-2018, source-opm-assessment-strategy]
+    anchors: [scarce-review-time-without-comparable-evidence, design-trustworthy-clinician-selection]
+  - id: note-reviewer-role-shifts-from-ranking-to-exception-handling
+    statement: >
+      If comparable signals are collected and combined explicitly, the human reviewer's distinctive role becomes gathering missing evidence, interpreting cases the structured system cannot resolve, noticing representation errors, and making accountable exceptions rather than manually ranking every prospect from scratch.
+    sourceIds: [source-mechanical-combination-2013, source-selection-review-2023]
+    anchors: [select-clinician, design-trustworthy-clinician-selection]
+  - id: note-candidate-facing-explanations-are-low-cost-control
+    statement: >
+      Explaining why an assessment is relevant, what happens next, and how the information contributes to the process is a comparatively low-cost candidate-experience control supported across older and newer applicant-reaction research.
+    sourceIds: [source-explanations-meta-2009, source-ai-explanations-2025]
+    anchors: [attract-candidates, screen-candidates, select-clinician]
+  - id: note-source-channels-should-be-valued-by-usable-evidence
+    statement: >
+      For this model, candidate-generation channels should eventually be compared not only by prospect volume but by how much trustworthy, reusable evidence they contribute before the clinician is asked to do additional work and by the downstream quality of the candidates they produce.
+    sourceIds: [source-selection-review-2023]
+    anchors: [source-candidates, attract-candidates, candidate-yield]
+  - id: note-ai-field-experiment-is-prototype-relevant-not-policy
+    statement: >
+      The recent voice-AI field experiment is particularly relevant to prototyping because the automation changed who collected structured evidence while keeping human decision authority constant. It is useful precedent for testing an AI-assisted evidence-gathering interaction, but its outcome estimates should not be imported into a clinician network forecast.
+    sourceIds: [source-voice-ai-field-2026]
+    anchors: [design-trustworthy-clinician-selection, scarce-review-time-without-comparable-evidence]
+questions:
+  - id: question-auto-stop-boundary
+    question: Which pre-contract conditions are truly noncompensable eligibility gates, and which should remain evidence that can be outweighed or sent to human review?
+  - id: question-human-review-trigger
+    question: What review-priority rule produces the best selection accuracy per reviewer hour: uncertainty, expected value of additional information, predicted quality, network need, or a combination?
+  - id: question-selection-experience-minimum
+    question: What minimum candidate-experience controls should every automated or human-assisted stage provide, including explanation, status visibility, opportunity to demonstrate capability, response timing, and access to a person for consequential ambiguity?
+  - id: question-stage-level-false-negatives
+    question: How can the platform estimate false negatives at early screening stages when rejected prospects normally produce no downstream quality data?
+  - id: question-clinician-ai-collection
+    question: Would clinicians accept an automated conversational evidence-gathering step if it were clearly bounded to information collection and summary rather than final selection, and what interaction design would preserve professional trust?
