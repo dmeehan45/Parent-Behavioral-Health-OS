@@ -165,6 +165,10 @@ author asks.
 1. **Gather the prose.** The file itself, or the branch diff
    (`git diff main -- <paths>`) when reviewing a change.
 2. **Extract the factual assertions** and grade each against the rigor test.
+   A mechanism claim — "X polls Y", "no configuration needed", "this reuses
+   the existing endpoint" — is checked against the code it describes, not
+   against its own plausibility. The strongest finding a review can produce
+   is a confident sentence the repository contradicts.
 3. **Scan against the catalog**, pattern by pattern for a document, headings
    plus the high-frequency word list for microcopy.
 4. **Report**, then fix if asked. Open with a one-line verdict — **ship**,
