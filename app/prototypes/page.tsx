@@ -79,7 +79,7 @@ export default function PrototypesPage() {
                   <div className="card-actions">
                     {launchable ? (
                       <Link className="button" href={prototype.href}>
-                        Launch prototype <span aria-hidden="true">→</span>
+                        Run it <span aria-hidden="true">→</span>
                       </Link>
                     ) : (
                       <span className="muted small">Not built yet</span>

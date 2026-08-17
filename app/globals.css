@@ -2431,9 +2431,52 @@ p:last-child {
   border-radius: var(--radius-lg);
 }
 
-.prototype-context {
-  padding-top: 28px;
-  border-top: 1px solid var(--line);
+/*
+ * The run screen. A participant sees one line of chrome and then the software;
+ * the reasoning lives on the bet's page, behind the ribbon link. The ribbon is
+ * the honest frame — the kind in words, the bet it tests, and that nothing in
+ * it is real — and must stay a line rather than grow into a page head.
+ */
+.prototype-run {
+  padding-top: 12px;
+  padding-bottom: 64px;
+}
+
+.run-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 14px;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.run-ribbon-bet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.run-ribbon-bet:hover {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.run-ribbon-note {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+/* The drawer holds record prose, so it reads at the article measure even
+   though the stage above it runs wider. */
+.run-about .detail-blocks {
+  max-width: var(--ds-container-text);
 }
 
 .prototype-grid {

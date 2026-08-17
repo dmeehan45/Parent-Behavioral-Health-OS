@@ -481,6 +481,15 @@ export function projectModel(): ModelGraph {
           // which for a bet with an experiment is the intervention, then what
           // trying it would settle.
           ...markdownBlocks(bet.sections, [SECTION.bet]),
+          // The door out of reading and into trying. The href is the declared
+          // run route: `ROUTES.prototype` points at the bet's own page, which
+          // is where this block already lives.
+          ...linksBlock(
+            "Prototype",
+            bet.prototype?.route
+              ? [{ ...link("prototype", bet.id, bet.title, bet.prototype.status), href: bet.prototype.route }]
+              : [],
+          ),
           ...linksBlock("Where it lands", targets),
           ...linksBlock(
             "Who it studies",

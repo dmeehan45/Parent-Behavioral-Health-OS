@@ -1,18 +1,23 @@
 import Link from "next/link";
-import { Badge, Breadcrumb, ConfidenceBadge, KindBadge, SourceLink } from "@/components/model/badges";
+import { Breadcrumb, KindBadge } from "@/components/model/badges";
 import { DetailBlocks } from "@/components/model/detail-blocks";
 import { EXPERIMENT_SECTIONS } from "@/lib/content/body";
 import { projectModel } from "@/lib/model/graph";
 
 /**
- * Chrome around a prototype route.
+ * The run screen around a prototype route.
  *
- * A prototype only means something next to the bet it tests, so the surrounding
- * context — the problem, the intervention, what it is aimed at, and what would
- * have to move for it to be working — is resolved from the Bet whose
- * `prototype.route` points here. Nothing about the model is written into the
- * prototype page itself, so renaming a bet or retargeting it updates this
- * automatically.
+ * This is the surface that goes in front of a participant, so it carries as
+ * little of the model as honesty allows: a ribbon naming what this is, the bet
+ * it tests, and that nothing in it is real — then the interaction. The
+ * reasoning a product or technical reader wants — the problem, the experiment,
+ * the evidence — lives on the bet's own page, one link away, where it was
+ * already rendered from the same projection. Repeating it here made the page a
+ * second bet record with software in the middle, and the participant read the
+ * answer sheet before the experience.
+ *
+ * The bet is still resolved from the route, never written in here, so renaming
+ * or retargeting a bet updates this surface without touching it.
  */
 export function PrototypeShell({ route, children }: { route: string; children: React.ReactNode }) {
   const graph = projectModel();
@@ -37,71 +42,45 @@ export function PrototypeShell({ route, children }: { route: string; children: R
     );
   }
 
-  // The problem comes first: the software only means something next to what it
-  // was built against. Both come from the Bet's projected blocks, so retargeting
-  // or rewording the model updates this page without touching it.
-  const problem = bet.blocks.find((block) => block.type === "links" && block.label === "The problem this answers");
-  const targets = bet.blocks.find((block) => block.type === "links" && block.label === "Where it lands");
-  // The experiment sections come across whole. A reviewer standing in front of
-  // the software should be able to see what it is meant to settle, what was
-  // deliberately left out, and what to watch for — without the builder there to
-  // narrate it.
+  // What a facilitator may need mid-session: what this is meant to settle,
+  // what was deliberately left out, and what to watch for. Derived from the
+  // Bet's projected blocks, so rewording the model updates the drawer without
+  // touching this file. Claims, metrics, and targets stay on the bet's page —
+  // they are for the reading audience, not for somebody running a session.
   const experiment = new Set<string>(EXPERIMENT_SECTIONS);
   const context = bet.blocks.filter(
     (block) =>
+      (block.type === "links" && block.label === "The problem this answers") ||
       (block.type === "prose" && block.label === "Intervention") ||
-      (block.type === "links" && (block.label === "Success would affect" || block.label === "Supporting claims")) ||
       (block.type === "markdown" && (experiment.has(block.label) || block.label.toLowerCase().includes("question"))),
   );
 
   return (
-    <main className="shell page prototype-page">
-      <Breadcrumb
-        trail={[
-          { label: "System map", href: "/map" },
-          { label: "Prototypes", href: "/prototypes" },
-          { label: bet.title, href: bet.href },
-          { label: "Prototype" },
-        ]}
-      />
+    <main className="shell prototype-run">
+      {/* The page needs a name, but the participant does not need a title
+          card. Same pattern as the map's own h1. */}
+      <h1 className="visually-hidden">{bet.title} — prototype</h1>
 
-      <header className="page-head">
-        <div className="page-head-main">
-          <div className="page-head-badges">
-            <KindBadge kind="prototype" />
-            {prototype.status ? <Badge tone="accent">{prototype.status}</Badge> : null}
-            <ConfidenceBadge confidence={bet.confidence} />
-            <Badge tone="quiet" title="No real patient, clinician, or practice data appears here">
-              synthetic data only
-            </Badge>
-          </div>
-          <h1>{bet.title}</h1>
-          {bet.summary ? <p className="lede">{bet.summary}</p> : null}
-        </div>
-
-        <div className="page-head-aside">
-          <Link className="button secondary" href={bet.href}>
-            <span aria-hidden="true">←</span> Back to the bet
-          </Link>
-          <Link className="button secondary" href={`/map?lens=bets&open=${encodeURIComponent(prototype.id)}`}>
-            Show on the map <span aria-hidden="true">→</span>
-          </Link>
-          <SourceLink file={bet.file} sourceUrl={graph.sourceUrl} />
-        </div>
-      </header>
+      <div className="run-ribbon">
+        <KindBadge kind="prototype" />
+        <Link className="run-ribbon-bet" href={bet.href}>
+          Tests the bet: {bet.title} <span aria-hidden="true">→</span>
+        </Link>
+        <span className="run-ribbon-note" title="No real patient, clinician, or practice data appears here">
+          Synthetic data · nothing saved
+        </span>
+      </div>
 
       <section className="prototype-stage" aria-label="Prototype">
         {children}
       </section>
 
-      <section className="prototype-context">
-        <h2>What this prototype is testing</h2>
-        {/* Level three: these sit under this section's own h2, not under the h1. */}
-        <DetailBlocks
-          blocks={[...(problem ? [problem] : []), ...(targets ? [targets] : []), ...context]}
-          headingLevel={3}
-        />
-      </section>
+      {/* Collapsed so a participant never reads what the session is watching
+          for before the session. Native disclosure, keyboard-operable as-is. */}
+      <details className="disclosure run-about">
+        <summary>What this prototype is testing</summary>
+        <DetailBlocks blocks={context} />
+      </details>
     </main>
   );
 }

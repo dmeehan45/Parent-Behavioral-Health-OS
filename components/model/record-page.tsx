@@ -48,6 +48,17 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
     return `/map?${params.toString()}`;
   })();
 
+  // A bet's page is the reasoning; the run screen is the same software with
+  // the reasoning stripped away, fit to put in front of a participant. An
+  // unbuilt prototype's href falls back to this page's own, and gets no button.
+  const runHref = (() => {
+    if (node.kind !== "bet") return undefined;
+    const prototype = graph.nodes.find(
+      (candidate) => candidate.kind === "prototype" && candidate.contentId === node.contentId,
+    );
+    return prototype && prototype.href !== node.href ? prototype.href : undefined;
+  })();
+
   return (
     <main className="shell page">
       <Breadcrumb
@@ -80,6 +91,11 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
         </div>
 
         <div className="page-head-aside">
+          {runHref ? (
+            <Link className="button" href={runHref}>
+              Run the prototype <span aria-hidden="true">→</span>
+            </Link>
+          ) : null}
           <Link className="button secondary" href={mapHref}>
             Show on the map <span aria-hidden="true">→</span>
           </Link>
