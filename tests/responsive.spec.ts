@@ -310,6 +310,26 @@ test.describe("responsive shell", () => {
     expect(reachedEnd, "the end of the record cannot be reached by scrolling the sheet").toBe(true);
   });
 
+  /*
+   * Record ids come from filenames and research is expected to rename and
+   * remove things, so a link that was correct when it was sent can name nothing
+   * by the time it is opened. Without `app/not-found.tsx` that landed on the
+   * framework's own page: white ground, system font, and no way onward.
+   */
+  test("a dead end is still this product, and still offers a way out", async ({ page }) => {
+    await page.goto("/stages/this-id-does-not-exist");
+
+    const main = page.locator("main");
+    await expect(main).toBeVisible();
+
+    // A way onward, not just an apology.
+    await expect(main.locator('a[href="/map"]')).toBeVisible();
+
+    // On the wash like every other page, rather than the framework's white.
+    const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bg, "the dead-end page is not on the app's ground").not.toBe("rgb(255, 255, 255)");
+  });
+
   test("body copy stays readable rather than stretching the full width", async ({ page }) => {
     await page.goto("/");
 
