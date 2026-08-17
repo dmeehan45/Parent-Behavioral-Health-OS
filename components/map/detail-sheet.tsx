@@ -155,12 +155,10 @@ export function DetailSheet({
 
       {node ? (
         <div className="sheet-body">
-          {/* Substance first. The panel is narrow, and a reader who opened a
-              primitive wants to read it, not audit how completely it is filled in. */}
-          {/* Level three: inside the sheet these sit under the record's own h2. */}
-          <DetailBlocks blocks={node.blocks} onNavigate={onNavigate} headingLevel={3} />
-
-          <footer className="sheet-foot">
+          {/* The way out comes first. The sheet is a glance layer, and the hop
+              to the full read has to be visible without scrolling the very
+              content the reader was trying to skip. */}
+          <div className="sheet-actions">
             <Link className="button" href={node.href}>
               {node.kind === "prototype" ? "Launch prototype" : `Open ${KIND_LABELS[node.kind].toLowerCase()} page`}
               <span aria-hidden="true">→</span>
@@ -170,7 +168,12 @@ export function DetailSheet({
                 Centre on map
               </button>
             ) : null}
-          </footer>
+          </div>
+
+          {/* Level three: inside the sheet these sit under the record's own h2.
+              Long-form sections arrive folded — the panel is narrow, and the
+              record page is where reading happens. */}
+          <DetailBlocks blocks={node.blocks} onNavigate={onNavigate} headingLevel={3} collapse />
 
           <Provenance
             provenance={node.provenance}
@@ -178,6 +181,7 @@ export function DetailSheet({
             coverage={node.coverage}
             file={node.file}
             sourceUrl={graph.sourceUrl}
+            repoUrl={graph.repoUrl}
           />
         </div>
       ) : null}

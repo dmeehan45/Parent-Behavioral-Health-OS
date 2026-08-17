@@ -21,6 +21,7 @@ export function DetailBlocks({
   blocks,
   onNavigate,
   headingLevel = 2,
+  collapse = false,
 }: {
   blocks: DetailBlock[];
   onNavigate?: (nodeId: string) => void;
@@ -31,6 +32,14 @@ export function DetailBlocks({
    * page in the model, which is the outline a screen reader navigates by.
    */
   headingLevel?: 2 | 3;
+  /**
+   * Fold the long-form markdown blocks behind their own headings. The detail
+   * sheet sets this: it is a glance layer, and an authored section printed
+   * whole in a narrow column buries every link below it. Record pages leave it
+   * off — they are the full read, and folded prose there would just be a
+   * second click on the way to what the reader already came for.
+   */
+  collapse?: boolean;
 }) {
   if (blocks.length === 0) return null;
 
@@ -51,6 +60,18 @@ export function DetailBlocks({
             );
 
           case "markdown":
+            if (collapse) {
+              // Native disclosure: keyboard-operable as-is, and the heading
+              // stays in the outline whether the fold is open or not.
+              return (
+                <details className="detail-block detail-fold" key={key}>
+                  <summary>
+                    <Heading className="field-label">{block.label}</Heading>
+                  </summary>
+                  <Markdown source={block.value} />
+                </details>
+              );
+            }
             return (
               <section className="detail-block" key={key}>
                 <Heading className="field-label">{block.label}</Heading>

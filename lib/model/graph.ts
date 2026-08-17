@@ -492,10 +492,6 @@ export function projectModel(): ModelGraph {
           ...(firstSentence(bet.sections[SECTION.bet]) === normalizeProse(bet.sections[SECTION.bet])
             ? []
             : proseBlock("Intervention", bet.sections[SECTION.bet])),
-          // Everything else the author wrote, in the order they wrote it —
-          // which for a bet with an experiment is the intervention, then what
-          // trying it would settle.
-          ...markdownBlocks(bet.sections, [SECTION.bet]),
           // The door out of reading and into trying. The href is the declared
           // run route: `ROUTES.prototype` points at the bet's own page, which
           // is where this block already lives.
@@ -515,6 +511,11 @@ export function projectModel(): ModelGraph {
           // A plain list rather than links: these point into `research/`, which
           // is staging and has no record page to send a reader to.
           ...listBlock("Waiting on research", bet.awaiting),
+          // The experiment's long form comes last, in the order the author
+          // wrote it. A reader scanning for what this bet touches should not
+          // have to scroll the whole experiment to find a link — the shape of
+          // the argument is identity, relationships, then the detail.
+          ...markdownBlocks(bet.sections, [SECTION.bet]),
         ],
         lenses: ["bets"],
         searchText: [bet.title, problem?.title, bet.sections[SECTION.bet], bet.id].join(" "),

@@ -36,7 +36,8 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
   const notes = notesAboutRecord(node.contentId);
   // Authority is the guardrail that keeps a proposal from reading as policy, so
   // what the word means cannot live in a `title` a touch reader never sees. The
-  // map has the legend for this; a record page has nowhere else to put it.
+  // map has the legend for this; here it renders with the provenance at the
+  // foot — bookkeeping after the record, never in front of the title.
   const authorityMeaning = graph.vocab.authority.find((term) => term.id === node.authority)?.description;
 
   const mapHref = (() => {
@@ -78,12 +79,6 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
             {node.status ? <Badge tone="quiet">{node.status}</Badge> : null}
             {node.dataStatus ? <Badge tone="quiet">data {node.dataStatus}</Badge> : null}
           </div>
-
-          {authorityMeaning ? (
-            <p className="authority-note">
-              <strong>{node.authority}</strong> — {authorityMeaning}
-            </p>
-          ) : null}
 
           <h1>{node.title}</h1>
           {node.subtitle ? <p className="page-subtitle">{node.subtitle}</p> : null}
@@ -132,6 +127,9 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
         coverage={node.coverage}
         file={node.file}
         sourceUrl={graph.sourceUrl}
+        repoUrl={graph.repoUrl}
+        authority={node.authority}
+        authorityMeaning={authorityMeaning}
       />
     </main>
   );
