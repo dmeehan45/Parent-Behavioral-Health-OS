@@ -2,7 +2,7 @@ import Link from "next/link";
 import { KIND_COLOR } from "@/components/map/canvas-theme";
 import { Markdown } from "@/components/markdown";
 import { projectModel } from "@/lib/model/graph";
-import { KIND_LABELS, KIND_MEANING, ORIENTATION_KINDS } from "@/lib/model/kinds";
+import { KIND_LABELS, KIND_MEANING } from "@/lib/model/kinds";
 import { reviewDebt } from "@/lib/research/glance";
 import type { NodeKind } from "@/lib/model/types";
 
@@ -36,6 +36,21 @@ export default function Home() {
   const waiting = reviewDebt();
   const stages = statOf("stage");
 
+  /**
+   * A node's standing line: the count and the destination derived, the wording
+   * local and short.
+   *
+   * The canonical labels ("problems named", "prototypes you can try") are
+   * written for a strip that stands on its own. Under a node already titled
+   * Problem they say the word twice, and at a fifth of the row the second copy
+   * is what pushes the arrow onto a line of its own. These read as the
+   * continuation of the name above them, and hold for any count.
+   */
+  const standing = (id: string, label: string) => {
+    const entry = statOf(id);
+    return entry ? { value: entry.value, label, href: entry.href } : undefined;
+  };
+
   // A bet id is content, so the example command borrows one rather than
   // stating it. With nothing to borrow the placeholder is the honest form.
   const briefCommand = `npm run prototype:brief -- ${firstBet ? firstBet.id : "<bet-id>"}`;
@@ -52,101 +67,94 @@ export default function Home() {
    * rather than anything in `content/`, which is why it can live in code: the
    * steps do not change when a stage or a bet does.
    *
-   * `short` and the live count stay visible on the card; `essence`, `carries`
-   * and `detail` are what opening the mechanism adds. Two of the five are
-   * model primitives and carry their kind. Research and what a prototype
-   * teaches deliberately do not: both are staging a person has to decide on,
-   * and a category hue would say they were already part of the model.
+   * A node carries only what survives being read at a glance: its name, its
+   * kind, and where the loop currently stands there. Prose in a fifth of a
+   * row is prose nobody can read — the mechanism is written at full measure
+   * below, once, for all five.
+   *
+   * Two of the five are model primitives and carry their kind. Research and
+   * what a prototype teaches deliberately do not: both are staging a person
+   * has to decide on, and a category hue would say they were already part of
+   * the model.
    */
   const loop: Array<{
     name: string;
     kind?: NodeKind;
-    /** The one visible sentence: what this step is, said at scanning length. */
-    short: string;
     /** Where the loop currently stands at this step, from the projection. */
     stat?: { value: number; label: string; href: string };
-    essence: string;
+    /** How the step actually works. Never what the primitive *is* — the kind
+        already says that, and two copies of it drift apart. */
+    mechanism: React.ReactNode;
     carries: string;
-    detail: React.ReactNode;
     command?: string;
   }> = [
     {
       name: "Research",
-      short: "A question goes out and comes back as findings with sources, waiting on a person.",
       stat: { value: waiting, label: "waiting on you", href: "/review" },
-      essence:
-        "A question goes to a chat agent or to a scheduled run, and comes back as a bounded handoff in the repository: sources, findings small enough to argue with one at a time, and what it was still unsure about.",
-      carries: "The sources and the uncertainty, still attached to the finding.",
-      detail: (
+      mechanism: (
         <p>
-          It never edits the model. The brief is what stops a routine finding the same thing forever: it prints what
-          earlier runs established, and restating one of them exactly is a validation error rather than a duplicate
-          nobody notices.
+          A question goes to a chat agent or to a scheduled run, and comes back as a bounded handoff in the repository:
+          sources, findings small enough to argue with one at a time, and what it was still unsure about. It never
+          edits the model. The brief is what stops a routine finding the same thing forever — it prints what earlier
+          runs established, and restating one of them exactly is a validation error rather than a duplicate nobody
+          notices.
         </p>
       ),
+      carries: "The sources and the uncertainty, still attached to the finding.",
       command: "npm run research:brief -- <question-id>",
     },
     {
       name: "Problem",
       kind: "problem",
-      short: "A person reads the evidence and names where the machine breaks.",
-      stat: statOf("problem"),
-      essence:
-        "A person reads the finding next to its evidence and decides. What it can become is a named problem: where the machine breaks, which stages and steps it bites, and what that costs.",
-      carries: "The targets and the evidence, already linked.",
-      detail: (
+      stat: standing("problem", "named"),
+      mechanism: (
         <p>
-          Naming a problem is a complete contribution — it does not need an answer yet. The tooling composes the
-          record&rsquo;s identity, its targets and the trace proving it was reviewed, then leaves every word of the body
+          A person reads the finding next to its evidence and decides. The tooling composes the record&rsquo;s identity,
+          the stages and steps it bites, and the trace proving it was reviewed — then leaves every word of the body
           empty, because the sentence that names the trouble is a person&rsquo;s.
         </p>
       ),
+      carries: "The targets and the evidence, already linked.",
     },
     {
       name: "Bet",
       kind: "bet",
-      short: "One problem, one proposed answer, and the shape of the experiment.",
-      stat: statOf("bet"),
-      essence:
-        "One problem, one proposed answer, and the shape of the experiment: what trying it should settle, what it assumes, and the signal that would show we were wrong.",
-      carries: "The experiment's shape, with a history.",
-      detail: (
+      stat: standing("bet", "on the table"),
+      mechanism: (
         <p>
-          A bet never restates the trouble, because two copies of it drift apart. Approving the experiment is a pull
-          request against the bet rather than a message in a chat, so the next person can read what was agreed without
-          asking anybody.
+          Alongside the answer, the bet records the shape of the experiment: what trying it should settle, what it
+          assumes, and the signal that would show we were wrong. Approving that is a pull request against the bet
+          rather than a message in a chat, so the next person can read what was agreed without asking anybody.
         </p>
       ),
+      carries: "The experiment's shape, with a history.",
     },
     {
       name: "Prototype",
       kind: "prototype",
-      short: "One command composes the build context, and software makes the bet concrete.",
-      stat: statOf("prototype"),
-      essence:
-        "One command composes the whole build context — the bet, the problem, the flow it lands on with its rules and exceptions, the evidence and where it is weak, and an honest known / assumed / unknown.",
-      carries: "Everything above, in one paste.",
-      detail: (
+      stat: standing("prototype", "you can try"),
+      mechanism: (
         <p>
-          Hand it to a coding agent and it can start. It can also refuse, and the refusal is the point: a bet whose
-          experiment nobody has shaped comes back <em>not ready to build</em>, with the questions to put to a person. A
-          guess written into a blank field becomes something the built software makes look real.
+          One command composes the whole build context — the bet, the problem, the flow it lands on with its rules and
+          exceptions, the evidence and where it is weak, and an honest known / assumed / unknown. Hand it to a coding
+          agent and it can start. It can also refuse, and the refusal is the point: a bet whose experiment nobody has
+          shaped comes back <em>not ready to build</em>, with the questions to put to a person.
         </p>
       ),
+      carries: "Everything above, in one paste.",
       command: briefCommand,
     },
     {
       name: "What it teaches",
-      short: "Somebody tries the software, and their reaction re-enters as evidence.",
-      essence:
-        "Somebody uses the software and reacts. That re-enters as a handoff decided by a person, because one reaction is a reported observation rather than a proven claim.",
-      carries: "Back to the top, as evidence the next run can see.",
-      detail: (
+      mechanism: (
         <p>
-          Whatever survives that review changes <code>content/</code>, and every open map redraws within seconds of the
-          change landing, highlighting what moved.
+          Somebody uses the software and reacts. That re-enters as a handoff decided by a person, because one reaction
+          is a reported observation rather than a proven claim. Whatever survives that review changes{" "}
+          <code>content/</code>, and every open map redraws within seconds of the change landing, highlighting what
+          moved.
         </p>
       ),
+      carries: "Back to the top, as evidence the next run can see.",
     },
   ];
 
@@ -162,14 +170,12 @@ export default function Home() {
           A model of how the practice actually runs and where it breaks, narrowed to the problems technology can fix —
           so clinicians and families get better outcomes, and what works can be productized.
         </p>
-        <p className="home-lead">
-          It is an open-source context-to-prototype system. Research becomes a named problem, a problem gets one bet, a
-          bet becomes software somebody can try, and what that teaches comes back in. The point is to prototype the
-          right solutions to the right problems.
-        </p>
+        {/* The loop was described here in a sentence and drawn again directly
+            below. The drawing is the better telling, so this says what the
+            thing *is* and hands the sequence to the diagram. */}
         <p className="muted small">
-          A reference model, not a product. It holds no patient, clinician, or practice data, and it is wrong in places
-          we would like you to find.
+          An open-source context-to-prototype system, and a reference model rather than a product. It holds no patient,
+          clinician, or practice data, and it is wrong in places we would like you to find.
         </p>
 
         <div className="home-actions">
@@ -195,8 +201,7 @@ export default function Home() {
         <span className="eyebrow">The loop</span>
         <h2>How a question becomes software you can try</h2>
         <p className="muted">
-          Four moves and a return. Each leaves a reviewable artifact, and each join is a command that composes the next
-          step&rsquo;s context out of what is already written down. Open a step for the mechanism.
+          Four moves and a return, each leaving a reviewable artifact the next step composes its context from.
         </p>
 
         <ol className="pipeline">
@@ -212,70 +217,92 @@ export default function Home() {
                 <h3>{step.name}</h3>
               </span>
 
-              <p className="pipeline-gist">{step.short}</p>
-
               {step.stat ? (
                 <Link className="pipeline-stat" href={step.stat.href}>
                   <strong>{step.stat.value}</strong>
-                  {/* The space before the arrow is non-breaking, so the
-                      narrowest column never strands it on a line of its own. */}
                   <span>
                     {step.stat.label}
-                    {" "}
+                    {"\u00a0"}
                     <span aria-hidden="true">→</span>
                   </span>
                 </Link>
               ) : (
                 <span className="pipeline-stat pipeline-return">
-                  <span aria-hidden="true">⟲</span> back to the top
+                  <span aria-hidden="true">↺</span>
+                  <span>back to the top</span>
                 </span>
               )}
-
-              <details className="pipeline-more">
-                <summary>The mechanism</summary>
-                <p className="pipeline-essence">{step.essence}</p>
-                <p className="pipeline-carry">
-                  <strong>Carries forward:</strong> {step.carries}
-                </p>
-                {step.detail}
-                {step.command ? <code className="home-command">{step.command}</code> : null}
-              </details>
             </li>
           ))}
         </ol>
 
+        {/* One disclosure for all five, at the article measure — not five
+            accordions inside a five-column row, where opening one tore the
+            rail out of alignment and set the commands in a 100px gutter. It is
+            also the only place the vocabulary is defined now: the separate
+            "four words" list said the same things a second time. */}
+        <details className="disclosure pipeline-guide">
+          <summary>What each step means, and how it works</summary>
+          <dl className="define-list">
+            <div>
+              <dt>
+                <span className="legend-swatch" style={{ background: KIND_COLOR.stage }} aria-hidden="true" />
+                {KIND_LABELS.stage}
+              </dt>
+              <dd>
+                <p>{KIND_MEANING.stage}</p>
+                <p className="pipeline-carry">
+                  <strong>Where the loop runs.</strong> Every problem, bet and prototype below is pinned to one.
+                </p>
+              </dd>
+            </div>
+
+            {loop.map((step) => (
+              <div key={step.name}>
+                <dt>
+                  {step.kind ? (
+                    <span
+                      className="legend-swatch"
+                      style={{ background: KIND_COLOR[step.kind] }}
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  {step.name}
+                </dt>
+                <dd>
+                  {step.kind ? <p>{KIND_MEANING[step.kind]}</p> : null}
+                  {step.mechanism}
+                  <p className="pipeline-carry">
+                    <strong>Carries forward:</strong> {step.carries}
+                  </p>
+                  {step.command ? <code className="home-command">{step.command}</code> : null}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <p className="muted small">
+            Each is a Markdown file naming the ones it depends on, which is what makes the whole model readable in one
+            pass by a person or an agent.
+          </p>
+        </details>
+
         <p className="muted small">
-          The loop runs through the machine itself
+          It runs on the machine itself
           {stages ? (
             <>
               {" — "}
               <Link href={stages.href}>
                 {stages.value} {stages.label}
-                {" "}
-                <span aria-hidden="true">→</span>
+                <span aria-hidden="true"> →</span>
               </Link>
+              {" — "}
             </>
-          ) : null}
-          . Nothing between the steps lives in a chat window, so no context is rebuilt from memory and none goes
-          missing between the question and the build.
+          ) : (
+            ", "
+          )}
+          and nothing between the steps lives in a chat window.
         </p>
       </section>
-
-      <details className="disclosure home-vocab">
-        <summary>The four words the model is built from</summary>
-        <dl className="define-list">
-          {ORIENTATION_KINDS.map((kind) => (
-            <div key={kind}>
-              <dt>{KIND_LABELS[kind]}</dt>
-              <dd>{KIND_MEANING[kind]}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="muted small">
-          Each is a Markdown file naming the ones it depends on, which is what makes the whole model readable in one
-          pass by a person or an agent.
-        </p>
-      </details>
 
       {firstRun ? (
         <section className="home-start">
@@ -436,9 +463,11 @@ export default function Home() {
         </div>
       </section>
 
+      {/* The hero already says this is a reference model rather than a
+          product. What is left for the footer is the part it does not cover. */}
       <p className="page-note">
-        This model is generalized and provisional. It does not describe any particular company, it is not a medical
-        record system, and much of it is still marked as proposed rather than settled.
+        This model does not describe any particular company, it is not a medical record system, and much of it is still
+        marked as proposed rather than settled.
       </p>
     </main>
   );
