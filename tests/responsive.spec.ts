@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import type { NodeKind } from "../lib/model/types";
+import { FIXED_ROUTES, routesFromModel } from "./routes";
 
 /**
  * Responsive smoke tests.
@@ -8,50 +8,13 @@ import type { NodeKind } from "../lib/model/types";
  * breaks on a phone: a fixed width, an unwrapped row, a canvas that pushes the
  * page sideways. That is what these check, and not much else.
  *
- * The routes come from `/api/model` rather than from a list here, for the same
- * reason the interface does: adding a stage or a bet must not require editing
- * application code, and a hardcoded ID here would rot the first time content
- * moved.
- */
-
-/** Static routes that exist regardless of what is in `content/`. */
-const FIXED_ROUTES = ["/", "/map", "/prototypes", "/review", "/review/apply"];
-
-/**
- * One record page per primitive, so every page template gets looked at once —
- * plus *every* prototype.
+ * Whether what fits can be *read* is a different question, and lives in
+ * `legibility.spec.ts`. Keeping them apart matters: this file asks about the
+ * box, that one asks about the text inside it, and for a long time only the
+ * first question was ever asked.
  *
- * Record pages all render through one template, so a second stage would test
- * nothing a first did not. A prototype is the opposite: each one is bespoke
- * interaction code, and it is the most likely thing in the repository to be
- * written by somebody who has not read the design system. Sampling one of them
- * would leave the rest unchecked, which is the same "the empty state cannot
- * fail" trap this file already exists to avoid.
- *
- * Derived from the model, so adding a prototype adds its test with no change
- * here — the same way adding a stage adds its node.
+ * The routes are derived from the model in `routes.ts`, shared with that file.
  */
-async function routesFromModel(page: Page): Promise<string[]> {
-  const response = await page.request.get("/api/model");
-  expect(response.ok()).toBeTruthy();
-  const model = (await response.json()) as {
-    nodes: Array<{ kind: NodeKind; href: string; contentId: string }>;
-  };
-
-  const seen = new Map<NodeKind, string>();
-  const prototypes: string[] = [];
-  for (const node of model.nodes) {
-    // A prototype whose bet declares no route falls back to that bet's own page,
-    // which the bet template already covers. Recognised by where it falls back
-    // *to* rather than by a `/prototypes/` prefix: the route is whatever the bet
-    // declares, and assuming its shape here is the kind of convention that
-    // quietly stops being true.
-    const unbuilt = node.href === `/bets/${node.contentId}`;
-    if (node.kind === "prototype" && !unbuilt) prototypes.push(node.href);
-    else if (!seen.has(node.kind)) seen.set(node.kind, node.href);
-  }
-  return [...new Set([...seen.values(), ...prototypes])];
-}
 
 /**
  * The primitive with the most to say, whatever it currently is.

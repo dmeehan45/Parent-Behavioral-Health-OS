@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { ConversationReviewBridge } from "@/components/review/conversation-review-bridge";
 import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { projectReview } from "@/lib/research/projection";
 
@@ -22,19 +21,14 @@ export default async function ReviewRunPage({ params }: { params: Params }) {
   const run = runs.find((candidate) => candidate.id === runId);
   if (!run) notFound();
 
+  // The bridge is rendered by the workspace, under the run's own heading. It
+  // used to sit here, before it — which put a call to action about the page
+  // above anything saying which page it was, and left it outside `<main>`.
   return (
-    <>
-      <ConversationReviewBridge
-        runId={run.id}
-        question={run.question}
-        findings={run.findings.length}
-        candidates={run.candidates.length}
-      />
-      <ReviewWorkspace
-        run={run}
-        supersedable={supersedable.filter((entry) => entry.run !== run.id)}
-        sourceUrl={sourceUrl}
-      />
-    </>
+    <ReviewWorkspace
+      run={run}
+      supersedable={supersedable.filter((entry) => entry.run !== run.id)}
+      sourceUrl={sourceUrl}
+    />
   );
 }

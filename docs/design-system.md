@@ -90,6 +90,13 @@ stat bands are the pattern; an adjective without a number behind it is not.
 **720px is the article measure.** Long-form reading is what the record pages
 are for.
 
+**30 characters per line is the floor.** The comfortable band for continuous
+reading is 45–75; below about 30 the eye stops reading lines and starts
+reassembling fragments. The ceiling had been enforced since the beginning and
+the floor had not, which is how a front-page band shipped at fifteen. Narrow
+columns are still a legitimate choice — this is the point where text is no
+longer prose, not a house preference about column width.
+
 ## Typefaces
 
 The system's two faces are licensed third-party typefaces, and the source
@@ -129,19 +136,39 @@ The system's second grey is not carried over. `#959e9f` measures 2.74:1, and
 splitting the muted tier again would reintroduce that failure at a smaller
 size. Hierarchy below the muted tier is carried by size, weight and tracking.
 
-## Responsive tests
+## Browser checks
 
-`npm run test:responsive` runs a thin Playwright smoke test at 390×844 and
-1440×900 over every page template, with the record routes derived from
-`/api/model` rather than hardcoded. It checks that nothing overflows its
-viewport, that nav links hit 44px, that body copy keeps its measure, and that
-the map canvas actually has a height and its floating controls stay on screen
-and off each other.
+`npm run test:responsive` builds and serves the app and runs everything under
+`tests/*.spec.ts` at 390×844 and 1440×900, over every page template, with the
+record routes derived from `/api/model` rather than hardcoded (`tests/routes.ts`,
+shared by both specs). There are two, and they ask different questions.
 
-It is deliberately thin. This is a thinking tool and iteration speed matters
-more than coverage — the tests exist to stop a push from silently breaking the
-phone, not to pin the design down. Add a case when a responsive bug gets past
-them; do not grow them into a visual regression suite.
+**`responsive.spec.ts` — does it fit.** Nothing overflows its viewport, nav links
+hit 44px, body copy keeps its 720px ceiling, the map canvas has a height, and its
+floating controls stay on screen and off each other.
+
+**`legibility.spec.ts` — can it be read.** Characters per line against the floor
+above, on every wrapping block of prose. Three things about how it measures are
+deliberate:
+
+- It **opens every `<details>` first**. The bug it was written for was reviewed
+  with all five of its disclosures shut, which is the state that cannot fail.
+- It measures the **glyphs**, not the line count. `length / lines` reports 24 for
+  a sentence set at 45 whenever the last line is short, and a check that cries
+  wolf is a check nobody reads.
+- It **skips headings, composed rows and the canvas**. Display type is set
+  short-line on purpose, a badge-plus-title-plus-meta row is a structure rather
+  than a sentence, and React Flow draws inside a transform where a measured rect
+  is not the size text is painted at — the canvas governs its own legibility by
+  zoom tier, in painted pixels, which is stricter.
+
+Both are deliberately thin. This is a thinking tool and iteration speed matters
+more than coverage — they exist to stop a push from silently breaking the phone
+or shipping something nobody can read, not to pin the design down. Add a case
+when a bug gets past them; do not grow them into a visual regression suite.
+
+Neither replaces looking at the thing. `AGENTS.md` carries that rule, and what
+it means by the state that holds the most content.
 
 ## Upstream
 

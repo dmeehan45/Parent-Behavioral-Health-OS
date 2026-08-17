@@ -1953,8 +1953,20 @@ p:last-child {
   margin-bottom: 14px;
 }
 
+/*
+ * A page-head title is content, not a slogan.
+ *
+ * The base `h1` clamps up to 46px, which is right for the home hero — one short
+ * line, the brand's signature. It is wrong for the titles that actually appear
+ * here: a Claim is a full sentence, and a research question runs to forty words.
+ * At the hero size a question set nine lines deep on a phone and pushed the
+ * whole record below the fold. Display type is for short strings; a heading
+ * that is a sentence is set at a sentence's size.
+ */
 .page-head h1 {
   margin-bottom: 10px;
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.15;
 }
 
 .page-subtitle {
