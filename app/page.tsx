@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { KindBadge } from "@/components/model/badges";
+import { KIND_COLOR } from "@/components/map/canvas-theme";
 import { Markdown } from "@/components/markdown";
 import { projectModel } from "@/lib/model/graph";
 import { KIND_LABELS, KIND_MEANING, ORIENTATION_KINDS } from "@/lib/model/kinds";
+import { reviewDebt } from "@/lib/research/glance";
 import type { NodeKind } from "@/lib/model/types";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,14 @@ export default function Home() {
   const [firstBet] = graph.buildTargets;
   const unbuilt = graph.buildTargets.filter((bet) => !bet.built);
 
+  // The loop's live state. Model counts come from the same stats the doors
+  // strip used to render; the research count reads staging through the glance
+  // helpers, which swallow their errors so a malformed handoff cannot take
+  // down the front door. One number, same definition as the nav badge.
+  const statOf = (id: string) => graph.stats.find((entry) => entry.id === id);
+  const waiting = reviewDebt();
+  const stages = statOf("stage");
+
   // A bet id is content, so the example command borrows one rather than
   // stating it. With nothing to borrow the placeholder is the honest form.
   const briefCommand = `npm run prototype:brief -- ${firstBet ? firstBet.id : "<bet-id>"}`;
@@ -43,15 +52,19 @@ export default function Home() {
    * rather than anything in `content/`, which is why it can live in code: the
    * steps do not change when a stage or a bet does.
    *
-   * `essence` and `carries` stay visible; `detail` is what opening a step adds.
-   * Two of the five are model primitives and carry their kind. Research and
-   * what a prototype teaches deliberately do not: both are staging a person has
-   * to decide on, and a category hue would say they were already part of the
-   * model.
+   * `short` and the live count stay visible on the card; `essence`, `carries`
+   * and `detail` are what opening the mechanism adds. Two of the five are
+   * model primitives and carry their kind. Research and what a prototype
+   * teaches deliberately do not: both are staging a person has to decide on,
+   * and a category hue would say they were already part of the model.
    */
   const loop: Array<{
     name: string;
     kind?: NodeKind;
+    /** The one visible sentence: what this step is, said at scanning length. */
+    short: string;
+    /** Where the loop currently stands at this step, from the projection. */
+    stat?: { value: number; label: string; href: string };
     essence: string;
     carries: string;
     detail: React.ReactNode;
@@ -59,6 +72,8 @@ export default function Home() {
   }> = [
     {
       name: "Research",
+      short: "A question goes out and comes back as findings with sources, waiting on a person.",
+      stat: { value: waiting, label: "waiting on you", href: "/review" },
       essence:
         "A question goes to a chat agent or to a scheduled run, and comes back as a bounded handoff in the repository: sources, findings small enough to argue with one at a time, and what it was still unsure about.",
       carries: "The sources and the uncertainty, still attached to the finding.",
@@ -74,6 +89,8 @@ export default function Home() {
     {
       name: "Problem",
       kind: "problem",
+      short: "A person reads the evidence and names where the machine breaks.",
+      stat: statOf("problem"),
       essence:
         "A person reads the finding next to its evidence and decides. What it can become is a named problem: where the machine breaks, which stages and steps it bites, and what that costs.",
       carries: "The targets and the evidence, already linked.",
@@ -88,6 +105,8 @@ export default function Home() {
     {
       name: "Bet",
       kind: "bet",
+      short: "One problem, one proposed answer, and the shape of the experiment.",
+      stat: statOf("bet"),
       essence:
         "One problem, one proposed answer, and the shape of the experiment: what trying it should settle, what it assumes, and the signal that would show we were wrong.",
       carries: "The experiment's shape, with a history.",
@@ -102,6 +121,8 @@ export default function Home() {
     {
       name: "Prototype",
       kind: "prototype",
+      short: "One command composes the build context, and software makes the bet concrete.",
+      stat: statOf("prototype"),
       essence:
         "One command composes the whole build context — the bet, the problem, the flow it lands on with its rules and exceptions, the evidence and where it is weak, and an honest known / assumed / unknown.",
       carries: "Everything above, in one paste.",
@@ -116,6 +137,7 @@ export default function Home() {
     },
     {
       name: "What it teaches",
+      short: "Somebody tries the software, and their reaction re-enters as evidence.",
       essence:
         "Somebody uses the software and reacts. That re-enters as a handoff decided by a person, because one reaction is a reported observation rather than a proven claim.",
       carries: "Back to the top, as evidence the next run can see.",
@@ -165,25 +187,79 @@ export default function Home() {
         </div>
       </section>
 
-      {/* The counts are the navigation, not decoration: each leads to what it
-          counts, so the shape of the model is also the way into it. */}
-      <ul className="home-doors" aria-label="What is in the model, and where to find it">
-        {graph.stats.map((entry) => (
-          <li key={entry.label}>
-            <Link href={entry.href}>
-              <strong>{entry.value}</strong>
-              {/* The space before the arrow is non-breaking. In the narrowest
-                  column a plain one drops the arrow onto a line of its own,
-                  where it reads as a stray glyph rather than as a link. */}
-              <span>
-                {entry.label}
+
+      {/* The loop, drawn rather than described — and the counts are the
+          navigation, not decoration: each node says where the loop currently
+          stands at that step and leads to the surface that holds it. */}
+      <section className="pipeline-band" id="loop" aria-label="How a question becomes software you can try">
+        <span className="eyebrow">The loop</span>
+        <h2>How a question becomes software you can try</h2>
+        <p className="muted">
+          Four moves and a return. Each leaves a reviewable artifact, and each join is a command that composes the next
+          step&rsquo;s context out of what is already written down. Open a step for the mechanism.
+        </p>
+
+        <ol className="pipeline">
+          {loop.map((step) => (
+            <li className="pipeline-node" key={step.name}>
+              <span className="pipeline-head">
+                {/* The legend's swatch, not a kind badge: the node's name is
+                    already the kind's word, and a badge repeated it letter for
+                    letter. Hue plus the word still says what it is. */}
+                {step.kind ? (
+                  <span className="legend-swatch" style={{ background: KIND_COLOR[step.kind] }} aria-hidden="true" />
+                ) : null}
+                <h3>{step.name}</h3>
+              </span>
+
+              <p className="pipeline-gist">{step.short}</p>
+
+              {step.stat ? (
+                <Link className="pipeline-stat" href={step.stat.href}>
+                  <strong>{step.stat.value}</strong>
+                  {/* The space before the arrow is non-breaking, so the
+                      narrowest column never strands it on a line of its own. */}
+                  <span>
+                    {step.stat.label}
+                    {" "}
+                    <span aria-hidden="true">→</span>
+                  </span>
+                </Link>
+              ) : (
+                <span className="pipeline-stat pipeline-return">
+                  <span aria-hidden="true">⟲</span> back to the top
+                </span>
+              )}
+
+              <details className="pipeline-more">
+                <summary>The mechanism</summary>
+                <p className="pipeline-essence">{step.essence}</p>
+                <p className="pipeline-carry">
+                  <strong>Carries forward:</strong> {step.carries}
+                </p>
+                {step.detail}
+                {step.command ? <code className="home-command">{step.command}</code> : null}
+              </details>
+            </li>
+          ))}
+        </ol>
+
+        <p className="muted small">
+          The loop runs through the machine itself
+          {stages ? (
+            <>
+              {" — "}
+              <Link href={stages.href}>
+                {stages.value} {stages.label}
                 {" "}
                 <span aria-hidden="true">→</span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+              </Link>
+            </>
+          ) : null}
+          . Nothing between the steps lives in a chat window, so no context is rebuilt from memory and none goes
+          missing between the question and the build.
+        </p>
+      </section>
 
       <details className="disclosure home-vocab">
         <summary>The four words the model is built from</summary>
@@ -236,49 +312,6 @@ export default function Home() {
           <p className="muted small">Invented families and clinicians. Nothing you do in it is saved anywhere.</p>
         </section>
       ) : null}
-
-      <section className="home-band" id="loop">
-        <span className="eyebrow">The loop</span>
-        <h2>How a question becomes software you can try</h2>
-        <p className="muted">
-          Four moves and a return. Each leaves a reviewable artifact, and each join is a command that composes the next
-          step&rsquo;s context out of what is already written down. Open a step for the mechanism.
-        </p>
-
-        <ol className="loop">
-          {loop.map((step) => (
-            <li key={step.name}>
-              <details>
-                <summary>
-                  <span className="loop-head">
-                    <h3>{step.name}</h3>
-                    {step.kind ? <KindBadge kind={step.kind} subtle /> : null}
-                  </span>
-                  <span className="loop-essence">{step.essence}</span>
-                  <span className="loop-carry">
-                    <strong>Carries forward:</strong> {step.carries}
-                  </span>
-                </summary>
-                <div className="loop-detail">
-                  {step.detail}
-                  {step.command ? <code className="home-command">{step.command}</code> : null}
-                </div>
-              </details>
-            </li>
-          ))}
-        </ol>
-
-        <p className="muted">
-          Nothing between the steps lives in a chat window. That is why it moves quickly: no context is rebuilt from
-          memory, and none goes missing between the question and the build.
-        </p>
-
-        <div className="home-actions">
-          <Link className="button secondary" href="/review">
-            See what research is proposing <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </section>
 
       <section className="home-band">
         <span className="eyebrow">Division of labour</span>

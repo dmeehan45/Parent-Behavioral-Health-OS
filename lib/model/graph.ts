@@ -425,6 +425,10 @@ export function projectModel(): ModelGraph {
         source: nodeId(targetKind, target),
         target: nodeId("problem", problem.id),
         kind: "problem",
+        // Read along the arrow: the stage breaks here. Labels only paint at
+        // reading zoom, so the spine explains itself exactly when a reader
+        // leans in to follow it.
+        label: "breaks here",
         // Carried into the evidence lens too, so a problem drawn there hangs
         // under the part of the machine it bites instead of floating loose.
         lenses: problemLenses,
@@ -528,6 +532,7 @@ export function projectModel(): ModelGraph {
         source: nodeId("problem", problem.id),
         target: nodeId("bet", bet.id),
         kind: "bet",
+        label: "answered by",
         lenses: ["bets"],
       });
     }
@@ -588,6 +593,7 @@ export function projectModel(): ModelGraph {
       source: nodeId("bet", bet.id),
       target: nodeId("prototype", bet.id),
       kind: "prototype",
+      label: "tested by",
       lenses: ["bets"],
     });
   }
@@ -777,7 +783,12 @@ export function projectModel(): ModelGraph {
       target: nodeId("stage", edge.to),
       kind: feedback ? "feedback" : "flow",
       label: edge.relationship.replaceAll("_", " "),
-      lenses: ["flow", "bets", "evidence"],
+      // The operating flow is the flow lens's argument. On the bets and
+      // evidence lenses the stage row is context for a vertical spine, so the
+      // forward chain comes along (drawn muted there) while the feedback arcs
+      // stay home: a gold dashed line across a lens that is not about the
+      // system learning answers a question nobody asked there.
+      lenses: feedback ? ["flow"] : ["flow", "bets", "evidence"],
     });
   }
 
@@ -867,10 +878,11 @@ export function projectModel(): ModelGraph {
     // requiring the reader to already know the vocabulary — and that double as
     // the front door's navigation, so each one leads to what it counts.
     stats: [
-      stat(countByKind("stage"), "stage of the machine", "stages of the machine", "/map"),
-      stat(countByKind("problem"), "problem named", "problems named", soleHref("problem")),
-      stat(countByKind("bet"), "bet on the table", "bets on the table", soleHref("bet")),
+      stat("stage", countByKind("stage"), "stage of the machine", "stages of the machine", "/map"),
+      stat("problem", countByKind("problem"), "problem named", "problems named", soleHref("problem")),
+      stat("bet", countByKind("bet"), "bet on the table", "bets on the table", soleHref("bet")),
       stat(
+        "prototype",
         entryPoints.length,
         "prototype you can try",
         "prototypes you can try",
@@ -890,8 +902,8 @@ export function projectModel(): ModelGraph {
 /* -------------------------------------------------------------------------- */
 
 /** A count with its label already agreeing with it, and somewhere to go. */
-function stat(value: number, singular: string, plural: string, href: string) {
-  return { value, label: value === 1 ? singular : plural, href };
+function stat(id: string, value: number, singular: string, plural: string, href: string) {
+  return { id, value, label: value === 1 ? singular : plural, href };
 }
 
 /**

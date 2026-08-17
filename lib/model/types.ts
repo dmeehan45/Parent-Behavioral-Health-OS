@@ -212,7 +212,7 @@ export type ModelGraph = {
    * Size of the model in plain words, each count leading to what it counts.
    * Labels are already pluralised.
    */
-  stats: Array<{ label: string; value: number; href: string }>;
+  stats: Array<{ id: string; label: string; value: number; href: string }>;
   /** Working software a newcomer can try, derived from Bets that declare it. */
   entryPoints: EntryPoint[];
   /** Every Bet, unbuilt ones first, for a reader who wants to build one. */
