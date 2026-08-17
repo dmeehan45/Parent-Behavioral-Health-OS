@@ -20,6 +20,13 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:3210",
     trace: "off",
     screenshot: "only-on-failure",
+    // Sandboxed environments (Claude Code on the web, some CI images) ship a
+    // pre-installed Chromium that is not the revision this Playwright pins, and
+    // cannot download the one it wants. Point at it and the suite runs; leave
+    // the variable unset and nothing changes.
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+      ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } }
+      : {}),
   },
 
   projects: [

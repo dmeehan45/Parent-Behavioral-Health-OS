@@ -30,6 +30,9 @@
   --accent: var(--ds-action);
   --accent-ink: var(--ds-action-hover);
   --accent-soft: var(--ds-action-wash);
+  --brand-surface: var(--ds-surface-brand);
+  --brand-on-surface: var(--ds-text-on-brand);
+  --brand-on-surface-muted: var(--ds-text-on-brand-muted);
   --warn: var(--ds-gold-on-tint);
   --warn-soft: var(--ds-gold-lightest);
   --evidence: var(--ds-green-on-tint);
@@ -81,7 +84,7 @@
     --kind-stage: var(--ds-blue-medium);
     --kind-step: var(--ds-blue-light);
     --kind-problem: var(--ds-coral-light);
-    --kind-claim: var(--ds-coral-medium);
+    --kind-claim: var(--ds-coral-aa);
     --kind-bet: var(--ds-gold-medium);
     --kind-prototype: var(--ds-gold-light);
     --kind-metric: var(--ds-green-medium);
@@ -672,6 +675,11 @@ p:last-child {
   background: var(--kind-claim);
 }
 
+/* The nav is a scroller with its scrollbar hidden, so on a phone it silently
+   cut its last link — the one carrying the count of research waiting on you —
+   53px short of the badge, with nothing saying more was there. `test:responsive`
+   never saw it: the clipping happens inside this box, so the document never
+   grows. Same fade the lens strip already uses. */
 .app-nav {
   display: flex;
   align-items: center;
@@ -679,6 +687,21 @@ p:last-child {
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+
+/* A mask cannot follow the scroll position, so the fade sits over the last 18px
+   whether or not there is anything left to reveal — which would leave the final
+   link permanently half-erased once you scrolled to it. Trailing padding of the
+   same depth is what makes it honest: scrolled to the end, the gradient falls
+   across padding and the link is whole. Same arrangement as `.palette-results`.
+   Only where it can overflow — above this width everything fits, and a fade
+   over the last link would be a lie. */
+@media (max-width: 860px) {
+  .app-nav {
+    padding-right: 18px;
+    /* ds-allow: a mask's black is opacity, not a colour role. */
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 18px), transparent 100%);
+  }
 }
 
 .app-nav::-webkit-scrollbar {
@@ -742,6 +765,22 @@ p:last-child {
 .shell.page .detail-blocks,
 .shell.page > .prose,
 .shell.page .detail-prose {
+  max-width: var(--ds-container-text);
+}
+
+/*
+ * The rules have to agree with the measure, or they contradict it. Capping the
+ * blocks left `.page-head`'s underline and `.provenance`'s top rule spanning
+ * the full 1240px column above and below content that stops at 720px — and a
+ * rule is a statement about how wide the column is, so the eye reads the
+ * leftover 520px as content that failed to render.
+ *
+ * Scoped to pages that are measure-capped throughout. `/review` and
+ * `/prototypes` share `.shell.page` but lay out full-width card grids, where a
+ * full-width rule is telling the truth.
+ */
+.shell.page:has(.detail-blocks) .page-head,
+.shell.page:has(.detail-blocks) .provenance {
   max-width: var(--ds-container-text);
 }
 
@@ -1612,13 +1651,21 @@ p:last-child {
   outline: none;
 }
 
+/* The scrollport ends wherever the box does, which sliced the row straddling
+   that line cleanly in half — a result showing its top half above the footer
+   reads as a rendering fault rather than as "scroll for more". The fade says
+   the list continues. Bottom padding matches the fade depth so that a list
+   which already fits never has its last row washed out: there, the gradient
+   only ever falls across padding. */
 .palette-results {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   list-style: none;
   margin: 0;
-  padding: 6px;
+  padding: 6px 6px 22px;
+  /* ds-allow: a mask's black is opacity, not a colour role. */
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 22px), transparent 100%);
 }
 
 .palette-results button {
@@ -2529,10 +2576,14 @@ p:last-child {
   max-width: 60ch;
 }
 
+/* A lasting brand panel, so it reads the surface role rather than the action
+   role it used to borrow. `--accent-ink` is `--ds-action-hover`, which inverts
+   to a *light* blue in dark mode; the card's text did not follow, so the
+   eyebrow rendered in exactly its own background colour. */
 .clinician-card {
   padding: var(--ds-space-8);
-  background: var(--accent-ink);
-  color: var(--ds-blue-lightest);
+  background: var(--brand-surface);
+  color: var(--brand-on-surface);
   border-radius: var(--radius-card);
   box-shadow: var(--ds-shadow-brand);
 }
@@ -2540,7 +2591,7 @@ p:last-child {
 /* On the deep blue card the eyebrow takes the light step of its own hue,
    which is the rule for tinted text on a tinted ground. */
 .clinician-card .eyebrow {
-  color: var(--ds-blue-light);
+  color: var(--brand-on-surface-muted);
 }
 
 .clinician-card h2 {
@@ -2616,8 +2667,12 @@ p:last-child {
   letter-spacing: -0.03em;
 }
 
+/* Block, not inline-block: the context line before it is inline, so this ran
+   straight on from it — "Parent participationIn your proposed caseload —
+   remove" — and its `margin-top` did nothing, because the two were on one
+   line. */
 .family-state {
-  display: inline-block;
+  display: block;
   margin-top: 8px;
   font-size: 12px;
   font-weight: 650;
@@ -2685,6 +2740,37 @@ p:last-child {
 
   .app-header {
     padding-left: 14px;
+  }
+
+  /* Buy back the width the last link needs so its count stays on screen. The
+     44px target is held by min-height, not by this padding. */
+  .app-header {
+    gap: 10px;
+  }
+
+  .app-nav {
+    gap: 2px;
+  }
+
+  .app-nav a {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+}
+
+/*
+ * Three labels and a count do not fit 390px at the full link size, and padding
+ * alone only ever bought a pixel or two of slack — enough to pass on one
+ * browser and fail on another, since text measurement varies between builds by
+ * more than that. Dropping the label a step shrinks all three proportionally
+ * and leaves room the difference cannot eat. Same breakpoint the wordmark
+ * already uses.
+ */
+@media (max-width: 560px) {
+  .app-nav a {
+    font-size: 13px;
+    padding-left: 6px;
+    padding-right: 6px;
   }
 
   .shell {
@@ -2973,6 +3059,17 @@ p:last-child {
   margin: 0 0 16px;
 }
 
+/* A run's synthesis is unbounded — these ranged from twenty words to three
+   hundred and fifty, and grid cards share the tallest row height, so the short
+   one carried a 400px void. The card is a way in, not the reading surface;
+   the whole synthesis is one click away. */
+.review-section .card > .small.muted {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .review-list {
   margin: 0;
   padding: 0;
@@ -3086,6 +3183,12 @@ p:last-child {
   padding-top: 16px;
 }
 
+/* `display: flex` removes the marker Chromium draws for a `list-item` summary,
+   and these were otherwise styled exactly like `.field-label` — the app's
+   *non-interactive* section heading. A collapsed disclosure therefore read as
+   an empty section, which is how "the other 25" queued questions and every
+   decided run became unreachable rather than merely folded away. The chevron
+   is the affordance; the count says what is behind it. */
 .disclosure > summary {
   display: flex;
   align-items: center;
@@ -3096,7 +3199,26 @@ p:last-child {
   letter-spacing: 0.1em;
   font-size: 10px;
   font-weight: 700;
-  color: var(--ink-3);
+  color: var(--ink-2);
+}
+
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure > summary::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg) translate(-1px, -1px);
+  transition: transform var(--ds-duration) var(--ds-ease);
+}
+
+.disclosure[open] > summary::before {
+  transform: rotate(45deg) translate(-1px, -1px);
 }
 
 .disclosure > summary:hover {
@@ -3171,10 +3293,13 @@ p:last-child {
 }
 
 /* A long command must scroll inside its own box rather than widening the page. */
+/* These run 1500–2800px against a 666px box. `white-space: pre` put roughly
+   800px of every command out of sight behind a horizontal scroll, which is the
+   wrong trade for a line whose whole purpose is to be read and copied whole.
+   Wrapping costs nothing here: it is one shell command, not aligned columns. */
 .queue-command {
   display: block;
   max-width: 100%;
-  overflow-x: auto;
   margin: 6px 0 0;
   padding: 8px 10px;
   background: var(--surface-2);
@@ -3184,7 +3309,8 @@ p:last-child {
   font-size: 12px;
   line-height: 1.5;
   color: var(--ink-2);
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /*
