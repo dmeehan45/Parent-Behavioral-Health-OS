@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge, Breadcrumb } from "@/components/model/badges";
+import { ConversationReviewBridge } from "@/components/review/conversation-review-bridge";
 import { FindingCard } from "@/components/review/finding-card";
 import {
   DISPOSITIONS,
@@ -129,6 +130,12 @@ export function ReviewWorkspace({
 
   const status = runStatus(run);
 
+  /** Compared loosely: whitespace and a trailing question mark are not a difference. */
+  const sameSentence = (a: string, b: string) =>
+    a.replace(/\s+/g, " ").trim().replace(/[?.]$/, "").toLowerCase() ===
+    b.replace(/\s+/g, " ").trim().replace(/[?.]$/, "").toLowerCase();
+  const answersBeyondTitle = run.answers.filter((answer) => !sameSentence(answer.question, run.question));
+
   return (
     <main className="shell page review">
       <Breadcrumb trail={[{ label: "System map", href: "/map" }, { label: "Review", href: "/review" }, { label: run.id }]} />
@@ -142,9 +149,13 @@ export function ReviewWorkspace({
           </div>
           <h1>{run.question}</h1>
           <p className="lede">{run.synthesis}</p>
-          {run.answers.length ? (
+          {/* A run usually answers the queued question it was named after, and
+              printing that back under the heading set the same forty words
+              twice, a line apart. Only the questions the title does not already
+              carry are worth saying. */}
+          {answersBeyondTitle.length ? (
             <p className="small muted">
-              Answering: {run.answers.map((answer) => answer.question).join("; ")}
+              Answering: {answersBeyondTitle.map((answer) => answer.question).join("; ")}
             </p>
           ) : null}
         </div>
@@ -154,6 +165,16 @@ export function ReviewWorkspace({
         Nothing here has changed the model. A decision authorizes a later, separate change to <code>content/</code> —
         it does not make one.
       </p>
+
+      {/* Under the run's own heading, inside `main`: this is a way of working
+          on the run, so it only means anything once the reader knows which
+          run they are looking at. */}
+      <ConversationReviewBridge
+        runId={run.id}
+        question={run.question}
+        findings={run.findings.length}
+        candidates={run.candidates.length}
+      />
 
       <section className="review-findings" aria-label="Findings">
         <h2 className="field-label">

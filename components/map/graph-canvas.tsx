@@ -215,6 +215,11 @@ export function GraphCanvas({
         const feedback = edge.kind === "feedback";
         const vertical = edge.kind !== "flow" && edge.kind !== "feedback";
         const dimmed = related ? !(related.has(edge.source) && related.has(edge.target)) : false;
+        // The stage chain is the flow lens's argument; on every other lens it
+        // is context for a vertical spine. Context keeps the row reading as a
+        // sequence but drops the arrowheads and the relationship labels, so
+        // the ink spends itself on the connections the lens is actually about.
+        const context = lens !== "flow" && edge.kind === "flow";
         const color = EDGE_COLOR[edge.kind];
 
         return {
@@ -226,19 +231,19 @@ export function GraphCanvas({
           type: feedback ? "default" : "smoothstep",
           pathOptions: feedback ? undefined : { borderRadius: 14 },
           animated: feedback,
-          className: `edge edge-${edge.kind}${dimmed ? " edge-dimmed" : ""}`,
-          label: showLabels ? edge.label : undefined,
+          className: `edge edge-${edge.kind}${dimmed ? " edge-dimmed" : ""}${context ? " edge-context" : ""}`,
+          label: showLabels && !context ? edge.label : undefined,
           labelBgPadding: [5, 3] as [number, number],
           labelBgBorderRadius: 3,
-          markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14, color },
+          markerEnd: context ? undefined : { type: MarkerType.ArrowClosed, width: 14, height: 14, color },
           style: {
             stroke: color,
-            strokeWidth: edge.kind === "flow" ? 1.6 : 1.2,
+            strokeWidth: context ? 1.1 : edge.kind === "flow" ? 1.6 : 1.2,
             strokeDasharray: feedback ? "6 5" : edge.kind === "state" ? "3 4" : undefined,
           },
         };
       }),
-    [lensEdges, related, showLabels],
+    [lensEdges, related, showLabels, lens],
   );
 
   /* ---- Viewport behaviour ----------------------------------------------- */

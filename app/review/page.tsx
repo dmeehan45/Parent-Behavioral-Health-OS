@@ -35,6 +35,13 @@ export default function ReviewIndexPage() {
   const settled = runs.filter((run) => run.total > 0 && run.decided === run.total);
   const openRuns = runs.filter((run) => run.decided < run.total);
 
+  // What is owed, in the same units as the navigation badge: undecided
+  // findings *and* undecided proposals. The page once counted findings alone,
+  // so the badge said 15 while this line said 7 and the queue looked different
+  // depending on where you stood.
+  const undecided = runs.reduce((count, run) => count + (run.total - run.decided), 0);
+  const proposalsAwaiting = undecided - awaiting.length;
+
   return (
     <main className="shell page">
       <Breadcrumb trail={[{ label: "System map", href: "/map" }, { label: "Research" }]} />
@@ -52,8 +59,15 @@ export default function ReviewIndexPage() {
       <SinceLastLook ids={[...runs.map((run) => run.id), ...findings.map(({ finding }) => finding.decisionId)]} />
 
       <p className="review-standing">
-        <strong>{awaiting.length}</strong> waiting on you · <strong>{accepted.length}</strong> ready to apply ·{" "}
-        <strong>{queue.length}</strong> worth investigating
+        <strong>{undecided}</strong> waiting on you
+        {proposalsAwaiting > 0 ? (
+          <span className="muted">
+            {" "}
+            ({awaiting.length} finding{awaiting.length === 1 ? "" : "s"} · {proposalsAwaiting} proposal
+            {proposalsAwaiting === 1 ? "" : "s"})
+          </span>
+        ) : null}{" "}
+        · <strong>{accepted.length}</strong> ready to apply · <strong>{queue.length}</strong> worth investigating
       </p>
 
       {runs.length === 0 ? (
@@ -65,7 +79,7 @@ export default function ReviewIndexPage() {
       {openRuns.length ? (
         <section className="review-section" aria-label="Waiting on you">
           <h2 className="field-label">
-            Waiting on you <span className="field-count">{awaiting.length}</span>
+            Waiting on you <span className="field-count">{undecided}</span>
           </h2>
           <div className="card-grid">
             {openRuns.map((run) => {

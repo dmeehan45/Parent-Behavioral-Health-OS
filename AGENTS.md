@@ -453,6 +453,45 @@ passed all the way through the bug above, because it only ever checked `/map`
 with nothing open. **Check the state that holds the most content, not the empty
 one** — the empty state is the one that cannot fail.
 
+### Fitting is not the same as being readable
+
+A front-page band shipped with its prose set at fifteen characters a line: five
+equal columns of a 1000px measure, about 110px each, every one carrying a
+twelve-word sentence, a disclosure and a shell command. The gist wrapped to six
+ragged lines and `npm run prototype:brief -- guided-first-caseload` broke across
+six more. It was unreadable, and it went through review green.
+
+Three things had to be true at once, and each is worth fixing separately:
+
+- **The measure was bounded above and never below.** The one typography
+  assertion in the repository was `width <= 760px`, so 110px passed it. A range
+  checked at one end reads as protection and is not: `docs/design-system.md`
+  now names the floor beside the article measure, and `tests/legibility.spec.ts`
+  enforces it in characters per line — the unit the standard is written in,
+  measured from the glyphs rather than from how the last line happened to fall.
+- **The state that was checked was the one that could not fail.** The band was
+  screenshotted with all five of its disclosures shut. That is the same trap as
+  the map above, met in a new component and not recognised, so the legibility
+  check now opens every `<details>` on the page before it measures anything.
+- **The browser step was ad-hoc, and it was checking intent.** Nothing required
+  opening the page, so it happened when somebody remembered, and the question
+  being asked was *is this what I meant to build* rather than *is this how it
+  should be built*. Those are different questions, and only the second one finds
+  a bug like this.
+
+So, before you commit anything visual: **serve the built app and look at it, at
+both widths, in the state that holds the most** — every disclosure open, the
+longest record, the sheet docked. What a check cannot measure is exactly what
+that look is for: rows that fall out of alignment when one of them grows, a
+heading that wraps to four lines, the same sentence said twice on one screen.
+Fix what you find before the commit, not after the review.
+
+The measure floor is a floor, not a target. Narrow columns are a legitimate
+choice and the check argues with none of them; it fails at the point where text
+has stopped being prose and become a column of word fragments. If a change makes
+it fail, widen the container, shorten the text, or move it somewhere with room —
+do not raise the threshold to fit the design.
+
 ## Incompleteness is valid
 
 The schemas are deliberately permissive. Only `id` and `title` are required on
@@ -507,12 +546,18 @@ npm run lint
 npm run lint:design        # brand values outside the token layer
 npm run typecheck
 npm run build
-npm run test:responsive    # phone and desktop smoke test; builds and serves the app
+npm run test:responsive    # phone and desktop: does it fit, and can it be read
 ```
 
 CI runs all of them. Validation failures name the offending file and field.
 
-`test:responsive` needs a browser once: `npx playwright install chromium`.
+`test:responsive` needs a browser once: `npx playwright install chromium`. It
+builds and serves the app itself and runs everything under `tests/*.spec.ts` —
+the responsive smoke test and the legibility floor.
+
+**A visual change is not finished when those pass.** Serve it and look at it
+first, in the state that holds the most; the section above says what that means
+and why it is the step that was missing.
 
 ### Branch from `main`, and target `main`
 
