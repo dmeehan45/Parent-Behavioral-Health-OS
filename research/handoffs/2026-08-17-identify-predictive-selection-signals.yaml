@@ -1,0 +1,291 @@
+contractVersion: 1
+run:
+  id: 2026-08-17-identify-predictive-selection-signals
+  question: >
+    For each working clinician-quality domain, which signals available at prospect prioritization, pre-contract qualification, onboarding, cold-start matching, and longitudinal monitoring predict later observed performance, and which commonly used signals add little valid information or introduce bias?
+  synthesis: >
+    The evidence favors progressive measurement over a one-time screening score. Before care begins, the strongest psychotherapy-specific signal is performance-based interpersonal skill observed under challenging conditions; static resume variables such as years of experience, training stage, highest qualification, theoretical orientation, and self-rated social skill are weak or inconsistent predictors of patient outcome and should not become quality rankings without local prospective validation. Modality-specific competence and adherence may establish capability in some settings, but their relationship with outcomes is inconsistent across adult and youth studies. Once care begins, alliance, rapport, and patient-reported experience provide earlier and more direct evidence about the care-effectiveness domain, while risk-adjusted longitudinal outcomes become the strongest basis for estimating contextual clinician strengths. A randomized trial shows that matching patients using therapists' empirically derived historical strengths can improve outcomes. Feedback and routine outcome monitoring can themselves improve care and narrow therapist variability, so responsiveness to platform feedback is best treated as a clinician-system interaction signal with the support context preserved. External evidence is thin for predicting platform operating reliability from pre-contract variables; scheduling, documentation, workflow, and support-response signals should therefore be validated prospectively against operating outcomes inside the platform rather than treated as clinical-quality proxies.
+  createdAt: 2026-08-17
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: public-research
+    context: >
+      Built from the current longitudinal clinician-profile reflection and a targeted evidence pass prioritizing recent systematic reviews, meta-analyses, prospective studies, and matching trials. The matrix separates care effectiveness and relationship, adaptive clinical practice, and operating partnership reliability; contextual strength conditions those domains rather than standing as another scalar score.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+  answers: [identify-predictive-selection-signals]
+sources:
+  - id: source-therapist-effect-review-2026
+    identity: therapist-effect-review-2026
+    kind: publication
+    title: "The therapist effect in adult psychotherapy: a systematic scoping review of reviews"
+    locator:
+      doi: 10.1080/10503307.2026.2683003
+    access: available
+    publishedAt: 2026-06-04
+  - id: source-effective-therapist-characteristics-2020
+    identity: effective-therapist-characteristics-systematic-review-2020
+    kind: publication
+    title: "The professional and personal characteristics of effective psychotherapists: a systematic review"
+    locator:
+      doi: 10.1080/10503307.2019.1620366
+    access: available
+    publishedAt: 2019-05-24
+  - id: source-fis-prospective-2016
+    identity: facilitative-interpersonal-skills-prospective-2016
+    kind: publication
+    title: "A prospective study of therapist facilitative interpersonal skills as a predictor of treatment outcome"
+    locator:
+      doi: 10.1037/ccp0000060
+    access: available
+    publishedAt: 2015-11-23
+  - id: source-trib-longitudinal-2017
+    identity: therapy-related-interpersonal-behaviors-longitudinal-2017
+    kind: publication
+    title: "Predicting psychotherapy outcome based on therapist interpersonal skills: A five-year longitudinal study of a therapist assessment protocol"
+    locator:
+      url: https://pubmed.ncbi.nlm.nih.gov/28277042/
+    access: available
+  - id: source-training-outcomes-2017
+    identity: psychotherapist-training-client-outcomes-2017
+    kind: publication
+    title: "A longitudinal investigation of the impact of psychotherapist training: Does training improve client outcomes?"
+    locator:
+      doi: 10.1037/cou0000252
+    access: available
+    publishedAt: 2017-10-01
+  - id: source-experience-outcomes-2016
+    identity: therapist-experience-outcomes-longitudinal-2016
+    kind: publication
+    title: "Do psychotherapists improve with time and experience? A longitudinal analysis of outcomes in a clinical setting"
+    locator:
+      doi: 10.1037/cou0000131
+    access: available
+  - id: source-deliberate-practice-2015
+    identity: deliberate-practice-highly-effective-therapists-2015
+    kind: publication
+    title: "The role of deliberate practice in the development of highly effective psychotherapists"
+    locator:
+      url: https://pubmed.ncbi.nlm.nih.gov/26301425/
+    access: available
+  - id: source-deliberate-practice-review-2025
+    identity: deliberate-practice-systematic-review-2025
+    kind: publication
+    title: "A systematic review of deliberate practice in psychotherapy: Definitions, operationalization, and preliminary outcomes"
+    locator:
+      doi: 10.1037/pst0000569
+    access: available
+    publishedAt: 2025-03-27
+  - id: source-youth-adherence-competence-meta-2020
+    identity: youth-adherence-competence-meta-analysis-2020
+    kind: publication
+    title: "Systematic literature review and meta-analysis of the relationship between adherence, competence and outcome in psychotherapy for children and adolescents"
+    locator:
+      doi: 10.1007/s00787-018-1265-2
+    access: available
+  - id: source-routine-cbt-competence-2024
+    identity: routine-cbt-adherence-competence-outcomes-2024
+    kind: publication
+    title: "Quality of cognitive-behavioural therapy in routine psychiatric care: therapist adherence and competence, and patient outcomes for depression and anxiety disorders"
+    locator:
+      doi: 10.1186/s12888-024-06328-4
+    access: available
+    publishedAt: 2024-12-05
+  - id: source-alliance-predictors-2025
+    identity: alliance-quality-predictors-meta-analysis-2025
+    kind: publication
+    title: "A multilevel meta-analysis of client and therapist predictors for alliance quality: Absolute and relative associations with working alliance"
+    locator:
+      doi: 10.1037/pst0000603
+    access: available
+    publishedAt: 2025-10-20
+  - id: source-alliance-therapist-effects-2021
+    identity: alliance-therapist-effects-meta-analysis-2021
+    kind: publication
+    title: "Examining therapist effects in the alliance-outcome relationship: A multilevel meta-analysis"
+    locator:
+      doi: 10.1037/ccp0000637
+    access: available
+    publishedAt: 2021-04-08
+  - id: source-family-youth-alliance-2018
+    identity: family-involved-youth-alliance-meta-analysis-2018
+    kind: publication
+    title: "Alliance and Treatment Outcome in Family-Involved Treatment for Youth Problems: A Three-Level Meta-analysis"
+    locator:
+      doi: 10.1007/s10567-017-0249-y
+    access: available
+  - id: source-youth-therapist-factors-review-2023
+    identity: youth-therapist-factors-systematic-review-2023
+    kind: publication
+    title: "Review: Therapist factors and their impact on therapeutic alliance and outcomes in child and adolescent mental health - a systematic review"
+    locator:
+      doi: 10.1111/camh.12518
+    access: available
+    publishedAt: 2021-11-11
+  - id: source-strength-matching-rct-2021
+    identity: therapist-strength-matching-rct-2021
+    kind: publication
+    title: "Effect of Matching Therapists to Patients vs Assignment as Usual on Adult Psychotherapy Outcomes: A Randomized Clinical Trial"
+    locator:
+      doi: 10.1001/jamapsychiatry.2021.1221
+    access: available
+    publishedAt: 2021-06-09
+  - id: source-domain-performance-2024
+    identity: multidomain-therapist-performance-2024
+    kind: publication
+    title: "Disentangling the Therapist Effect: Clustering Therapists by Using Different Treatment Outcomes"
+    locator:
+      doi: 10.1007/s10488-024-01365-3
+    access: available
+    publishedAt: 2024-03-21
+  - id: source-rom-review-2023
+    identity: routine-outcome-monitoring-review-2023
+    kind: publication
+    title: "Routine Outcome Monitoring and Feedback: Research Review and Recommendations"
+    locator:
+      doi: 10.1080/10503307.2023.2181114
+    access: available
+    publishedAt: 2023-03-17
+  - id: source-feedback-therapist-effects-2022
+    identity: feedback-narrows-therapist-effects-2022
+    kind: publication
+    title: "Progress feedback narrows the gap between more and less effective therapists: A therapist effects meta-analysis of clinical trials"
+    locator:
+      url: https://pubmed.ncbi.nlm.nih.gov/35901368/
+    access: available
+findings:
+  - id: finding-performance-based-interpersonal-skills-predict
+    statement: >
+      Performance-based assessments of therapist interpersonal skill under challenging clinical interactions are a promising pre-care predictor of later patient outcomes and are better supported than self-rated social skill.
+    sourceIds:
+      - source-therapist-effect-review-2026
+      - source-effective-therapist-characteristics-2020
+      - source-fis-prospective-2016
+      - source-trib-longitudinal-2017
+    suggestedTargets: [screen-candidates, select-clinician]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The direct prospective studies are relatively small and largely adult or training-clinic samples. Transfer to parent-focused, child, and family care should be tested rather than assumed, and a specific performance task should not be adopted merely because the construct is promising.
+  - id: finding-static-resume-signals-weak
+    statement: >
+      Years of experience, training stage, highest qualification, theoretical orientation, demographic characteristics, and similar static resume variables are weak or inconsistent predictors of psychotherapy outcomes and should not be treated as clinician-quality rankings without prospective local validation.
+    sourceIds:
+      - source-therapist-effect-review-2026
+      - source-effective-therapist-characteristics-2020
+      - source-training-outcomes-2017
+      - source-experience-outcomes-2016
+      - source-deliberate-practice-2015
+      - source-youth-therapist-factors-review-2023
+    suggestedTargets: [screen-candidates, select-clinician]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Some individual studies find effects for selected characteristics in selected settings. The finding is not that experience or training never matter, but that they are unreliable as general-purpose outcome rankings and can conceal subgroup or context interactions.
+  - id: finding-competence-adherence-are-mixed-predictors
+    statement: >
+      Modality-specific competence and treatment adherence have inconsistent relationships with patient outcomes, including in youth psychotherapy, so demonstrated competence is better treated as evidence of capability or readiness unless the platform validates that a particular assessment predicts the quality domain it intends to rank.
+    sourceIds:
+      - source-youth-adherence-competence-meta-2020
+      - source-routine-cbt-competence-2024
+      - source-therapist-effect-review-2026
+    suggestedTargets: [select-clinician, clinician-onboarding]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Competence-outcome relationships vary by treatment, measurement method, setting, and patient group. Some narrower literatures report positive effects, so capability thresholds should remain treatment-specific rather than being generalized into one clinician-quality score.
+  - id: finding-early-alliance-is-rapid-update-signal
+    statement: >
+      Once care begins, alliance and rapport provide an early update on the care-effectiveness-and-relationship domain and predict later outcomes across adult, youth, and family-involved psychotherapy, although the signal reflects both clinician and patient contributions.
+    sourceIds:
+      - source-alliance-predictors-2025
+      - source-alliance-therapist-effects-2021
+      - source-family-youth-alliance-2018
+      - source-youth-therapist-factors-review-2023
+    suggestedTargets: [matching, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Alliance is not a pure clinician trait and should not be compared across clinicians without case and relationship context. In family care there can be multiple alliances with patient, parent, caregiver, and family system rather than one dyadic rating.
+  - id: finding-historical-domain-performance-supports-matching
+    statement: >
+      Risk-adjusted historical performance by problem domain can identify contextual clinician strengths that improve future assignment decisions; in a randomized community mental-health trial, matching patients to therapists using empirically derived historical strengths improved symptomatic and functional outcomes.
+    sourceIds:
+      - source-strength-matching-rct-2021
+      - source-domain-performance-2024
+    suggestedTargets: [matching, quality-outcomes, select-clinician]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The randomized trial was adult outpatient care and required historical outcome depth. It supports domain-specific performance as a matching signal, not a universal threshold for case count, risk adjustment, or transfer to parent-focused care.
+  - id: finding-feedback-responsiveness-is-system-interaction
+    statement: >
+      Responsiveness to routine outcome feedback is a longitudinal clinician-system interaction signal rather than a static clinician trait because feedback systems can themselves improve outcomes and reduce differences between more and less effective therapists.
+    sourceIds:
+      - source-rom-review-2023
+      - source-feedback-therapist-effects-2022
+      - source-deliberate-practice-review-2025
+    suggestedTargets: [quality-outcomes, clinician-onboarding]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Evidence supports the effect of feedback systems more strongly than the predictive value of an individual clinician's measured responsiveness to support. A platform should test whether response patterns predict later adaptive practice or operating reliability before using them for ranking.
+notes:
+  - id: matrix-prospect-prior-signals
+    statement: >
+      Prospect prioritization matrix row: licensure, scope, geography, languages, populations served, and other factual attributes are useful eligibility or contextual filters but are not established quality signals; years of experience, degree or qualification level, theoretical orientation, prestige, and self-rated social skill are cheap to collect but weak or inconsistent as outcome predictors. Use them to establish feasibility and context, not to create a top-clinician score.
+    sourceIds: [source-therapist-effect-review-2026, source-effective-therapist-characteristics-2020, source-training-outcomes-2017, source-experience-outcomes-2016]
+    anchors: [identify-predictive-selection-signals, screen-candidates]
+  - id: matrix-precontract-performance-signals
+    statement: >
+      Pre-contract qualification matrix row: performance-based interpersonal responses to challenging clinical scenarios have the strongest direct pre-care predictive evidence found in this pass, with moderate collection burden; modality-specific role-play or competence assessment can establish capability but has mixed evidence as an outcome predictor; self-report remains lower burden and lower confidence.
+    sourceIds: [source-effective-therapist-characteristics-2020, source-fis-prospective-2016, source-trib-longitudinal-2017, source-youth-adherence-competence-meta-2020, source-routine-cbt-competence-2024]
+    anchors: [identify-predictive-selection-signals, select-clinician]
+  - id: matrix-onboarding-signals
+    statement: >
+      Onboarding matrix row: verified facts can strengthen the contextual map, while observed use of platform workflows, correction of errors, uptake of feedback, and response to support are candidate signals for operating partnership or adaptive practice. The external psychotherapy literature does not establish these platform behaviors as clinical-quality predictors; they should be validated prospectively against the platform outcomes they are meant to predict and recorded with the support conditions that produced them.
+    sourceIds: [source-rom-review-2023, source-feedback-therapist-effects-2022, source-deliberate-practice-review-2025]
+    anchors: [identify-predictive-selection-signals, clinician-onboarding]
+  - id: matrix-cold-start-matching-signals
+    statement: >
+      Cold-start matching matrix row: use verified contextual facts and only those pre-contract assessments that have survived validation, while keeping confidence low when longitudinal evidence is absent. If credible historical domain-specific outcomes exist from another compatible context they may be informative, but platform-specific performance should not be fabricated from resume similarity. Early alliance and experience signals can update the profile quickly after care starts.
+    sourceIds: [source-strength-matching-rct-2021, source-alliance-predictors-2025, source-family-youth-alliance-2018]
+    anchors: [identify-predictive-selection-signals, matching]
+  - id: matrix-longitudinal-signals
+    statement: >
+      Longitudinal monitoring matrix row: risk-adjusted symptom and function trajectories, deterioration, patient or family alliance and experience, domain-specific performance, treatment completion patterns, adaptive response to feedback, and operating reliability can deepen the profile over time. Keep these outcomes separable, attach case mix and support context, and use historical performance prospectively rather than treating one favorable aggregate as global quality.
+    sourceIds: [source-strength-matching-rct-2021, source-domain-performance-2024, source-alliance-therapist-effects-2021, source-family-youth-alliance-2018, source-rom-review-2023]
+    anchors: [identify-predictive-selection-signals, quality-outcomes, matching]
+  - id: matrix-operating-reliability-needs-local-validation
+    statement: >
+      Operating partnership reliability is the domain with the weakest transferable external prediction evidence. Documentation, scheduling accuracy, availability freshness, responsiveness, workflow completion, and support uptake are plausible platform-local signals, but their value should be judged against future operating outcomes and should not be allowed to stand in for care effectiveness.
+    sourceIds: [source-therapist-effect-review-2026, source-rom-review-2023]
+    anchors: [identify-predictive-selection-signals, design-trustworthy-clinician-selection, clinician-onboarding]
+questions:
+  - id: question-performance-task-transfer
+    question: Which performance-based interpersonal or clinical-judgment assessment, if any, has enough predictive validity for parent-focused, child, and family behavioral health to justify candidate burden?
+  - id: question-platform-prospective-validation
+    question: What prospective holdout design should the platform use to test whether pre-contract and onboarding signals predict each quality domain without learning historical selection bias?
+  - id: question-operating-reliability-target
+    question: Which later operating outcomes should define successful operating partnership so onboarding and pre-contract signals can be validated against a real target rather than general convenience?
+  - id: question-early-update-policy
+    question: How much early-care alliance, experience, or outcome evidence should be required before the system changes a clinician's cold-start matching profile?
+  - id: question-signal-fairness
+    question: Which candidate signals are likely to encode access to training, prior platform opportunity, culture, language, demographic similarity, or historical case assignment and therefore require fairness constraints or exclusion from selection?
