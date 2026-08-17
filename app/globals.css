@@ -199,11 +199,16 @@ code {
   border-radius: var(--radius);
 }
 
+/* The first thing a keyboard reader can touch, and it measured 43.3px against
+   the floor this system sets for itself. */
 .skip-link {
   position: absolute;
   left: -9999px;
   top: 8px;
   z-index: 200;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ds-touch-target);
   background: var(--ink);
   color: var(--paper);
   padding: 10px 16px;
@@ -1682,11 +1687,16 @@ p:last-child {
    Command palette
    ========================================================================== */
 
+/* `align-items` defaults to `stretch`, and this backdrop is `inset: 0`, so the
+   dialog was stretched to its own `max-height` on every query — 560px whether
+   it held forty results or a sentence saying there were none. Aligning to the
+   start makes `max-height` a cap again rather than a fixed height. */
 .palette-backdrop {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: flex;
+  align-items: flex-start;
   justify-content: center;
   padding: 10vh 16px 16px;
   background: color-mix(in srgb, var(--ink) 32%, transparent);
@@ -1724,8 +1734,10 @@ p:last-child {
    the list continues. Bottom padding matches the fade depth so that a list
    which already fits never has its last row washed out: there, the gradient
    only ever falls across padding. */
+/* `flex-basis: auto` rather than 0: the dialog now sizes to its content, and a
+   zero basis in an auto-height column has no free space to grow back from. */
 .palette-results {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   list-style: none;
@@ -1894,7 +1906,14 @@ p:last-child {
   gap: 8px;
 }
 
+/* Standalone navigation, not a link inside a sentence, so WCAG 2.5.8's inline
+   exception does not apply and these measured 18.6px. The row keeps its height
+   by pulling the padding back out of the margin, so nothing moves. */
 .breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 0;
   color: var(--ink-2);
   text-decoration: none;
 }
@@ -1979,6 +1998,44 @@ p:last-child {
    Reduced motion is honoured globally, which stops the shimmer rather than the
    layout — the placeholder still says "something is coming here".
    ========================================================================== */
+
+/* The dead-end pages — nothing at this address, and a render that threw. Both
+   read as ordinary pages of this product rather than as the framework's, which
+   is the whole point of having them. */
+.not-found {
+  max-width: var(--ds-container-text);
+  padding: 40px 0 0;
+}
+
+.not-found .lede {
+  margin-top: 12px;
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+/* The validators name the offending file and field, so the message is the most
+   useful thing here. Long, and it must not widen the page. */
+.error-detail {
+  margin: 24px 0 16px;
+  padding: 14px 16px;
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 
 .skeleton-head {
   display: flex;

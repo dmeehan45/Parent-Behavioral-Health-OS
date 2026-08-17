@@ -424,3 +424,84 @@ The earlier method section still stands. This pass added:
   that had been green over it for days.
 - **Both colour schemes, always.** Dark mode had never been rendered. It held
   the Critical finding and one of the Mediums.
+
+---
+
+# Adversarial pass 2, 2026-08-17
+
+**Reviewed by**: Claude Code
+**Date**: 2026-08-17, against `main` at `73a0daf`
+**Scope**: What the first two passes never opened — **every record rather than one
+per kind** (43 of 50 had never been rendered), the detail sheet for **all eight
+kinds**, and the states that only exist when something goes wrong or nothing
+matches
+**Input type**: Running application (production build, `next start`), 141 captures
+
+The first pass audited one record per kind. That is a template check, and it
+answers a different question from *does this hold for the content that actually
+exists* — a layout breaks on the outlier, not the representative. So this pass
+enumerated the model: 50 nodes, every one of them opened at two widths.
+
+## The template held; the edges did not
+
+**All 49 record captures came back with no contrast, overlap or clipping
+finding of any kind.** That is a real result and worth recording: the record
+page is the most-worked surface in the interface and it survives its own
+content, including a 105-character claim title and a bet carrying thirteen
+blocks. The same is true of the detail sheet across all eight kinds.
+
+Everything below was found somewhere else — in the states nobody reaches on a
+normal day.
+
+| ID | Severity | Where | Evidence | Why it matters | Status |
+|----|----------|-------|----------|----------------|--------|
+| **Y-001** | **High** | Every unresolved URL | There is no `app/not-found.tsx`, so `notFound()` — called by every route that looks a record up by id — landed on Next's own page: **white ground** where every other page is on the `#e8fcf6` wash, system font instead of Manrope, and **no link anywhere onward**. The document measured **1952px** tall at a 900px viewport, so it scrolled for no reason. | This is not a rare page here. View state lives in the URL so views can be shared, record ids come from filenames, and research is expected to rename and remove things — so a link that was right when it was sent can name nothing when it is opened. The one moment a reader is already lost was the one moment the product stopped looking like itself. | **Fixed** — house style, one script word, two ways back; document height **1952px → 900px** |
+| **Y-002** | **High** | Any render that throws | No `app/error.tsx` either. The projection deliberately refuses a model it cannot vouch for — `checkFlowContinuity` inside `getRepository()`, `checkResearchTrace` inside `projectModel()` — so a bad edit under `content/` or `research/` takes every model-driven route down. It did so onto the framework's error page, which cannot say that the cause is content rather than code. | The refusal is correct and documented. Landing it on a page that gives the reader nothing to act on wastes it — the validators name the offending file and field, and that message is the most useful thing on the screen. | **Fixed** — the thrown message is shown, with the two commands that reproduce it |
+| **Y-003** | Medium | Command palette, empty results | `.palette-backdrop` is `display: flex` with **no `align-items`**, so it defaults to `stretch`; the backdrop is `inset: 0`, so the dialog was stretched to its own `max-height` on every query. With results this is invisible, because `.palette-results` grows to fill it. With none, the empty block does not grow, leaving **311px of blank white below the footer** in a 560px box holding 339px of content. | The state that says "nothing matched" was the state that looked most broken. | **Fixed** — dialog sizes to content, capped at 560; blank below footer **311px → 1px** |
+| **Y-004** | Medium | Every record page | `.breadcrumb a` sets no height at all and measured **18.6px**. Standalone navigation, not a link inside a sentence, so WCAG 2.5.8's inline exception does not apply — and A-005 in the 2026-08-14 pass listed this exact defect and marked it **Fixed**. It was not. | Small, and worth naming precisely because it was reported fixed once already. | **Fixed** — **24.6px** |
+| **Y-005** | Low | Every page | `.skip-link` measured **43.3px** against the 44px floor this design system sets for itself. The first thing a keyboard reader can touch. | 0.7px, and the rule is the repository's own. | **Fixed** — **44px** |
+
+**1 High pair, 2 Medium, 1 Low. All five fixed and re-measured.**
+
+## Found and deliberately not fixed
+
+**A record URL that names nothing returns HTTP 200.** `/does-not-exist` correctly
+returns 404, but `/stages/nope`, `/bets/nope` and `/review/nope` — the routes
+that call `notFound()` — return **200** with not-found content. These routes are
+`force-dynamic`, and the status is committed as the response begins streaming,
+before `notFound()` fires.
+
+What a reader sees is now correct, and this is a routing-architecture question
+rather than a UX one: fixing it means changing how those routes resolve an id,
+which is a larger change than this pass should make on its own judgement. Named
+here so it is not lost.
+
+## Two corrections to this pass's own instrument
+
+The probe over-reported twice, and both are now fixed in it rather than argued
+around in prose:
+
+- **`overflow: visible` is not clipping.** Round 1 flagged every `h1` for
+  `scrollHeight` exceeding `clientHeight`; a tight `line-height` paints outside
+  the box rather than cutting. The check now skips visible overflow, which is
+  why no record page in this pass reported a false clip.
+- **A child of a scroller is not overflowing the viewport.** `.lens-tab`
+  "Entities" reads 13.2px past the right edge at 390px, because a bounding rect
+  ignores the ancestor that clips it. The strip is a scroller with a fade, and
+  that is the design working. Reported per-capture in round 2 and confirmed as
+  noise rather than carried into the findings.
+
+An instrument that over-reports is worse than a coarser one, because every
+false positive costs the judgement needed to dismiss it.
+
+## What changed
+
+- `app/not-found.tsx`, `app/error.tsx` — new (Y-001, Y-002).
+- `app/globals.css` — `.not-found` / `.error-detail` styles; palette backdrop
+  alignment and results flex-basis (Y-003); breadcrumb (Y-004); skip link
+  (Y-005).
+- `tests/responsive.spec.ts` — a dead end is still this product, and still
+  offers a way out.
+
+All checks pass: the ten validation and test scripts, `build`, and
+`test:responsive` (16/16).
