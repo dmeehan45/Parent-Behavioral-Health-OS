@@ -72,7 +72,7 @@ export default function ReviewIndexPage() {
 
       {runs.length === 0 ? (
         <p className="empty-note">
-          No research has been handed off yet. A run starts with a question — see <code>docs/research-routine.md</code>.
+          No research has been handed off yet. A run starts with a question — see <code>docs/research-workflow.md</code>.
         </p>
       ) : null}
 
