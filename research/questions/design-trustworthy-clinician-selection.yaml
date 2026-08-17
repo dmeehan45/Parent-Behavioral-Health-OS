@@ -1,9 +1,9 @@
 id: design-trustworthy-clinician-selection
-question: "How should clinician qualification, structured evaluation, and selection be sequenced to minimize candidate and operator burden without weakening decision quality, while giving clinicians a process that feels reliable, fair, clear, and worth continuing through?"
+question: "How should a clinician network with limited reviewer capacity sequence prospect generation, evidence capture, automated qualification, and human evaluation so that scarce human judgment is spent where it adds the most decision value, without weakening selection quality or clinician trust?"
 askedBy: accountable-reviewer-2026-08-16
 createdAt: 2026-08-16
 status: open
 priority: high
-targets: [screen-candidates, select-clinician, selection-complete, clinician-supply]
+targets: [source-candidates, attract-candidates, screen-candidates, select-clinician, selection-complete, clinician-supply, scarce-review-time-without-comparable-evidence]
 why: >
-  Selection is a two-sided experience. The platform is evaluating clinicians while clinicians are evaluating the platform's reliability, trustworthiness, personality fit, and ease of interaction. The model needs an evidence-based sequence for cheap qualification, deeper evaluation, and selection that protects predictive quality and candidate trust instead of optimizing only for speed or reviewer effort.
+  The pre-contract constraint is not simply interview quality. A platform can encounter or generate more plausible clinician prospects than its team can deeply evaluate, and those prospects arrive with uneven evidence from different channels. The system needs an evidence-based sequence for deciding what can be resolved cheaply, which missing information is worth collecting, when automation is trustworthy enough to progress or stop a candidate, and where human review adds enough decision value to justify its cost. Selection remains a two-sided experience: the process must also feel reliable, fair, clear, relevant, and worth continuing through for clinicians the platform may want to contract.
