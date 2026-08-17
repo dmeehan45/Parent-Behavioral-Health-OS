@@ -476,7 +476,13 @@ export function projectModel(): ModelGraph {
             "The problem this answers",
             problem ? [link("problem", problem.id, problem.title, problem.status)] : [],
           ),
-          ...proseBlock("Intervention", bet.sections[SECTION.bet]),
+          // The lede is this section's first sentence, so a one-sentence `# Bet`
+          // — the style the guidance asks for — printed the same words twice,
+          // a few hundred pixels apart. Say it once when there is only one
+          // sentence to say; keep the block when the section carries more.
+          ...(firstSentence(bet.sections[SECTION.bet]) === bet.sections[SECTION.bet]?.trim()
+            ? []
+            : proseBlock("Intervention", bet.sections[SECTION.bet])),
           // Everything else the author wrote, in the order they wrote it —
           // which for a bet with an experiment is the intervention, then what
           // trying it would settle.

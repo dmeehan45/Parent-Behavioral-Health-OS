@@ -141,6 +141,14 @@
   --ds-surface-hover: var(--ds-blue-lightest);
   --ds-surface-inverse: var(--ds-ink);
 
+  /* A persistent deep-brand panel, and the two text steps that are legible on
+     it. This is a *surface* role, so it holds its lightness in both schemes —
+     unlike an action role, which legitimately inverts. Anything painting a
+     lasting brand-blue ground reads these, never `--ds-action-hover`. */
+  --ds-surface-brand: var(--ds-blue-darkest);
+  --ds-text-on-brand: var(--ds-blue-lightest);
+  --ds-text-on-brand-muted: var(--ds-blue-light);
+
   --ds-text-body: var(--ds-ink);
   --ds-text-heading: var(--ds-ink);
   --ds-text-muted: var(--ds-gray-aa);
@@ -202,6 +210,11 @@
     --ds-surface-hover: #14262e;
     --ds-surface-inverse: #e9f1ef;
 
+    /* The brand panel keeps its deep ground on a dark page — it is already
+       darker than the wash, so it reads as a panel without inverting. Lifted
+       one step off `--ds-blue-darkest` so its border still separates. */
+    --ds-surface-brand: #063550;
+
     --ds-text-body: #e9f1ef;
     --ds-text-heading: #ffffff;
     --ds-text-muted: #99a5a4;
@@ -214,6 +227,13 @@
     --ds-action: var(--ds-blue-medium);
     --ds-action-hover: var(--ds-blue-light);
     --ds-action-wash: #14262e;
+
+    /* What "coral that meets AA" is depends on the ground, so the -aa step is
+       re-derived for the dark surfaces rather than carried over. `coral-medium`
+       measured 4.30:1 on `--ds-surface-subtle`; this is that colour lifted in
+       lightness only, to 5.46:1, and it stays a distinct ramp step from the
+       `coral-light` the problem kind takes. */
+    --ds-coral-aa: #f8737c;
 
     --ds-status-success: var(--ds-green-medium);
     --ds-status-warning: var(--ds-gold-medium);

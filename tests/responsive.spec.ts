@@ -114,6 +114,36 @@ test.describe("responsive shell", () => {
     }
   });
 
+  /*
+   * The nav is a horizontal scroller with its scrollbar hidden, so when its
+   * links stopped fitting they were clipped *inside* it and the document never
+   * grew. "every page template fits its viewport" stayed green while the phone
+   * showed "Researc" and dropped the count of research waiting on a person.
+   * Overflow measured at the document says nothing about that; this measures
+   * the link against the box that clips it.
+   */
+  test("no primary nav link is clipped inside the nav's own scroller", async ({ page }) => {
+    await page.goto("/");
+
+    const nav = page.locator("header.app-header nav");
+    await expect(nav.locator("a").first()).toBeVisible();
+
+    const clipped = await nav.evaluate((el) => {
+      const right = el.getBoundingClientRect().right;
+      return [...el.querySelectorAll("a")]
+        .map((a) => ({
+          text: (a as HTMLElement).innerText.trim().replace(/\s+/g, " "),
+          cutBy: Math.round(a.getBoundingClientRect().right - right),
+        }))
+        .filter((link) => link.cutBy > 2);
+    });
+
+    expect(
+      clipped,
+      `nav links cut off inside the nav: ${clipped.map((c) => `"${c.text}" by ${c.cutBy}px`).join(", ")}`,
+    ).toEqual([]);
+  });
+
   test("the map canvas renders and stays inside the page", async ({ page }) => {
     await page.goto("/map");
 

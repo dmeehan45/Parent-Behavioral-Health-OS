@@ -251,3 +251,141 @@ Reproducing this review: build and serve the app, then drive it with the pre-ins
 - Contrast was computed by walking every element with a direct text child, compositing the background stack until an opaque layer was reached, and comparing against WCAG 1.4.3 thresholds using the element's own font size and weight. Measuring against the composited ground rather than the declared token is what surfaced A-002 — the token is correct on white and the app has no white ground.
 - Canvas text size was derived by reading the `.react-flow__viewport` transform matrix and multiplying by the computed `font-size` of `.node-title`, `.node-summary` and `.node-kind`, which is what the reader actually sees.
 - Focus-ring clipping was established by comparing the focused element's box against its clipping parent's box (0.6–1.9px of inset against a ring drawn 4px outside) rather than by eyeballing a screenshot.
+
+---
+
+# Adversarial pass, 2026-08-17
+
+**Reviewed by**: Claude Code
+**Date**: 2026-08-17
+**Scope**: The whole interface again, plus the three surfaces the 2026-08-14 pass never opened — `/review`, `/review/[runId]`, `/review/apply` — and **dark mode**, which it never rendered at all
+**Input type**: Running application (production build, `next start`), driven with the pre-installed Chromium
+**Platform context**: 320, 390, 768, 1280, 1440, 1440×700 and 1920 wide, in both colour schemes, across nine interaction states
+
+The brief was narrower than the first review's and deliberately adversarial:
+hierarchy, rendering, borders and margins, overlap, and whether this looks like
+software somebody tested. 134 captures over 19 routes, each paired with a
+geometry probe. **None came back clean.**
+
+## What this pass could see that the last one could not
+
+The 2026-08-14 review was almost entirely *measurement* — computed styles,
+bounding boxes, contrast arithmetic. It is why that pass found a clipped focus
+ring and a mis-set zoom constant, and why it did not find a disclosure control
+with no disclosure affordance: every property involved computes correctly. The
+defect is only visible to something that looks at the result.
+
+So the loop here was: probe for candidates, **then read the screenshot**. Four
+of the eleven findings below have no measurable signature at all.
+
+The corollary is a warning about the guard. `npm run test:responsive` was green
+throughout, including on the phone, while the primary navigation was visibly
+cutting a word in half — because it measures `document.scrollWidth`, and the
+clipping happens *inside* a box that never grows the document. **A check that
+measures the document cannot see what the screen shows.** A case for it is
+added in this change.
+
+## Findings
+
+Severity is by consequence to a reader, not by size of fix. Every row was
+re-measured against the running application after the change.
+
+| ID | Severity | Where | Evidence | Why it matters | Status |
+|----|----------|-------|----------|----------------|--------|
+| **X-001** | **Critical** | Dark mode, `.clinician-card` | The eyebrow rendered `rgb(168,217,240)` on `rgb(168,217,240)` — **1:1, text in exactly its own background colour**. Heading and both stat pairs measured **1.35:1**. Cause: `--accent-ink` is `--ds-action-hover`, which is `--ds-blue-darkest` (#004a6b) in light and `--ds-blue-light` (#a8d9f0) in dark. The card used an *action-state* role as a persistent **surface**, so the ground inverted and the hardcoded light text did not follow. | The prototype's header — the clinician the whole bet is about — is blank space in dark mode. Nothing in the token layer forbade this, because the card was reading a role that was never a surface. | **Fixed** — 1:1 → **8.48:1**, 1.35 → **11.42:1** |
+| **X-002** | **High** | `/review` | `.disclosure > summary` sets `display: flex`, which removes Chromium's marker, and nothing replaced it. Its declared style was **byte-for-byte identical** to `.field-label` — the app's *non-interactive* section heading — in display, alignment, gap, transform, tracking, size, weight and colour. "THE OTHER 25" and "DECIDED 1" therefore rendered as headed sections with nothing beneath them. | This is the only route to 25 of the 30 queued research questions and to every decided run. The page whose job is "what is owed" hid most of what is owed behind a control that had taken off its uniform. | **Fixed** — chevron added, rotating on open; colour lifted off `.field-label` |
+| **X-003** | **High** | Every route, ≤860px | `.app-nav` is `overflow-x: auto` with `scrollbar-width: none`, **no fade mask**, and 53px of hidden content at 390px. The last link was cut by **53.4px**, rendering as "Researc" and losing its count badge entirely. | The truncated item is the one carrying how much research is waiting on a person, on every page of the application. And the suite passed: the document never overflows, so the only check that could have caught it was blind to it. | **Fixed** — 53.4px → **1.4px**; fade added; regression test added |
+| **X-004** | **High** | Command palette | The results scrollport ends where its box ends, so the row straddling that line was **sliced cleanly in half** — top half of "Clinician Onboarding & Readi…" visible above the footer rule, no fade, no row alignment. | A half-rendered row reads as a rendering fault, not as "scroll for more". It is the first thing a reader sees after searching. | **Fixed** — bottom fade, with padding sized to the fade so a list that already fits is never washed |
+| **X-005** | Medium | `/review`, inside X-002 | All 25 `.queue-command` blocks are `white-space: pre` in a 666px box against 1537–2758px of content: **750–873px of every command scrolled out of sight**. | These are shell commands whose entire purpose is to be read and copied whole. Reachable only once X-002 is fixed — which is how a disclosure with no affordance hides a second defect behind it. | **Fixed** — wraps; **0px** hidden |
+| **X-006** | Medium | Prototype, both schemes | `.family-state` is `inline-block` after an inline sibling, so it ran straight on: "Parent participation**In your proposed caseload — remove**". Its `margin-top: 8px` did nothing, because the two were on one line. | Two sentences fused mid-word, three times, in the one piece of working software the repository ships. Pure margin defect, and the most obviously untested thing in the interface. | **Fixed** — `display: block`, on its own line |
+| **X-007** | Medium | All record pages | `.page-head`'s underline and `.provenance`'s top rule spanned the full **1240px** column, above and below content capped at the **720px** article measure. | A rule is a statement about how wide the column is. Drawn at 1240 over text that stops at 720, it tells the eye there are 520px of content that failed to render. This is most of why record pages read as half-empty. | **Fixed** — rules → **720px**, scoped to measure-capped pages so `/review` and `/prototypes` keep their full-width grids |
+| **X-008** | Medium | `/review` | Cards render an unbounded `synthesis` — one run's is ~350 words, another's ~20 — inside a grid where `.card` is `height: 100%`. The short card carried a **~400px void**. | Three cards side by side, one of them two-thirds empty, is the layout reading as broken rather than as varied. | **Fixed** — six-line clamp; tallest card **574px → 331px** |
+| **X-009** | Medium | Dark mode, claim badge | `--kind-claim` resolves to `--ds-coral-medium` (#f64c57), measuring **4.30:1** on `--ds-surface-subtle` against the 4.5 required at 10px. | The one dark-mode contrast failure left after X-001, on a badge carrying a primitive's identity. | **Fixed** — **5.46:1**, via a dark-mode `--ds-coral-aa` |
+| **X-010** | Medium | Bet record pages | `summary` is `firstSentence(sections.bet)` and the `Intervention` block is that same section, so a one-sentence `# Bet` — the style the guidance asks for — printed the same words **twice**, ~250px apart. | Duplicated prose is the classic tell of a template nobody read the output of. | **Fixed** — block suppressed when it would only repeat the lede; kept when the section carries more |
+| **X-011** | Medium | Every lens, every width | `.react-flow__viewport` scale is **0.8 at every viewport from 320 to 1920 and in every one of the four lenses**. At 1920 the operating flow still clips stage 08 while **760px of vertical space sits empty** (22% of the canvas used at 1440, 14% at 1920). | This is the centrepiece, and it never fits at any size. | **Not fixed — proposed**, see below |
+
+**Severity: 1 Critical, 3 High, 7 Medium. Ten fixed, one proposed.**
+
+## The one left open, and why
+
+**X-011 is a composition problem, not a defect.** The fit logic is correct: it
+takes `min(1, max(READABLE_ZOOM, wouldFit))` and centres what it frames, and the
+322px of dead space above and below the flow at 1440 is that centring working
+properly on content 120px tall. The operating flow is laid out as a **single
+horizontal row**, so it is inherently very wide and very short, and no viewport
+in a 16:9 world uses it well. The zoom floor added by V-001 is what stops it
+zooming out to compensate — correctly, since below it the text is unreadable.
+
+Fixing it means changing how `lib/model/layout.ts` arranges stages — wrapping the
+ladder, or a serpentine, or letting stage cards grow to carry more of what they
+say. That is a design judgement about what the map is *for*, and it belongs to a
+person, so it is written down here rather than guessed at.
+
+Two smaller things noted and deliberately not changed:
+
+- **The palette's right-hand column is redundant for three kinds.** It repeats
+  the kind badge verbatim — "ENTITY … Entity", "STAGE … Stage" — while carrying
+  real information for steps (parent stage) and metrics (units). Making it
+  consistent is a content decision about what a result should say.
+- **`.card` equalises heights across a grid row.** X-008 removed the symptom by
+  bounding the content; whether cards should size to content at all is a design
+  choice that affects `/prototypes` and the decided-runs grid too.
+
+## Two corrections to this pass's own measurements
+
+Recorded because the probe over-reported and the report should not:
+
+- **The `h1` is not clipped.** It measures `scrollHeight` 55 against
+  `clientHeight` 48 on every page, which the probe flagged. Its `overflow` is
+  `visible`, so the descenders paint; nothing is lost. A tight `line-height:
+  1.05` on a 46px face, and correct.
+- **The 58–67 sub-pixel-positioned bordered boxes on `/review` are not visible
+  defects.** Fractional offsets (`top: 381.95`, `height: 574.61`) come from
+  line-height arithmetic on a device pixel ratio of 2, where a half CSS pixel is
+  a whole device pixel and the border paints cleanly. Worth re-checking on a
+  1× display; not worth changing on the evidence here.
+
+## What changed
+
+Ten fixes, all re-measured against the running application:
+
+- `app/design-system.css` — added the `--ds-surface-brand` / `--ds-text-on-brand`
+  / `--ds-text-on-brand-muted` semantic role, because nothing in layer 2 meant
+  "a lasting brand-blue panel and the text that is legible on it", and the
+  absence is what let a card borrow an action role and invert (X-001). Added a
+  dark-mode `--ds-coral-aa`, since what "coral that meets AA" *is* depends on
+  the ground it sits on (X-009).
+- `app/globals.css` — the disclosure affordance (X-002); nav fade and width
+  (X-003); palette fade (X-004); command wrapping (X-005); `.family-state`
+  block (X-006); rules capped to the measure (X-007); card synthesis clamp
+  (X-008).
+- `lib/model/graph.ts` — the bet's `Intervention` block is composed only when it
+  would say something the lede does not (X-010).
+- `tests/responsive.spec.ts` — a case measuring nav links against the box that
+  clips them rather than against the document (X-003).
+- `playwright.config.ts` — `PLAYWRIGHT_CHROMIUM_EXECUTABLE`, so the suite can
+  run in a sandbox that ships a browser it cannot download. Unset, nothing
+  changes.
+
+All checks pass: `validate:content`, `validate:projection`, `validate:research`,
+`test:research`, `test:prototype`, `test:model`, `scan:safety`, `lint`,
+`lint:design`, `typecheck`, `build`, `test:responsive` (14/14).
+
+## Method, and what it adds to the 2026-08-14 method
+
+The earlier method section still stands. This pass added:
+
+- **A capture matrix rather than a route list.** 134 captures over 19 routes ×
+  seven widths × nine interaction states (default, detail sheet, palette, typed
+  palette, legend, expanded stages, focus walk, scrolled, short viewport) ×
+  both colour schemes, generated from `/api/model` so no route is hardcoded.
+- **Reading every capture.** The probe ranks candidates; it does not judge them.
+  X-002, X-004, X-006 and X-011 have no measurable signature — a control that
+  looks inert, a row cut in half, two sentences fused, a canvas that is mostly
+  empty. Each was found by looking.
+- **Probing the clipping box, not the document.** Every overflow and truncation
+  measurement compares an element against the nearest box that actually clips
+  it. This is the whole reason X-003 was visible here and invisible to a suite
+  that had been green over it for days.
+- **Both colour schemes, always.** Dark mode had never been rendered. It held
+  the Critical finding and one of the Mediums.
