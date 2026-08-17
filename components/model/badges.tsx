@@ -102,12 +102,23 @@ export function Provenance({
   coverage,
   file,
   sourceUrl,
+  repoUrl,
+  authority,
+  authorityMeaning,
 }: {
   provenance?: string;
   lastReviewed?: string;
   coverage: Coverage;
   file: string;
   sourceUrl?: string;
+  /** When set, the source line becomes the invitation to go deeper: the
+      repository is the model, and an agent pointed at it reads all of it. */
+  repoUrl?: string;
+  /** What the record's authority word means, said in words a touch reader can
+      reach. It lives here with the rest of the bookkeeping, after the record
+      has said its piece, rather than in front of the title. */
+  authority?: string;
+  authorityMeaning?: string;
 }) {
   return (
     <section className="provenance" aria-label="Where this comes from">
@@ -117,8 +128,23 @@ export function Provenance({
         {provenance ? <span className="small muted">believed from {provenance}</span> : null}
         {lastReviewed ? <span className="small muted">reviewed {lastReviewed}</span> : null}
       </div>
+      {authority && authorityMeaning ? (
+        <p className="authority-note">
+          <strong>{authority}</strong> — {authorityMeaning}
+        </p>
+      ) : null}
       <CoverageGaps coverage={coverage} />
-      <SourceLink file={file} sourceUrl={sourceUrl} />
+      {repoUrl ? (
+        <p className="agent-door">
+          Projected from <SourceLink file={file} sourceUrl={sourceUrl} />. The repository is the model —{" "}
+          <a href={repoUrl} target="_blank" rel="noreferrer">
+            clone it
+          </a>{" "}
+          and ask your agent to go deeper.
+        </p>
+      ) : (
+        <SourceLink file={file} sourceUrl={sourceUrl} />
+      )}
     </section>
   );
 }

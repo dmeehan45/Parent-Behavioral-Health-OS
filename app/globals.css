@@ -595,6 +595,33 @@ p:last-child {
   margin-top: 14px;
 }
 
+/* The one consistent exit to the deep dive: the surfaces stay light because
+   the repository carries the depth, and this line is where that contract is
+   said. The file link sits inline in the sentence, so it drops the standalone
+   margin the bare form carries. */
+.agent-door {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  max-width: var(--ds-container-text);
+}
+
+.agent-door .source-path {
+  margin-top: 0;
+}
+
+.agent-door > a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.agent-door > a:hover {
+  color: var(--accent-ink);
+}
+
 .source-path {
   font-family: var(--mono);
   font-size: 11px;
@@ -1248,8 +1275,11 @@ p:last-child {
   -webkit-line-clamp: 3;
 }
 
+/* The smallest reading text the standard tier draws, now that the summary
+   waits for detailed. Mirrored by SMALLEST_TEXT in graph-canvas.tsx, which
+   derives the zoom thresholds from it — change one and change both. */
 .node-subtitle {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--ink-3);
 }
 
@@ -1456,18 +1486,18 @@ p:last-child {
   -webkit-overflow-scrolling: touch;
 }
 
-.sheet-foot {
+/* The hop to the full read, first thing in the scrollport rather than after
+   the very content the reader was trying to skip. */
+.sheet-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-top: 28px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+  margin-bottom: 24px;
 }
 
-/* The panel is short and already ruled off by its footer, so the provenance
-   block does not need the breathing room a full page gives it. */
+/* The panel is short, so the provenance block does not need the breathing
+   room a full page gives it. */
 .sheet-body .provenance {
   margin-top: 24px;
 }
@@ -1485,6 +1515,43 @@ p:last-child {
 
 .detail-block {
   min-width: 0;
+}
+
+/*
+ * A folded long-form section in the detail sheet. The summary row is the
+ * block's own heading plus a chevron, kept to the 44px tap floor; the chevron
+ * is decoration over a native control, so the glyph carries no meaning colour.
+ */
+.detail-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.detail-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.detail-fold > summary::before {
+  content: "▸";
+  font-size: 11px;
+  color: var(--ink-3);
+  transition: transform var(--ds-duration) var(--ds-ease);
+}
+
+.detail-fold[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.detail-fold > summary .field-label {
+  margin: 0;
+}
+
+.detail-fold > summary:hover .field-label {
+  color: var(--ink);
 }
 
 .detail-prose {
@@ -1867,10 +1934,11 @@ p:last-child {
   color: var(--ink-3);
 }
 
-/* Says what the authority badge above it means, in words, on the page rather
-   than in a tooltip. Sized to be read after the badge, not before the title. */
+/* Says what the record's authority word means, in words rather than in a
+   tooltip a touch reader never sees. It lives with the provenance at the foot
+   of the record — bookkeeping after the content, never in front of the title. */
 .authority-note {
-  margin: -6px 0 14px;
+  margin: 0 0 12px;
   font-size: 12px;
   line-height: 1.5;
   color: var(--ink-2);

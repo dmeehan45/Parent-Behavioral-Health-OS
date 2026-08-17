@@ -72,7 +72,11 @@ export function ModelNodeCard({ data }: NodeProps<CanvasNode>) {
         {tier !== "compact" && node.subtitle && !insideParent ? (
           <span className="node-subtitle">{node.subtitle}</span>
         ) : null}
-        {tier !== "compact" && node.summary ? <span className="node-summary">{node.summary}</span> : null}
+        {/* The summary waits for the reader to lean in. At map scale a sentence
+            per node is a wall of prose, and scanning is what the canvas is for —
+            titles, subtitles, and counts carry the shape; the detail sheet and
+            the record page carry the reading. */}
+        {tier === "detailed" && node.summary ? <span className="node-summary">{node.summary}</span> : null}
 
         {tier !== "compact" ? (
           <span className="node-signals">

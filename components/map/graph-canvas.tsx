@@ -55,9 +55,11 @@ type Props = {
  * is dropped, and it is what the reader navigates by.
  *
  * `SMALLEST_TEXT` mirrors `globals.css` — `.node-title` in compact, and
- * `.node-summary` once the summary appears. The uppercase kind label is smaller
- * still, but it is short, tracked and all-caps, and holding the whole canvas to
- * it would keep the map permanently zoomed into two nodes.
+ * `.node-subtitle` once the tier draws body text: the summary now waits for the
+ * detailed tier, so the subtitle is the smallest reading text standard offers.
+ * The uppercase kind label and the signal counts are smaller still, but they
+ * are short, tracked labels rather than prose, and holding the whole canvas to
+ * them would keep the map permanently zoomed into two nodes.
  */
 const MIN_TITLE_PX = 12;
 const MIN_BODY_PX = 11;
