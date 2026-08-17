@@ -196,7 +196,7 @@ findings:
       - source-selection-review-2023
     suggestedTargets: [scarce-review-time-without-comparable-evidence, screen-candidates, select-clinician]
     classification: new
-    evidenceStance: inference
+    evidenceStance: contextualizes
     evidenceQuality: secondary
     generalizedApplicability: true
     uncertainty: >
