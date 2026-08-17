@@ -71,9 +71,15 @@ function isoDate(value?: Date): string | undefined {
   return value ? value.toISOString().slice(0, 10) : undefined;
 }
 
-function firstSentence(value?: string): string | undefined {
+/** Authored Markdown wraps where it suits the author; the prose does not change. */
+function normalizeProse(value?: string): string | undefined {
   if (!value) return undefined;
-  const trimmed = value.trim().replace(/\s+/g, " ");
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function firstSentence(value?: string): string | undefined {
+  const trimmed = normalizeProse(value);
+  if (!trimmed) return undefined;
   const stop = trimmed.indexOf(". ");
   return stop > 0 ? `${trimmed.slice(0, stop)}.` : trimmed;
 }
@@ -480,7 +486,10 @@ export function projectModel(): ModelGraph {
           // — the style the guidance asks for — printed the same words twice,
           // a few hundred pixels apart. Say it once when there is only one
           // sentence to say; keep the block when the section carries more.
-          ...(firstSentence(bet.sections[SECTION.bet]) === bet.sections[SECTION.bet]?.trim()
+          // Compared after the same whitespace collapse `firstSentence` applies,
+          // because where an author wrapped their Markdown line is not a
+          // difference in what the sentence says.
+          ...(firstSentence(bet.sections[SECTION.bet]) === normalizeProse(bet.sections[SECTION.bet])
             ? []
             : proseBlock("Intervention", bet.sections[SECTION.bet])),
           // Everything else the author wrote, in the order they wrote it —

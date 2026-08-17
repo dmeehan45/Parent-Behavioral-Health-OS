@@ -361,8 +361,43 @@ Ten fixes, all re-measured against the running application:
   (X-008).
 - `lib/model/graph.ts` — the bet's `Intervention` block is composed only when it
   would say something the lede does not (X-010).
-- `tests/responsive.spec.ts` — a case measuring nav links against the box that
-  clips them rather than against the document (X-003).
+- `tests/responsive.spec.ts` — a case asserting that what the nav hides, it
+  admits to hiding (X-003).
+
+## What review caught that this pass had wrong
+
+Three of these came back from automated review on the pull request, and all
+three were right. Recorded because they are the same *kind* of error twice —
+a fix verified against one environment and one configuration.
+
+- **The nav fix was tuned to 1.4px of headroom, and CI renders ~10px wider.**
+  The same three labels measure differently between browser builds; a fix with
+  a pixel of slack passes where it was written and fails everywhere else.
+  Dropping the label a step at ≤560px buys 18px, which a rendering difference
+  cannot eat. Measured: 390px now fits with the badge 24px clear.
+- **The test asserted the wrong property.** "No link is clipped" fails for a
+  documented configuration — `NEXT_PUBLIC_CONTENT_SOURCE_URL` adds a fourth
+  `Repository ↗` link and the nav then legitimately scrolls. It was also
+  measuring before the webfont arrived, where the labels are set in the
+  fallback face and the nav reads 152px *under* full rather than over. The
+  property that actually separates broken from fixed is neither of those:
+  **hidden content must be signposted.** The original defect was 53px behind
+  no scrollbar, no fade and no cue. That invariant holds at any link count and
+  any font metric, and it is checked at 320px, where these labels certainly do
+  not fit — otherwise the assertion would be skipped at every width the suite
+  runs, and a guard whose body never executes is not a guard.
+- **A mask cannot follow the scroll position.** The fade sat over the last 18px
+  whether or not anything remained to reveal, so scrolling to the end left the
+  last link permanently half-erased. Trailing padding of the same depth fixes
+  it — the same arrangement X-004 already used for the palette, which this
+  should have reused the first time.
+
+One correctness bug, in the projection change:
+
+- **`firstSentence` collapses whitespace; the comparison only trimmed it.** A
+  one-sentence `# Bet` wrapped across two Markdown lines therefore did not
+  match, and X-010's duplicate survived for exactly the authoring style the
+  guidance encourages. Both sides now normalize through the same helper.
 - `playwright.config.ts` — `PLAYWRIGHT_CHROMIUM_EXECUTABLE`, so the suite can
   run in a sandbox that ships a browser it cannot download. Unset, nothing
   changes.

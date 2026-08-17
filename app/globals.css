@@ -687,15 +687,20 @@ p:last-child {
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  /* ds-allow: a mask's black is opacity, not a colour role. */
-  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 18px), transparent 100%);
 }
 
-/* Nothing is hidden when it all fits, and a fade over the last link would then
-   be a lie. */
-@media (min-width: 861px) {
+/* A mask cannot follow the scroll position, so the fade sits over the last 18px
+   whether or not there is anything left to reveal — which would leave the final
+   link permanently half-erased once you scrolled to it. Trailing padding of the
+   same depth is what makes it honest: scrolled to the end, the gradient falls
+   across padding and the link is whole. Same arrangement as `.palette-results`.
+   Only where it can overflow — above this width everything fits, and a fade
+   over the last link would be a lie. */
+@media (max-width: 860px) {
   .app-nav {
-    mask-image: none;
+    padding-right: 18px;
+    /* ds-allow: a mask's black is opacity, not a colour role. */
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 18px), transparent 100%);
   }
 }
 
@@ -2750,6 +2755,22 @@ p:last-child {
   .app-nav a {
     padding-left: 7px;
     padding-right: 7px;
+  }
+}
+
+/*
+ * Three labels and a count do not fit 390px at the full link size, and padding
+ * alone only ever bought a pixel or two of slack — enough to pass on one
+ * browser and fail on another, since text measurement varies between builds by
+ * more than that. Dropping the label a step shrinks all three proportionally
+ * and leaves room the difference cannot eat. Same breakpoint the wordmark
+ * already uses.
+ */
+@media (max-width: 560px) {
+  .app-nav a {
+    font-size: 13px;
+    padding-left: 6px;
+    padding-right: 6px;
   }
 
   .shell {

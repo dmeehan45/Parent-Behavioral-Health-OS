@@ -122,26 +122,53 @@ test.describe("responsive shell", () => {
    * Overflow measured at the document says nothing about that; this measures
    * the link against the box that clips it.
    */
-  test("no primary nav link is clipped inside the nav's own scroller", async ({ page }) => {
+  test("what the nav hides, the nav admits to hiding", async ({ page }) => {
     await page.goto("/");
 
     const nav = page.locator("header.app-header nav");
     await expect(nav.locator("a").first()).toBeVisible();
 
-    const clipped = await nav.evaluate((el) => {
-      const right = el.getBoundingClientRect().right;
-      return [...el.querySelectorAll("a")]
-        .map((a) => ({
-          text: (a as HTMLElement).innerText.trim().replace(/\s+/g, " "),
-          cutBy: Math.round(a.getBoundingClientRect().right - right),
-        }))
-        .filter((link) => link.cutBy > 2);
-    });
+    // Measure the settled layout. Before Manrope arrives the labels are set in
+    // the fallback face and every width here is a different number — measured
+    // at first paint this reads Times New Roman and reports the nav 152px
+    // *under* full rather than over.
+    await page.evaluate(() => document.fonts.ready);
 
-    expect(
-      clipped,
-      `nav links cut off inside the nav: ${clipped.map((c) => `"${c.text}" by ${c.cutBy}px`).join(", ")}`,
-    ).toEqual([]);
+    const read = () =>
+      nav.evaluate((el) => ({
+        hidden: el.scrollWidth - el.clientWidth,
+        fades: getComputedStyle(el).maskImage !== "none",
+        links: [...el.querySelectorAll("a")].map((a) => (a as HTMLElement).innerText.trim().replace(/\s+/g, " ")),
+      }));
+
+    // Exact fit is not assertable: the same labels measure differently between
+    // browser builds by around ten pixels, and `NEXT_PUBLIC_CONTENT_SOURCE_URL`
+    // legitimately adds a fourth link. What must hold either way is that a
+    // reader can tell there is more — the original defect was 53px hidden
+    // behind no scrollbar, no fade and no cue, which reads as a rendering
+    // fault rather than as something to scroll.
+    const assertHonest = (state: Awaited<ReturnType<typeof read>>, at: number) => {
+      if (state.hidden <= 1) return false;
+      expect(
+        state.fades,
+        `at ${at}px the nav hides ${state.hidden}px of ${state.links.length} links (${state.links.join(", ")}) with no fade to say so`,
+      ).toBe(true);
+      return true;
+    };
+
+    const size = page.viewportSize();
+    assertHonest(await read(), size?.width ?? 0);
+
+    // 320px is the narrowest width this interface claims to support, and the
+    // one where these labels certainly do not fit. Checked explicitly so the
+    // assertion above is exercised rather than skipped everywhere: at the
+    // project widths the nav now fits, and a guard whose body never runs is
+    // not a guard.
+    await page.setViewportSize({ width: 320, height: size?.height ?? 844 });
+    await page.evaluate(() => document.fonts.ready);
+    const narrow = await read();
+    expect(narrow.hidden, "the nav is expected to overflow at 320px").toBeGreaterThan(1);
+    assertHonest(narrow, 320);
   });
 
   test("the map canvas renders and stays inside the page", async ({ page }) => {
