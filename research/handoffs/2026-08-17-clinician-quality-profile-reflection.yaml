@@ -1,0 +1,85 @@
+contractVersion: 1
+run:
+  id: 2026-08-17-clinician-quality-profile-reflection
+  kind: reflection
+  reflectsOn: [2026-08-16-define-clinician-quality]
+  question: >
+    How should clinician quality be represented as a longitudinal evidence profile that supports prospect prioritization, pre-contract qualification, onboarding, cold-start matching, later matching, and network support without treating quality as a static clinician trait?
+  synthesis: >
+    The working object is an evolving clinician evidence profile rather than six equal quality scores or a new operating stage. Three quality domains currently look separable enough to carry forward: care effectiveness and relationship, adaptive clinical practice, and operating partnership reliability. Contextual strength is a conditioning map across those domains rather than another scalar quality dimension. Learning responsiveness is split between adaptive clinical practice and operating partnership reliability. Every observation retains an attribution envelope that includes case mix, match conditions, platform configuration, workload, and the support or intervention the clinician received, plus an evidence-confidence envelope describing provenance, recency, sample depth, missingness, and uncertainty. Different lifecycle moments read different subsets of the same profile: cheap and explicitly weak priors for deciding whether deeper human evaluation is worthwhile, richer structured evidence during pre-contract qualification, verified and demonstrated evidence during onboarding, conservative cold-start matching context, and risk-adjusted longitudinal evidence for later matching, clinician support, training, and network operating decisions. The profile therefore spans supply, matching, care monitoring, and network optimization rather than belonging to any one stage.
+  createdAt: 2026-08-17
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: repository-reflection
+    context: >
+      Structured from accountable-reviewer feedback on the clinician-quality research run after re-orienting on current main and the repository's Research to Problem to Bet to Prototype to Learn loop. No new external evidence was gathered in this reflection.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+sources:
+  - id: source-clinician-quality-run
+    identity: repo-clinician-quality-run-2026-08-16
+    kind: repository
+    title: "Research handoff: define clinician quality"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: research/handoffs/2026-08-16-define-clinician-quality.yaml
+    access: available
+    publishedAt: 2026-08-16
+notes:
+  - id: note-three-quality-domains
+    statement: >
+      The current working profile has three quality domains: care effectiveness and relationship; adaptive clinical practice; and operating partnership reliability. Therapeutic relationship and care experience sit inside care effectiveness, while learning responsiveness is split between adaptive clinical practice and operating partnership reliability rather than standing alone.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, identify-predictive-selection-signals]
+  - id: note-contextual-strength-conditions-quality
+    statement: >
+      Contextual strength is better treated as a map that conditions the quality domains by population, presenting problem, family configuration, modality, acuity, and other relevant circumstances than as a separate scalar quality dimension.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, define-matching-quality]
+  - id: note-profile-deepens-by-lifecycle
+    statement: >
+      The same clinician profile should deepen through five evidence bands: prospect priors used only to decide whether deeper human evaluation is worthwhile; structured pre-contract qualification evidence; verified and demonstrated onboarding evidence; conservative cold-start matching evidence; and longitudinal observed evidence used for later matching, clinician support, training, and network decisions.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [identify-predictive-selection-signals, design-trustworthy-clinician-selection, define-selection-handoff, matching]
+  - id: note-system-support-is-part-of-attribution
+    statement: >
+      Observed clinician performance is partly co-produced by the operating system. Historical performance should retain the platform configuration, onboarding state, tools, human support, remediation, training, workload, and other material support conditions under which the outcome was produced, especially when interpreting operating reliability or responsiveness to feedback.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, quality-outcomes, clinician-onboarding]
+  - id: note-attribution-and-confidence-are-observation-level
+    statement: >
+      Attribution context and evidence confidence should travel with individual observations or estimates rather than becoming another clinician score. Case mix, match quality, support state, recency, sample depth, missingness, provenance, and uncertainty determine how much a later decision should learn from the observation.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, quality-outcomes]
+  - id: note-quality-corpus-spans-operating-stages
+    statement: >
+      Clinician quality is an evolving measurement corpus that informs clinician supply decisions, matching and care monitoring, and network decisions about support and training. It is not an operating stage in itself.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, clinician-supply, matching, quality-outcomes]
+  - id: note-continuity-remains-outcome-to-explain
+    statement: >
+      Continuity remains a downstream outcome to explain rather than a clinician-quality verdict on its own until the model can separate beneficial continuity from case mix, constrained alternatives, prolonged care without improvement, and other causes.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, quality-outcomes]
+candidates:
+  - id: candidate-quality-feedback-misattribution-refined
+    kind: problem
+    description: >
+      The system can treat observed clinician performance as a static property of the clinician even when the result was produced jointly by case mix, match quality, platform configuration, and the support the clinician received, causing selection, matching, ranking, or support decisions to learn the wrong lesson from historical data.
+    targets: [clinician-supply, select-clinician, matching, quality-outcomes, clinician-onboarding]
+    rationale: >
+      Refines the earlier candidate that clinician-level quality feedback can encode case mix, matching, support, and missing follow-up as individual performance. Support and platform configuration are not merely noise to subtract away; they can be causal parts of how clinician effectiveness is produced and should remain visible so the system can learn how to improve clinicians rather than only rank them.
+    wouldWeakenIf: >
+      Longitudinal platform data show clinician performance is stable across materially different support, workflow, case-mix, and matching conditions, or the system already preserves those conditions well enough that later selection, matching, ranking, and support decisions do not attribute system-produced effects to the clinician.
+questions:
+  - id: question-profile-domain-boundaries
+    question: What minimum set of mutually exclusive clinician-quality domains preserves the important distinctions for selection, matching, and support without producing overlapping scores?
+  - id: question-profile-evidence-bands
+    question: What evidence is appropriate to populate each clinician-profile domain at prospect prioritization, pre-contract qualification, onboarding, cold-start matching, and longitudinal monitoring?
+  - id: question-support-attribution-record
+    question: What minimum record of platform configuration, support, training, remediation, workload, and match context must accompany a clinician performance observation so later models can distinguish clinician effects from system effects and clinician-system interaction effects?
