@@ -229,12 +229,17 @@ notes:
     anchors: [design-trustworthy-clinician-selection, scarce-review-time-without-comparable-evidence]
 questions:
   - id: question-auto-stop-boundary
-    question: Which pre-contract conditions are truly noncompensable eligibility gates, and which should remain evidence that can be outweighed or sent to human review?
+    question: >
+      Which pre-contract conditions are truly noncompensable eligibility gates, and which should remain evidence that can be outweighed or sent to human review?
   - id: question-human-review-trigger
-    question: What review-priority rule produces the best selection accuracy per reviewer hour: uncertainty, expected value of additional information, predicted quality, network need, or a combination?
+    question: >
+      What review-priority rule produces the best selection accuracy per reviewer hour: uncertainty, expected value of additional information, predicted quality, network need, or a combination?
   - id: question-selection-experience-minimum
-    question: What minimum candidate-experience controls should every automated or human-assisted stage provide, including explanation, status visibility, opportunity to demonstrate capability, response timing, and access to a person for consequential ambiguity?
+    question: >
+      What minimum candidate-experience controls should every automated or human-assisted stage provide, including explanation, status visibility, opportunity to demonstrate capability, response timing, and access to a person for consequential ambiguity?
   - id: question-stage-level-false-negatives
-    question: How can the platform estimate false negatives at early screening stages when rejected prospects normally produce no downstream quality data?
+    question: >
+      How can the platform estimate false negatives at early screening stages when rejected prospects normally produce no downstream quality data?
   - id: question-clinician-ai-collection
-    question: Would clinicians accept an automated conversational evidence-gathering step if it were clearly bounded to information collection and summary rather than final selection, and what interaction design would preserve professional trust?
+    question: >
+      Would clinicians accept an automated conversational evidence-gathering step if it were clearly bounded to information collection and summary rather than final selection, and what interaction design would preserve professional trust?
