@@ -61,14 +61,18 @@ one file:
 **Prose confidence may not outrun frontmatter.** A claim carries `authority`
 and `confidence`, and the prose around it has to sit at the same height. A
 `proposed` hypothesis at `confidence: low` cannot read as settled fact in a
-body, a doc, or a screen — and the inverse holds too: do not hedge a
-`validated` result or a `policy` rule into mush. When you tighten a hedged
-sentence, check what the record actually asserts before deciding which words
-were the slop and which were the calibration.
+body, a doc, or a screen. The inverse holds too, but hedging follows
+`confidence`, not `authority`: `validated` means evidence-backed, and the
+schema permits a validated record that is still weakly held, so only a
+`policy` rule — "reason from this as settled" — or `confidence: high` earns
+unhedged prose. When you tighten a hedged sentence, check what the record
+actually asserts before deciding which words were the slop and which were the
+calibration.
 
-**Never pad, and never invent the specific.** Incompleteness is valid in this
-repository: an empty field is honest, a thin file reads as thin on purpose.
-A humanizing pass shortens, sharpens, and grounds — it never fills. The
+**Never pad, and never invent the specific.** `AGENTS.md`'s "Incompleteness
+is valid" section owns the rule that an empty field is honest and a thin file
+reads as thin on purpose; read it there. The consequence for this pass: a
+humanizing edit shortens, sharpens, and grounds — it never fills. The
 catalog's cure for a vague sentence is a specific one, but that move is only
 available when the specific exists in the model or a named source. Otherwise
 the fix is to cut the vague sentence or mark the gap, and inventing a
@@ -104,9 +108,11 @@ against a generic idea of "human writing". The traits that matter:
   paragraph. Bold scattered mid-sentence for emphasis is the tell the catalog
   describes.
 - **Sentence case headings.** Always.
-- **No first person, no performance.** House prose does not say "I", does not
-  reassure, and does not warm up. It also does not perform neutrality — it has
-  positions and states them ("that is a decision rather than an omission").
+- **No authorial "I", and no performance.** House prose says "we" when the
+  project speaks — "something we think might be true" — and never "I". It does
+  not reassure and does not warm up. It also does not perform neutrality — it
+  has positions and states them ("that is a decision rather than an
+  omission").
 - **Hedges are calibration, not caution.** The sample hedges exactly where the
   model is uncertain and nowhere else. "Usually", "rarely", and "when in
   doubt" appear where they carry information.
@@ -135,7 +141,8 @@ Red flags, each one a finding:
 - An adjective standing in for a measurement: "dramatically faster", "much
   more reliable".
 - Prose asserting as fact what its record marks `proposed` or
-  `confidence: low` — or prose hedging what its record marks `validated`.
+  `confidence: low` — or prose hedging a `policy` rule or a high-confidence
+  record into mush.
 - A specific that appears nowhere in the model or a named source — the
   invented-detail failure described above.
 - A restated contract that another file owns.

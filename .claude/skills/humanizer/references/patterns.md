@@ -7,10 +7,9 @@ these patterns are what that tendency leaves behind.
 
 **Read this first.** Several "After" examples below fix vagueness with a
 specific — a date, a survey, a named body. That shows the *shape* of the fix.
-In this repository the move is only available when the specific exists in the
-model or a named source. If it does not, cut the vague sentence or mark the
-gap. Do not invent the specific to complete the pattern; an invented detail
-is a blocking finding, and worse than the slop it replaced.
+Whether the move is available is governed by the skill's never-pad rule
+(SKILL.md): the specific has to exist in the model or a named source, or the
+vague sentence gets cut instead. An invented detail is a blocking finding.
 
 ## Content patterns
 
@@ -175,10 +174,14 @@ with no exceptions to calibrate.
 None in this repository's prose or UI copy. The design system says meaning
 arrives in words; hue is category, and decoration is neither.
 
-### 19. Curly quotation marks
+### 19. Curly quotation marks — calibrated for this repository
 
-Straight quotes in source files. Curly quotes are a paste-from-chatbot
-fingerprint.
+The paste-from-chatbot fingerprint is curly quotes in *source prose* — a
+markdown file that otherwise uses straight quotes suddenly quoting "like
+this". The inconsistency is the tell. The interface, by contrast, uses
+typographic quotes deliberately — `components/review/finding-card.tsx` wraps
+extracts in them, `lib/model/open-ends.ts` composes them around titles — and
+a humanizing pass does not "fix" those.
 
 ## Communication patterns
 
@@ -300,6 +303,6 @@ by Siqi Chen (MIT), built on
 [Wikipedia: Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing).
 Patterns 30–34 and the marketing-register list in pattern 7 come from the
 [Hermes Agent port](https://github.com/NousResearch/hermes-agent/tree/main/skills/creative/humanizer).
-Calibrations on patterns 5, 6, 9, 11, 14, 15, 18, 21, 24, 26, 32, and 34 are
-this repository's, made against its house voice and rigor rules. The upstream
+Calibrations on patterns 5, 6, 9, 11, 14, 15, 18, 19, 21, 24, 26, 32, and 34
+are this repository's, made against its house voice and rigor rules. The upstream
 MIT license is preserved in [../LICENSE](../LICENSE).
