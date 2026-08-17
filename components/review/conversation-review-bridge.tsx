@@ -35,19 +35,17 @@ export function ConversationReviewBridge({
     }
   };
 
+  // The advisory that used to sit above this now belongs to the block that
+  // renders it, so what is left here is the control and what it carries.
   return (
-    <section className="shell page" aria-label="Continue review in conversation">
-      <div className="review-gate">
-        <strong>Work with the research in conversation.</strong> This page is the organized record and authorization surface, not the place where complex ideas have to be finished. Use the conversational engine to refine the run, then let it write back a reflection, questions, or explicit decisions through GitHub.
-      </div>
-      <div className="review-actions">
-        <button type="button" className="button" onClick={copy}>
-          {copied ? "Conversation brief copied" : "Copy conversation brief"}
-        </button>
-        <span className="small muted">
-          {findings} finding{findings === 1 ? "" : "s"} · {candidates} proposal{candidates === 1 ? "" : "s"}. Leave items undecided while they still need thinking.
-        </span>
-      </div>
-    </section>
+    <div className="review-actions">
+      <button type="button" className="button" onClick={copy}>
+        {copied ? "Conversation brief copied" : "Copy conversation brief"}
+      </button>
+      <span className="small muted">
+        {findings} finding{findings === 1 ? "" : "s"} · {candidates} proposal{candidates === 1 ? "" : "s"} — leave
+        anything undecided while it still needs thinking.
+      </span>
+    </div>
   );
 }

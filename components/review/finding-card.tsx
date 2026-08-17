@@ -5,7 +5,6 @@ import { Badge } from "@/components/model/badges";
 import {
   CLASSIFICATION_MEANING,
   DISPOSITIONS,
-  DISPOSITION_MEANING,
   DISPOSITION_TONE,
   QUALITY_MEANING,
   requiresEditedRecommendation,
@@ -142,14 +141,20 @@ export function FindingCard({
         ) : null}
       </dl>
 
+      {/*
+        The five choices, and nothing about what they mean.
+
+        Each meaning is one sentence, and printing all five on every card set
+        the same thirty sentences down a page holding six findings — which is
+        the wall this surface had become. The vocabulary is a property of the
+        page, not of any one finding, so it is stated once above the list and
+        the control here is just the choice.
+      */}
       <fieldset className="review-decision">
         <legend className="field-label">Authorization, when you are ready</legend>
-        <p className="small muted">
-          Leave this undecided while the finding still needs interpretation or refinement. Work with it in conversation first; a disposition is the point where you authorize what happens next.
-        </p>
-        <div className="review-options">
+        <div className="review-choices">
           {DISPOSITIONS.map((option) => (
-            <label className={`review-option${disposition === option ? " selected" : ""}`} key={option}>
+            <label className={`review-choice${disposition === option ? " selected" : ""}`} key={option}>
               <input
                 type="radio"
                 name={finding.decisionId}
@@ -157,10 +162,7 @@ export function FindingCard({
                 checked={disposition === option}
                 onChange={() => onChange({ disposition: option as Disposition })}
               />
-              <span className="review-option-name">
-                <Badge tone={DISPOSITION_TONE[option]}>{option}</Badge>
-              </span>
-              <span className="review-option-meaning">{DISPOSITION_MEANING[option]}</span>
+              <Badge tone={DISPOSITION_TONE[option]}>{option}</Badge>
             </label>
           ))}
         </div>

@@ -7,6 +7,8 @@ import { ConversationReviewBridge } from "@/components/review/conversation-revie
 import { FindingCard } from "@/components/review/finding-card";
 import {
   DISPOSITIONS,
+  DISPOSITION_MEANING,
+  DISPOSITION_TONE,
   requiresEditedRecommendation,
   requiresRationale,
   runStatus,
@@ -161,25 +163,54 @@ export function ReviewWorkspace({
         </div>
       </header>
 
-      <p className="review-gate">
-        Nothing here has changed the model. A decision authorizes a later, separate change to <code>content/</code> —
-        it does not make one.
-      </p>
-
-      {/* Under the run's own heading, inside `main`: this is a way of working
-          on the run, so it only means anything once the reader knows which
-          run they are looking at. */}
-      <ConversationReviewBridge
-        runId={run.id}
-        question={run.question}
-        findings={run.findings.length}
-        candidates={run.candidates.length}
-      />
+      {/* One block, not two. The guarantee and the way of working were two
+          near-identical blue callouts stacked on top of each other, which read
+          as one long advisory nobody finishes. */}
+      <section className="review-gate" aria-label="How this page works">
+        <p>
+          <strong>Nothing here has changed the model.</strong> A decision authorizes a later, separate change to{" "}
+          <code>content/</code> — it does not make one.
+        </p>
+        <p>
+          This page is the organized record and the authorization surface, not the place where complex ideas have to be
+          finished. Work with the run in conversation first, then let it write back a reflection, questions, or explicit
+          decisions through GitHub.
+        </p>
+        <ConversationReviewBridge
+          runId={run.id}
+          question={run.question}
+          findings={run.findings.length}
+          candidates={run.candidates.length}
+        />
+      </section>
 
       <section className="review-findings" aria-label="Findings">
         <h2 className="field-label">
           {run.findings.length} finding{run.findings.length === 1 ? "" : "s"} to decide
         </h2>
+
+        {/* The vocabulary, once. It describes the five words rather than any
+            one finding, and it was previously reprinted under every card —
+            thirty sentences on a page holding six. Folded, because the words
+            themselves carry most of it and the nuance is only wanted while
+            somebody is undecided. */}
+        <details className="disclosure review-vocab">
+          <summary>What the five decisions mean</summary>
+          <dl className="define-list">
+            {DISPOSITIONS.map((option) => (
+              <div key={option}>
+                <dt>
+                  <Badge tone={DISPOSITION_TONE[option]}>{option}</Badge>
+                </dt>
+                <dd>{DISPOSITION_MEANING[option]}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="small muted">
+            Leave a finding undecided while it still needs interpretation or refinement. A disposition is the point
+            where you authorize what happens next.
+          </p>
+        </details>
         {run.findings.map((finding) => (
           <FindingCard
             key={finding.decisionId}
