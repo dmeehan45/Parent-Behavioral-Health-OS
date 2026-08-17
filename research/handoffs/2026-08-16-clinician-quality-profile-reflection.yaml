@@ -1,0 +1,77 @@
+contractVersion: 1
+run:
+  id: 2026-08-16-clinician-quality-profile-reflection
+  kind: reflection
+  reflectsOn: [2026-08-16-define-clinician-quality]
+  question: >
+    What clinician quality profile structure should we carry forward from the first research run before researching predictive selection signals and refining the related quality-attribution Problem?
+  synthesis: >
+    The working model is not a single clinician quality score. It separates care performance, contextual strength or fit, and operating reliability, and it carries an attribution and evidence envelope alongside observed performance. The reviewer added an important refinement: clinician performance is partly co-produced by the operating system. Historical outcomes should therefore preserve the support, tooling, workflow, matching, and operating conditions under which they were observed, especially when interpreting operating reliability. Continuity remains an outcome to explain rather than a quality verdict on its own. These are working profile candidates for conversational refinement, not accepted canonical dimensions.
+  createdAt: 2026-08-16
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: reviewer-guided-reflection
+    context: >
+      Structured from the reviewed clinician-quality research handoff and the accountable reviewer's conversational interpretation. No new external research was performed in this reflection.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+sources:
+  - id: source-clinician-quality-run
+    identity: repo-clinician-quality-run-2026-08-16
+    kind: repository
+    title: "Research handoff: define clinician quality"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: research/handoffs/2026-08-16-define-clinician-quality.yaml
+    access: available
+    publishedAt: 2026-08-16
+notes:
+  - id: note-profile-is-layered-not-ranked
+    statement: >
+      The candidate clinician profile should be layered rather than ranked: care performance describes the quality of care observed, contextual strength describes where that performance appears to hold, and operating reliability describes how reliably care is delivered through the platform.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, clinician]
+  - id: note-care-performance-candidates
+    statement: >
+      Candidate care-performance dimensions are clinical effectiveness and meaningful improvement, therapeutic relationship and patient or family experience, and clinical judgment including safety, appropriateness, and adaptive practice.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, quality-outcomes]
+  - id: note-contextual-strength-is-a-map
+    statement: >
+      Population, problem, acuity, modality, age, and family-system strengths are better treated as a contextual strength map attached to performance than as evidence that a clinician is globally high or low quality.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, identify-predictive-selection-signals]
+  - id: note-operating-reliability-is-coproduced
+    statement: >
+      Operating reliability should not be interpreted as an independent clinician trait. Documentation, scheduling, communication, follow-through, and similar platform outcomes are partly co-produced by the clinician's interaction with workflow design, tooling, training, support, and operating expectations.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, clinician-onboarding, quality-outcomes]
+  - id: note-observation-needs-support-context
+    statement: >
+      Historical clinician observations should carry the operating-system version and support context that could have contributed to the result, including relevant onboarding, tooling, human support, workflow, matching, and remediation conditions where available.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, identify-predictive-selection-signals, quality-outcomes]
+  - id: note-evidence-envelope-is-not-a-score
+    statement: >
+      Each performance estimate should carry an evidence and attribution envelope such as case count, outcome coverage, case-mix adjustment, missingness, recency, support context, and uncertainty rather than presenting the estimate as equally reliable across clinicians.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, quality-outcomes]
+  - id: note-continuity-remains-explanatory-outcome
+    statement: >
+      Continuity or retention should remain an outcome to explain rather than a clinician quality verdict by itself because continued care can reflect therapeutic value, fit, access constraints, case mix, operating conditions, or other mechanisms.
+    sourceIds: [source-clinician-quality-run]
+    anchors: [define-clinician-quality, quality-outcomes]
+questions:
+  - id: question-profile-dimension-boundary
+    question: Should adaptive learning and responsiveness to feedback be a separate clinician-performance dimension, or evidence about clinical judgment and operating reliability?
+  - id: question-support-context-minimum
+    question: What minimum support and operating-context record must accompany historical clinician performance so the platform can distinguish clinician effects from system effects?
+  - id: question-profile-use-boundary
+    question: Which profile elements should be used for selection, which for matching, and which only for longitudinal quality monitoring?
+  - id: question-next-problem-refinement
+    question: How should the existing candidate Problem about clinician quality feedback encoding case mix, matching, support, and missing follow-up be refined once the profile and attribution model are stable enough?
