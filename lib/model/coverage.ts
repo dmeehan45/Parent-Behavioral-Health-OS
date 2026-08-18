@@ -102,6 +102,10 @@ export function betCoverage(bet: Bet): Coverage {
     // The shape of the experiment. Counted like any other modelable field, so a
     // bet nobody has worked out how to test reads as thin instead of finished.
     ...EXPERIMENT_SECTIONS.map((name) => [name, bet.sections[name]] as const),
+    // The experiment says what to learn; review prompts say how a tester is
+    // asked to pressure-test it. They are a separate field because refining the
+    // questions should not make the software itself stale.
+    ["Review prompts", bet.sections[SECTION.reviewPrompts]],
     ["Participant", bet.participant],
     ["Provenance", bet.provenance?.source],
     ["Last reviewed", bet.lastReviewed],
