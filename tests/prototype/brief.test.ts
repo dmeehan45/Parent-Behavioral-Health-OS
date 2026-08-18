@@ -11,19 +11,19 @@ const repo = getRepository();
 /**
  * A fixture that opts *in* to what it borrows.
  *
- * These tests want the real problem, steps, claims and metrics, so the packet is
- * exercised against a model that actually exists. They do not want any of the
- * bet's editorial state, and spreading the record to get the first meant
- * inheriting the second — which broke this suite three separate times, each on a
- * different field: `sections` when a bet was first shaped, `prototype` when one
- * was first stamped, and `awaiting` when one first named a research question.
+ * These tests want the real guided-first-caseload problem, steps, claims and
+ * metrics, so the packet is exercised against a model that actually exists.
+ * They do not want whichever Bet happens to sort first: adding an unrelated Bet
+ * must not silently change the fixture these assertions are describing.
  *
- * Listing what is taken fixes the whole class rather than the instance. A field
- * added to `Bet` tomorrow is absent here by default, which is the safe
- * direction: a test that misses new state is inconvenient, one that silently
- * inherits it is wrong.
+ * They also do not want any of the bet's editorial state. Listing what is taken
+ * fixes both classes of accidental inheritance. A field added to `Bet` tomorrow
+ * is absent here by default, which is the safe direction: a test that misses new
+ * state is inconvenient, one that silently inherits it is wrong.
  */
-const source = repo.bets[0];
+const source = repo.bets.find((candidate) => candidate.id === "guided-first-caseload");
+assert.ok(source, "prototype brief tests require the guided-first-caseload fixture");
+
 const bare: Bet = {
   id: source.id,
   title: source.title,
