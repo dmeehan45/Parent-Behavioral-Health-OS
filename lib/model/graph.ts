@@ -24,6 +24,7 @@ import {
 } from "@/lib/model/coverage";
 import { conformance } from "@/lib/prototype/conformance";
 import { contentRevision, fingerprint } from "@/lib/model/revision";
+import { projectConnectionDepth } from "@/lib/model/connection-depth";
 import { AUTHORITY_TERMS, EDGE_LEGEND, isFeedbackRelationship } from "@/lib/model/vocabulary";
 import type {
   BuildTarget,
@@ -611,7 +612,8 @@ export function projectModel(): ModelGraph {
      * rests on. They are the same link seen from two sides, and a contributor
      * has no reason to prefer one. Metrics already resolved both — claims did
      * not, so a Step that named a Claim got it in a block while the evidence
-     * lens drew no line, and the two surfaces disagreed about the same content.
+     * lens drew no line, and the step's open ends could not see it was resting on a
+     * low-confidence hypothesis. Two surfaces, same content, different answer.
      */
     const declaredBy = steps.filter((step) => step.claims?.includes(claim.id)).map((step) => step.id);
     const targets = resolveTargets([...claim.targets, ...declaredBy], stageById, stepById);
@@ -780,7 +782,7 @@ export function projectModel(): ModelGraph {
 
   for (const [index, edge] of map.edges.entries()) {
     const feedback = isFeedbackRelationship(edge.relationship);
-    edges.push({
+    const projected: ModelEdge = {
       id: `flow:${index}:${edge.from}->${edge.to}`,
       source: nodeId("stage", edge.from),
       target: nodeId("stage", edge.to),
@@ -792,6 +794,10 @@ export function projectModel(): ModelGraph {
       // stay home: a gold dashed line across a lens that is not about the
       // system learning answers a question nobody asked there.
       lenses: feedback ? ["flow"] : ["flow", "bets", "evidence"],
+    };
+    edges.push({
+      ...projected,
+      connection: projectConnectionDepth(projected, steps, entities, problems),
     });
   }
 
