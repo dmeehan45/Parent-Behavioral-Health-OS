@@ -64,6 +64,15 @@ jobs:
       - name: Lint design system
         run: npm run lint:design
 
+      # AI-default drift the colour rule cannot see: decorative gradients,
+      # glow, emoji-as-icons, motion and radius literals off the token scale.
+      # A deliberate exception opts out with a ds-allow comment and a reason.
+      - name: Scan for design tells
+        run: npm run scan:design-tells
+
+      - name: Test the design-tells scanner
+        run: npm run test:design
+
       - name: Typecheck
         run: npm run typecheck
 

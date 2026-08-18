@@ -22,7 +22,9 @@
     "test:research": "tsx --test tests/research/*.test.ts",
     "test:prototype": "tsx --test tests/prototype/*.test.ts",
     "test:model": "tsx --test tests/model/*.test.ts",
-    "test:responsive": "playwright test"
+    "test:responsive": "playwright test",
+    "scan:design-tells": "tsx scripts/scan-design-tells.ts",
+    "test:design": "tsx --test tests/design/*.test.ts"
   },
   "dependencies": {
     "@xyflow/react": "^12.8.4",

@@ -136,6 +136,21 @@ The system's second grey is not carried over. `#959e9f` measures 2.74:1, and
 splitting the muted tier again would reintroduce that failure at a smaller
 size. Hierarchy below the muted tier is carried by size, weight and tracking.
 
+## The design-tells scan
+
+`npm run scan:design-tells` catches the drift `lint:design` cannot: the
+mechanical signatures of generated UI — decorative gradients and gradient
+text, the AI-purple band, glow shadows, emoji standing in for icons, motion
+bypassing `--ds-duration`/`--ds-ease`, radius literals off the scale, and
+font faces outside Manrope and Caveat. It runs in CI and exits non-zero on
+any finding.
+
+A deliberate exception opts out the same way a colour does: a `ds-allow:`
+comment on the line or the one above, with a reason. The reason is
+load-bearing — it is what separates a decision from a default. The catalog
+behind the rules, and the judgement tells the scanner cannot see, live with
+the `design-tells` skill in `.claude/skills/design-tells/`.
+
 ## Browser checks
 
 `npm run test:responsive` builds and serves the app and runs everything under
