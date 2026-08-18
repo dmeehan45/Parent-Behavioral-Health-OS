@@ -8,21 +8,29 @@ import { DetailSheet } from "@/components/map/detail-sheet";
 import { useLiveModel } from "@/components/map/use-live-model";
 import { EDGE_COLOR, KIND_COLOR } from "@/components/map/canvas-theme";
 import { KIND_LABELS, KIND_MEANING } from "@/lib/model/kinds";
+import {
+  DEFAULT_FLOW_LAYERS,
+  FLOW_LAYER_IDS,
+  FLOW_LAYER_TERMS,
+  edgeProjectedFlowLayers,
+  type FlowLayerId,
+} from "@/lib/model/flow-layers";
 import type { LensId, ModelGraph, ModelNode } from "@/lib/model/types";
 
 export type MapView = {
   lens: LensId;
   open?: string;
   expand: string[];
+  layers: FlowLayerId[];
 };
 
 /**
  * The map workspace.
  *
- * One canvas, four lenses, and a detail layer that never takes the reader off
- * the map. All view state lives in the URL, so any view — a lens, an expanded
- * stage, an open primitive — is a link someone else can open and see the same
- * thing.
+ * One canvas, four lenses, toggleable operating-flow layers, and a detail layer
+ * that never takes the reader off the map. All view state lives in the URL, so
+ * a lens, layer isolation, expanded stage, or open primitive is a link someone
+ * else can open and see as the same picture.
  */
 export function MapWorkspace({ initialGraph, initialView }: { initialGraph: ModelGraph; initialView: MapView }) {
   const { graph, status, changed, lastChange, refresh } = useLiveModel(initialGraph);
@@ -30,13 +38,24 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
   const [lens, setLens] = useState<LensId>(initialView.lens);
   const [openId, setOpenId] = useState<string | undefined>(initialView.open);
   const [expanded, setExpanded] = useState<string[]>(initialView.expand);
+  const [layers, setLayers] = useState<FlowLayerId[]>(initialView.layers);
   const [trail, setTrail] = useState<string[]>([]);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [legendOpen, setLegendOpen] = useState(false);
+  const [layersOpen, setLayersOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; nonce: number }>();
 
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const openNode = openId ? nodeById.get(openId) : undefined;
+
+  const layerCounts = useMemo(() => {
+    const counts = Object.fromEntries(FLOW_LAYER_IDS.map((id) => [id, 0])) as Record<FlowLayerId, number>;
+    for (const edge of graph.edges) {
+      if (!edge.lenses.includes("flow")) continue;
+      for (const layer of edgeProjectedFlowLayers(graph, edge)) counts[layer] += 1;
+    }
+    return counts;
+  }, [graph]);
 
   /* ---- Shareable view state -------------------------------------------- */
 
@@ -45,11 +64,26 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
     if (lens !== "flow") params.set("lens", lens);
     if (openId) params.set("open", openId);
     if (expanded.length > 0) params.set("expand", expanded.map((id) => id.replace(/^stage:/, "")).join(","));
+    const allLayers = layers.length === DEFAULT_FLOW_LAYERS.length && DEFAULT_FLOW_LAYERS.every((id) => layers.includes(id));
+    if (!allLayers) params.set("layers", layers.join(","));
     const query = params.toString();
     // Written directly to history so panning around the model never triggers a
     // server round trip or scroll reset.
     window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
-  }, [lens, openId, expanded]);
+  }, [lens, openId, expanded, layers]);
+
+  const toggleLayer = useCallback((layer: FlowLayerId) => {
+    setLayers((previous) => {
+      if (previous.includes(layer)) {
+        // A completely blank relationship layer looks like a broken map. Keep
+        // at least one layer active and let the reader switch which one it is.
+        if (previous.length === 1) return previous;
+        return previous.filter((id) => id !== layer);
+      }
+      const enabled = new Set([...previous, layer]);
+      return FLOW_LAYER_IDS.filter((id) => enabled.has(id));
+    });
+  }, []);
 
   /* ---- Navigation ------------------------------------------------------- */
 
@@ -125,6 +159,7 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
         setPaletteOpen(true);
       } else if (event.key === "Escape") {
         if (paletteOpen) setPaletteOpen(false);
+        else if (layersOpen) setLayersOpen(false);
         else if (legendOpen) setLegendOpen(false);
         else open(undefined);
       } else if (/^[1-9]$/.test(event.key)) {
@@ -135,7 +170,7 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [graph.lenses, paletteOpen, legendOpen, open]);
+  }, [graph.lenses, paletteOpen, layersOpen, legendOpen, open]);
 
   /* ---- Render ----------------------------------------------------------- */
 
@@ -157,7 +192,10 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
               role="tab"
               aria-selected={entry.id === lens}
               className={`lens-tab${entry.id === lens ? " active" : ""}`}
-              onClick={() => setLens(entry.id)}
+              onClick={() => {
+                setLayersOpen(false);
+                setLens(entry.id);
+              }}
               title={entry.description}
             >
               {entry.label}
@@ -188,6 +226,23 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
             </span>
           </button>
 
+          {lens === "flow" ? (
+            <button
+              type="button"
+              className={`legend-toggle${layersOpen ? " active" : ""}`}
+              aria-pressed={layersOpen}
+              onClick={() => {
+                setLegendOpen(false);
+                setLayersOpen((value) => !value);
+              }}
+            >
+              <span className="legend-icon" aria-hidden="true">
+                ≋
+              </span>
+              <span className="legend-label">Layers</span>
+            </button>
+          ) : null}
+
           {/* The glyph carries it on a phone and the word carries it everywhere
               else, but the word stays in the accessibility tree either way —
               hiding it with `display: none` would leave the control unnamed. */}
@@ -195,7 +250,10 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
             type="button"
             className={`legend-toggle${legendOpen ? " active" : ""}`}
             aria-pressed={legendOpen}
-            onClick={() => setLegendOpen((value) => !value)}
+            onClick={() => {
+              setLayersOpen(false);
+              setLegendOpen((value) => !value);
+            }}
           >
             <span className="legend-icon" aria-hidden="true">
               ?
@@ -213,12 +271,21 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
           </div>
         ) : null}
 
+        {lens === "flow" && layersOpen ? (
+          <LayerControls
+            active={layers}
+            counts={layerCounts}
+            onToggle={toggleLayer}
+            onClose={() => setLayersOpen(false)}
+          />
+        ) : null}
         {legendOpen ? <Legend graph={graph} onClose={() => setLegendOpen(false)} /> : null}
 
         <ReactFlowProvider>
           <GraphCanvas
             graph={graph}
             lens={lens}
+            activeLayers={layers}
             selectedId={openId}
             expanded={expanded}
             changed={changed}
@@ -245,6 +312,71 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
       {paletteOpen ? (
         <CommandPalette graph={graph} onClose={() => setPaletteOpen(false)} onPick={pickFromPalette} />
       ) : null}
+    </div>
+  );
+}
+
+function LayerControls({
+  active,
+  counts,
+  onToggle,
+  onClose,
+}: {
+  active: FlowLayerId[];
+  counts: Record<FlowLayerId, number>;
+  onToggle: (layer: FlowLayerId) => void;
+  onClose: () => void;
+}) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    headingRef.current?.focus();
+    return () => {
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
+
+  return (
+    <div className="legend" role="dialog" aria-label="Operating flow layers">
+      <div className="legend-head">
+        <h2 ref={headingRef} tabIndex={-1}>
+          What is flowing?
+        </h2>
+        <button type="button" className="icon-button" onClick={onClose} aria-label="Close layer controls">
+          ✕
+        </button>
+      </div>
+
+      <p className="legend-note">
+        Isolate one kind of movement without changing the model underneath it. Nodes stay put so switching layers does not
+        redraw the system into a different story.
+      </p>
+
+      <ul className="legend-list">
+        {FLOW_LAYER_TERMS.map((term) => {
+          const enabled = active.includes(term.id);
+          const onlyActive = enabled && active.length === 1;
+          const count = counts[term.id];
+          return (
+            <li key={term.id}>
+              <label style={{ display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: 10, width: "100%", alignItems: "start" }}>
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  disabled={onlyActive}
+                  onChange={() => onToggle(term.id)}
+                  aria-label={`${enabled ? "Hide" : "Show"} ${term.label}`}
+                />
+                <span>
+                  <strong>{term.label}</strong> {term.description}
+                </span>
+                <span className="badge tone-quiet">{count === 0 ? "not explicit" : `${count} ${count === 1 ? "link" : "links"}`}</span>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
@@ -292,6 +424,19 @@ function Legend({ graph, onClose }: { graph: ModelGraph; onClose: () => void }) 
             <li key={entry.id}>
               <span>
                 <strong>{entry.label}</strong> {entry.description}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h3 className="field-label">Operating-flow layers</h3>
+        <ul className="legend-list">
+          {FLOW_LAYER_TERMS.map((term) => (
+            <li key={term.id}>
+              <span>
+                <strong>{term.label}</strong> {term.description}
               </span>
             </li>
           ))}

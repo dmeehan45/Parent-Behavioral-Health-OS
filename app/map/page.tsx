@@ -1,5 +1,6 @@
 import { projectModel } from "@/lib/model/graph";
 import { MapWorkspace, type MapView } from "@/components/map/map-workspace";
+import { DEFAULT_FLOW_LAYERS, isFlowLayerId } from "@/lib/model/flow-layers";
 import type { LensId } from "@/lib/model/types";
 
 /**
@@ -37,7 +38,13 @@ function readView(params: Record<string, string | string[] | undefined>, lensIds
     .map((id) => `stage:${id.trim()}`)
     .filter((id) => nodeIds.has(id));
 
-  return { lens, open, expand };
+  const requestedLayers = (single("layers") ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(isFlowLayerId);
+  const layers = requestedLayers.length > 0 ? requestedLayers : [...DEFAULT_FLOW_LAYERS];
+
+  return { lens, open, expand, layers };
 }
 
 export default async function MapPage({ searchParams }: { searchParams: Search }) {

@@ -9,15 +9,17 @@
  * Two strategies:
  *
  * - `dag` for the operating-flow lens. Stages are ranked left to right by
- *   longest path over non-feedback edges, then ordered within each rank to
- *   reduce edge crossings. An expanded stage becomes a container whose steps
- *   are laid out vertically inside it, so drilling in grows the stage downward
- *   instead of rearranging the whole graph.
+ *   longest path over operating-progression edges, then ordered within each
+ *   rank to reduce edge crossings. Data couplings and feedback are overlaid but
+ *   do not turn parallel work into a funnel. An expanded stage becomes a
+ *   container whose steps are laid out vertically inside it, so drilling in
+ *   grows the stage downward instead of rearranging the whole graph.
  * - `bands` for the satellite lenses. The stage spine stays on top and the
  *   attached primitives settle beneath the things they point at.
  */
 
 import { LENS_BANDS } from "@/lib/model/kinds";
+import { isOperatingProgression } from "@/lib/model/flow-layers";
 import type { LensId, ModelEdge, ModelNode, NodeKind } from "@/lib/model/types";
 
 export type LayoutNode = {
@@ -226,7 +228,7 @@ function layoutFlow(nodes: ModelNode[], edges: ModelEdge[], expanded: Set<string
   }
 
   const stageIds = stages.map((stage) => stage.id);
-  const forward = edges.filter((edge) => edge.kind === "flow");
+  const forward = edges.filter(isOperatingProgression);
   const ranks = longestPathRanks(stageIds, forward);
 
   const columns = new Map<number, string[]>();
@@ -372,8 +374,9 @@ export function layoutGraph(
   if (lens === "flow") return layoutFlow(nodes, edges, expanded);
 
   // Satellite lenses keep the spine in operating-flow order, so switching lens
-  // never scrambles the reader's mental model of the system.
+  // never scrambles the reader's mental model of the system. Informational
+  // couplings stay visible on their own lens but do not create another rank.
   const stageIds = nodes.filter((node) => node.kind === "stage").map((node) => node.id);
-  const stageRanks = longestPathRanks(stageIds, edges.filter((edge) => edge.kind === "flow"));
+  const stageRanks = longestPathRanks(stageIds, edges.filter(isOperatingProgression));
   return layoutBands(lens, nodes, edges, stageRanks);
 }
