@@ -20,6 +20,7 @@ import {
   MINIMAP_MASK,
   UNKNOWN_NODE_COLOR,
 } from "@/components/map/canvas-theme";
+import { ConnectionEdge } from "@/components/map/connection-edge";
 import { useLayoutOverrides } from "@/components/map/layout-overrides";
 import { nodeTypes, type CanvasNode, type DetailTier, type NodeState } from "@/components/map/model-node";
 import {
@@ -42,8 +43,11 @@ type Props = {
   /** The detail panel covers the lower canvas on narrow screens. */
   sheetOpen: boolean;
   onSelect: (nodeId?: string) => void;
+  onSelectConnection: (edgeId?: string) => void;
   onToggleExpand: (nodeId: string) => void;
 };
+
+const edgeTypes = { connection: ConnectionEdge };
 
 /**
  * Level of detail, derived from the size text is actually painted at.
@@ -102,6 +106,7 @@ export function GraphCanvas({
   focusRequest,
   sheetOpen,
   onSelect,
+  onSelectConnection,
   onToggleExpand,
 }: Props) {
   const { fitView, getViewport, setViewport, zoomIn, zoomOut } = useReactFlow();
@@ -249,12 +254,14 @@ export function GraphCanvas({
               ? EDGE_COLOR.bet
               : EDGE_COLOR[edge.kind];
         const stageConnection = edge.kind === "flow" || edge.kind === "feedback";
+        const richConnection = lens === "flow" && stageConnection && !context && Boolean(edge.connection);
         const layerLabel = lens === "flow" && stageConnection && visibleFlowLayers.length > 0 ? visibleFlowLayers.join(" · ") : undefined;
         const transfers = edgeFlowTransfers(graph, edge).filter((transfer) => activeLayerSet.has(transfer.layer));
         const transferLabel = transfers.length > 0
           ? `${transfers.slice(0, 2).map((transfer) => transfer.label).join(", ")}${transfers.length > 2 ? ` +${transfers.length - 2}` : ""}`
           : undefined;
         const label = [edge.label, layerLabel, transferLabel].filter(Boolean).join(" · ");
+        const returnLoop = edge.label?.trim().toLowerCase() === "returns to";
 
         return {
           id: edge.id,
@@ -262,11 +269,14 @@ export function GraphCanvas({
           target: edge.target,
           sourceHandle: feedback ? "sb" : vertical ? "sb" : "sr",
           targetHandle: feedback ? "tb" : vertical ? "tt" : "tl",
-          type: feedback ? "default" : "smoothstep",
-          pathOptions: feedback ? undefined : { borderRadius: 14 },
-          animated: feedback,
+          type: richConnection ? "connection" : feedback ? "default" : "smoothstep",
+          pathOptions: richConnection || feedback ? undefined : { borderRadius: 14 },
+          data: richConnection
+            ? { connection: edge.connection, activeLayers, dimmed, feedback, returnLoop, onOpen: onSelectConnection }
+            : undefined,
+          animated: feedback && !returnLoop,
           className: `edge edge-${edge.kind}${dimmed ? " edge-dimmed" : ""}${context ? " edge-context" : ""}`,
-          label: showLabels && !context && label ? label : undefined,
+          label: !richConnection && showLabels && !context && label ? label : undefined,
           labelBgPadding: [5, 3] as [number, number],
           labelBgBorderRadius: 3,
           markerEnd: context ? undefined : { type: MarkerType.ArrowClosed, width: 14, height: 14, color },
@@ -277,7 +287,7 @@ export function GraphCanvas({
           },
         };
       }),
-    [visibleEdges, graph, activeLayerSet, related, showLabels, lens],
+    [visibleEdges, graph, activeLayers, activeLayerSet, related, showLabels, lens, onSelectConnection],
   );
 
   /* ---- Viewport behaviour ----------------------------------------------- */
@@ -435,8 +445,12 @@ export function GraphCanvas({
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
-      onPaneClick={() => onSelect(undefined)}
+      onPaneClick={() => {
+        onSelect(undefined);
+        onSelectConnection(undefined);
+      }}
       // The hint has done its job the moment the reader moves the map. Only a
       // real gesture counts: React Flow reports its own animated `setViewport`
       // through here too, with a null event, and framing the view was cleared

@@ -1,0 +1,127 @@
+contractVersion: 1
+run:
+  id: 2026-08-18-system-map-connection-depth-reflection
+  kind: reflection
+  reflectsOn:
+    - 2026-08-15-candidate-problems-readiness-and-matching
+    - 2026-08-17-clinician-quality-profile-reflection
+  question: >
+    What does the current canonical model already say about what crosses stage boundaries, return paths, and learning loops, what can the system map show without inventing new claims, and which remaining connection questions are worth investigating next?
+  synthesis: >
+    The current model is already materially richer than its stage-to-stage arrows. Cross-stage Step `next` links carry specific work between Clinician Supply and Onboarding, Onboarding and Matching, Matching and Care Initiation, Care Initiation and Practice Operations, and Practice Operations and Retention & Growth. Some of those transitions also carry explicit Entity states, while Care Initiation records several failure routes that return toward Matching. Quality & Outcomes is different: its canonical prose describes observation, interpretation, attribution, and feedback into earlier decisions, while the process graph also carries a direct Practice Operations to Retention & Growth path. That makes it an open modelling question whether Quality & Outcomes is primarily a sequential stage, a cross-cutting learning layer, or both. Participant experience is thinner still. The model names actors, mutual decisions, burden-sensitive exceptions, and several experience-related research questions, but it does not yet define a stable cross-boundary experience payload that can be drawn as though it were known. The useful next map therefore distinguishes what is authored, what is mechanically derived from authored process/state, and what remains an explicit gap. Existing Problems and queued questions already cover much of the uncertainty around selection handoff, matching quality, authority, failed transitions, performance attribution, and participant experience, so this reflection proposes only the boundary questions that do not already have a clear research home.
+  createdAt: 2026-08-18
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: repository-reflection
+    context: >
+      Reviewed current main after the system-map layer and topology changes, including canonical map topology, cross-stage Steps and Entity states, Quality & Outcomes, canonical Problems, queued research questions, and the two prior reflections named above. No new external evidence was gathered.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+sources:
+  - id: source-current-map
+    identity: repo-system-map-main-2026-08-18
+    kind: repository
+    title: "Current system map topology"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: content/map.yaml
+    access: available
+    publishedAt: 2026-08-18
+  - id: source-current-process
+    identity: repo-cross-stage-process-main-2026-08-18
+    kind: repository
+    title: "Current cross-stage process and state model"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: content/steps
+    access: available
+    publishedAt: 2026-08-18
+  - id: source-quality-stage
+    identity: repo-quality-outcomes-stage-2026-08-18
+    kind: repository
+    title: "Quality & Outcomes stage"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: content/stages/quality-outcomes.md
+    access: available
+    publishedAt: 2026-08-18
+  - id: source-problems
+    identity: repo-canonical-problems-2026-08-18
+    kind: repository
+    title: "Current canonical problem set"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: content/problems
+    access: available
+    publishedAt: 2026-08-18
+  - id: source-questions
+    identity: repo-open-research-questions-2026-08-18
+    kind: repository
+    title: "Current queued research questions"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: research/questions
+    access: available
+    publishedAt: 2026-08-18
+notes:
+  - id: note-stage-arrows-hide-cross-stage-process
+    statement: >
+      The Step graph already carries cross-stage work that the top-level stage map compresses into a single arrow or omits entirely. In particular, `select-clinician` hands to `selection-complete`, `review-match` hands to `plan-first-encounter`, `confirm-care-continuation` hands to `reach-operating-rhythm`, and `reach-operating-rhythm` hands directly to `reach-sustainable-caseload` in Retention & Growth.
+    sourceIds: [source-current-process, source-current-map]
+    anchors: [clinician-supply, clinician-onboarding, matching, care-initiation, practice-operations, retention-growth]
+  - id: note-care-initiation-has-authored-rematch-paths
+    statement: >
+      Care Initiation already contains authored recovery semantics rather than only forward movement. Planning, completing, and confirming the first care transition all preserve reasons for failure and can route toward rematching or a new proposal, so a Care Initiation to Matching return path can be shown without inventing a hypothetical loop.
+    sourceIds: [source-current-process]
+    anchors: [care-initiation, matching, plan-first-encounter, complete-first-encounter, confirm-care-continuation]
+  - id: note-quality-stage-behaves-like-learning-system
+    statement: >
+      Quality & Outcomes is described canonically as observation and interpretation that should feed useful signals back into the operating system. At the same time, the process graph carries a direct Practice Operations to Retention & Growth transition. The current model therefore does not yet establish that Quality & Outcomes is a mandatory sequential gate between operating care and retention.
+    sourceIds: [source-current-process, source-quality-stage, source-current-map]
+    anchors: [practice-operations, quality-outcomes, retention-growth]
+  - id: note-experience-is-present-as-concern-not-handoff-object
+    statement: >
+      Participant experience is visible today through roles, mutual acceptance and continuation decisions, exception handling, and research questions about burden, authority, and matching quality, but the model does not define what experience context itself persists from one stage to the next. That uncertainty already has a research home in `define-family-patient-caregiver-authority` and `define-matching-quality`; a new generic experience-handoff question would duplicate them before either has been answered.
+    sourceIds: [source-current-process, source-questions]
+    anchors: [define-family-patient-caregiver-authority, define-matching-quality, matching, care-initiation]
+  - id: note-quality-feedback-belongs-to-existing-quality-questions
+    statement: >
+      Quality feedback cannot safely become a generic clinician score: the signal needs attribution context, case mix, confidence, and permitted downstream use. `define-clinician-quality` already asks what is reasonably attributable to the clinician and how proprietary platform signals should be used, while `define-matching-quality` already targets Quality & Outcomes and rematching. The learning-loop payload should be developed through those questions rather than queued again under a new name.
+    sourceIds: [source-questions]
+    anchors: [define-clinician-quality, define-matching-quality, quality-outcomes, matching]
+  - id: note-existing-problems-already-bind-important-boundaries
+    statement: >
+      The connection view should reuse canonical Problems rather than invent a second handoff-problem system. `activation-without-productivity` already spans Onboarding and Matching, while `clinician-performance-loses-context` spans Onboarding, Matching, and Quality & Outcomes and directly describes context that must survive a learning loop.
+    sourceIds: [source-problems]
+    anchors: [activation-without-productivity, clinician-performance-loses-context, clinician-onboarding, matching, quality-outcomes]
+  - id: note-existing-research-covers-several-boundary-unknowns
+    statement: >
+      Selection-to-onboarding persistence, matching quality, changing family or patient authority, and clinician-quality attribution already have queued questions. New map work should link those questions during research review rather than create near-duplicate questions merely because the same uncertainty becomes visually obvious on a handoff.
+    sourceIds: [source-questions]
+    anchors: [define-selection-handoff, define-matching-quality, define-family-patient-caregiver-authority, define-clinician-quality]
+candidates:
+  - id: candidate-quality-topology-role
+    kind: question
+    description: >
+      Should Quality & Outcomes remain a sequential operating stage, become a cross-cutting observation and learning layer, or intentionally be both, given the direct Practice Operations to Retention & Growth process path and the stage's feedback responsibilities to earlier decisions?
+    targets: [practice-operations, quality-outcomes, retention-growth]
+    rationale: >
+      The canonical stage prose and canonical process topology currently imply different structural roles. Resolving that ambiguity would change how later connections are represented, so it should be investigated before redesigning the stage model around either interpretation.
+  - id: candidate-minimum-handoff-contract
+    kind: question
+    description: >
+      What minimum boundary contract should every stage connection be able to represent across operating trigger, transferred state or information, participant experience, ownership, failure or rework, and learning without duplicating the canonical Step and Entity model?
+    rationale: >
+      The current projection can derive process and state for some boundaries, but not every important kind of transfer. A small explicit contract would let the map deepen consistently without turning handoffs into a second source of truth.
+  - id: candidate-demand-supply-information-payload
+    kind: question
+    description: >
+      What specific information should the authored Family Demand to Clinician Supply `informs` relationship carry, at what level of aggregation and freshness, and which supply decisions is it permitted to change?
+    targets: [family-demand, clinician-supply]
+    rationale: >
+      The relationship is already canonical but its payload is not. Researching the payload is more useful than drawing a generic data arrow that cannot say what information actually influences supply work.

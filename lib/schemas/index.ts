@@ -109,7 +109,7 @@ export const betSchema = z.object({
   awaiting: z.array(idSchema).optional(),
   authority: authoritySchema.optional(), ...common
 });
-export const relationshipSchema = z.enum(["flows_to", "supplies", "enables", "depends_on", "constrains", "informs", "influences", "feedback_to"]);
+export const relationshipSchema = z.enum(["flows_to", "supplies", "enables", "depends_on", "constrains", "informs", "influences", "feedback_to", "returns_to"]);
 export const mapSchema = z.object({ id: idSchema, title: z.string(), stages: z.array(idSchema), edges: z.array(z.object({ from: idSchema, to: idSchema, relationship: relationshipSchema })) });
 
 export type Stage = z.infer<typeof stageSchema> & { body: string; sections: Record<string, string>; file: string };

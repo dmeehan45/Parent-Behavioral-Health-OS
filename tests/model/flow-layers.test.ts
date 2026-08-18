@@ -4,7 +4,7 @@ import { projectModel } from "../../lib/model/graph";
 import { edgeFlowTransfers, edgeProjectedFlowLayers } from "../../lib/model/flow-layers";
 import { layoutGraph } from "../../lib/model/layout";
 
-test("stage boundaries surface entity state already carried by the Step graph", () => {
+test("stage boundaries surface state and actor continuity already carried by the Step graph", () => {
   const graph = projectModel();
   const handoff = graph.edges.find(
     (edge) => edge.source === "stage:clinician-onboarding" && edge.target === "stage:matching" && edge.kind === "flow",
@@ -13,10 +13,13 @@ test("stage boundaries surface entity state already carried by the Step graph", 
 
   const transfers = edgeFlowTransfers(graph, handoff);
   assert.ok(
-    transfers.some((transfer) => transfer.label === "Clinician: match-ready"),
+    transfers.some((transfer) => transfer.layer === "data" && transfer.label === "Clinician · match-ready"),
     `expected the existing clinician match-ready handoff, got ${transfers.map((transfer) => transfer.label).join(", ")}`,
   );
-  assert.ok(edgeProjectedFlowLayers(graph, handoff).includes("data"));
+  assert.ok(transfers.some((transfer) => transfer.layer === "experience" && transfer.label === "Clinician"));
+  const layers = edgeProjectedFlowLayers(graph, handoff);
+  assert.ok(layers.includes("data"));
+  assert.ok(layers.includes("experience"));
 });
 
 test("informational coupling does not force parallel demand and supply into a funnel", () => {

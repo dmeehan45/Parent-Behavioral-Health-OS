@@ -17,7 +17,12 @@ export const metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 /** View state arrives in the URL, so a shared link opens the same picture. */
-function readView(params: Record<string, string | string[] | undefined>, lensIds: LensId[], nodeIds: Set<string>): MapView {
+function readView(
+  params: Record<string, string | string[] | undefined>,
+  lensIds: LensId[],
+  nodeIds: Set<string>,
+  edgeIds: Set<string>,
+): MapView {
   const single = (key: string) => (typeof params[key] === "string" ? (params[key] as string) : undefined);
 
   const lensParam = single("lens") as LensId | undefined;
@@ -33,18 +38,32 @@ function readView(params: Record<string, string | string[] | undefined>, lensIds
   const openParam = single("open");
   const open = openParam?.includes(":") ? openParam : undefined;
 
+  // Connections are a view inside Operating flow, not a primitive shared by all
+  // lenses. A stale edge id or a URL that combines a connection with another
+  // lens falls back to that lens rather than opening detail for ink it cannot
+  // show.
+  const connectionParam = single("connection");
+  const connection = lens === "flow" && connectionParam && edgeIds.has(connectionParam) ? connectionParam : undefined;
+
   const expand = (single("expand") ?? "")
     .split(",")
     .map((id) => `stage:${id.trim()}`)
     .filter((id) => nodeIds.has(id));
 
-  const requestedLayers = (single("layers") ?? "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter(isFlowLayerId);
+  // A repeated layer in a shared URL is still one logical layer. Deduplicate
+  // before state is initialized so the "keep at least one active" guard and
+  // the URL round-trip both reason about the same set the reader sees.
+  const requestedLayers = [
+    ...new Set(
+      (single("layers") ?? "")
+        .split(",")
+        .map((id) => id.trim())
+        .filter(isFlowLayerId),
+    ),
+  ];
   const layers = requestedLayers.length > 0 ? requestedLayers : [...DEFAULT_FLOW_LAYERS];
 
-  return { lens, open, expand, layers };
+  return { lens, open, connection, expand, layers };
 }
 
 export default async function MapPage({ searchParams }: { searchParams: Search }) {
@@ -54,6 +73,7 @@ export default async function MapPage({ searchParams }: { searchParams: Search }
     params,
     graph.lenses.map((lens) => lens.id),
     new Set(graph.nodes.map((node) => node.id)),
+    new Set(graph.edges.map((edge) => edge.id)),
   );
 
   return <MapWorkspace initialGraph={graph} initialView={view} />;

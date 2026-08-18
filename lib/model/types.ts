@@ -35,6 +35,50 @@ export type EdgeKind =
   | "evidence" // claim or metric to what it targets
   | "state"; // step to entity, via inputs and outputs
 
+/**
+ * Different things can move across the same Stage boundary. These are view
+ * semantics over canonical relationships, never a second authored topology.
+ */
+export type FlowLayerId = "operating" | "data" | "experience" | "learning";
+
+/** A state or information payload the projection can prove crosses a boundary. */
+export type FlowTransfer = {
+  layer: FlowLayerId;
+  label: string;
+  /** Projected node ids whose authored relationships establish the transfer. */
+  sourceIds: string[];
+};
+
+/** A direct Step `next` that crosses the same Stage boundary as a Stage edge. */
+export type FlowProcessHandoff = {
+  sourceId: string;
+  sourceTitle: string;
+  targetId: string;
+  targetTitle: string;
+};
+
+/** A canonical Problem whose targets reach both sides of a Stage connection. */
+export type FlowProblemLink = {
+  id: string;
+  title: string;
+  href: string;
+};
+
+/**
+ * What the projection knows about a Stage-to-Stage connection.
+ *
+ * `layers` says which kinds of movement are explicitly present. `gaps` says a
+ * relationship exists but the model cannot yet describe the payload or handoff
+ * at that layer. A gap is intentionally different from an inferred answer.
+ */
+export type FlowConnectionDepth = {
+  layers: FlowLayerId[];
+  transfers: FlowTransfer[];
+  processHandoffs: FlowProcessHandoff[];
+  problems: FlowProblemLink[];
+  gaps: FlowLayerId[];
+};
+
 export type Tone = "neutral" | "accent" | "evidence" | "warn" | "quiet";
 
 /** A small derived count rendered on a node and in the detail sheet. */
@@ -143,6 +187,8 @@ export type ModelEdge = {
   kind: EdgeKind;
   label?: string;
   lenses: LensId[];
+  /** Present only for projected Stage-to-Stage flow and feedback connections. */
+  connection?: FlowConnectionDepth;
 };
 
 export type LensDescriptor = {
