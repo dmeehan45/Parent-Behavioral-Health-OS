@@ -15,8 +15,8 @@ import type {
  *
  * The Stage edge remains the top-level topology from `content/map.yaml`. This
  * function does not add a new Stage relationship. It asks what the canonical
- * Step, Entity, and Problem records already say about that relationship so the
- * same answer ships in `ModelGraph` to every consumer.
+ * Step, Entity, role, and Problem records already say about that relationship so
+ * the same answer ships in `ModelGraph` to every consumer.
  */
 export function projectConnectionDepth(
   edge: ModelEdge,
@@ -53,11 +53,34 @@ export function projectConnectionDepth(
       );
       if (!input) continue;
       const entity = entityById.get(output.entity);
-      const label = `${entity?.title ?? output.entity}: ${output.state}`;
-      transfers.set(`${output.entity}:${output.state}`, {
+      const label = `${entity?.title ?? output.entity} · ${output.state}`;
+      transfers.set(`data:${output.entity}:${output.state}`, {
         layer: "data",
         label,
         sourceIds: [nodeId("step", source.id), nodeId("entity", output.entity), nodeId("step", target.id)],
+      });
+    }
+
+    // Roles describe who is involved in the authored Step. When the same role
+    // appears on both sides of a direct cross-stage `next`, that continuity is
+    // useful on the map in its own right. Require the role to be primary on at
+    // least one side so background helpers do not turn into a wall of actors.
+    const sourcePrimary = new Set(source.roles?.primary ?? []);
+    const targetPrimary = new Set(target.roles?.primary ?? []);
+    const sourceRoles = new Set([...(source.roles?.primary ?? []), ...(source.roles?.supporting ?? [])]);
+    const targetRoles = new Set([...(target.roles?.primary ?? []), ...(target.roles?.supporting ?? [])]);
+    for (const role of sourceRoles) {
+      if (!targetRoles.has(role)) continue;
+      if (!sourcePrimary.has(role) && !targetPrimary.has(role)) continue;
+      const entity = entityById.get(role);
+      const label = entity?.title ?? humanize(role);
+      transfers.set(`experience:${role}`, {
+        // `experience` is the persisted layer id for shareable URLs. The UI
+        // names it Actors because the canonical signal we can currently prove
+        // is role continuity, not a richer claim about subjective experience.
+        layer: "experience",
+        label,
+        sourceIds: [nodeId("step", source.id), nodeId("step", target.id)],
       });
     }
   }
@@ -78,15 +101,11 @@ export function projectConnectionDepth(
   }
 
   const layers = new Set<FlowLayerId>(edgeFlowLayers(edge));
-  if (transfers.size > 0) layers.add("data");
+  for (const transfer of transfers.values()) layers.add(transfer.layer);
 
   const gaps = new Set<FlowLayerId>();
   if (layers.has("operating") && processHandoffs.length === 0) gaps.add("operating");
-  if (layers.has("data") && transfers.size === 0) gaps.add("data");
-  // Experience is a real design concern in the model, but there is no authored
-  // cross-boundary experience payload yet. Showing that absence is more useful
-  // than inferring one from adjacency or participant roles.
-  if (layers.has("operating")) gaps.add("experience");
+  if (layers.has("data") && ![...transfers.values()].some((transfer) => transfer.layer === "data")) gaps.add("data");
   // A feedback arrow says a learning relationship exists. Until the signal,
   // attribution context, cadence, and permitted use are explicit, its payload
   // remains a gap even though the relationship itself is canonical.
@@ -94,9 +113,17 @@ export function projectConnectionDepth(
 
   return {
     layers: FLOW_LAYER_IDS.filter((layer) => layers.has(layer)),
-    transfers: [...transfers.values()].sort((a, b) => a.label.localeCompare(b.label)),
+    transfers: [...transfers.values()].sort((a, b) => a.layer.localeCompare(b.layer) || a.label.localeCompare(b.label)),
     processHandoffs,
     problems: problemLinks.sort((a, b) => a.title.localeCompare(b.title)),
     gaps: FLOW_LAYER_IDS.filter((layer) => gaps.has(layer)),
   };
+}
+
+function humanize(value: string): string {
+  return value
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(" ");
 }
