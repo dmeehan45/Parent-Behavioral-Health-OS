@@ -19,6 +19,7 @@
     "research:brief": "tsx scripts/research-brief.ts",
     "research:new": "tsx scripts/research-new.ts",
     "prototype:brief": "tsx scripts/prototype-brief.ts",
+    "prototype:queue": "tsx scripts/prototype-queue.ts",
     "test:research": "tsx --test tests/research/*.test.ts",
     "test:prototype": "tsx --test tests/prototype/*.test.ts",
     "test:model": "tsx --test tests/model/*.test.ts",

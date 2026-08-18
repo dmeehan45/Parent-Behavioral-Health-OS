@@ -34,10 +34,12 @@ The map is live. Open it in a browser and leave it there: it polls a fingerprint
 Map → Problem → Bet → Prototype → Learn → Update Map
 ```
 
-Two commands carry the context across the joins, and both compose rather than
-decide:
+Four commands carry the context across the joins, and all of them compose
+rather than decide:
 
 ```bash
+npm run research:queue                      # what the loop is owed, then what to research
+npm run prototype:queue                     # every bet, and the next build, check, or review action
 npm run research:brief   -- <question-id>   # what earlier runs established
 npm run prototype:brief  -- <bet-id>        # everything needed to build one bet
 ```
@@ -100,6 +102,6 @@ The reference model represents generalized, provisional thinking about how a par
 
 ## Contributing
 
-See [the authoring guide](docs/authoring.md) to add system thinking without editing React code, and [CONTRIBUTING.md](CONTRIBUTING.md) for the process around model and software changes. [AGENTS.md](AGENTS.md) states the rules that keep the model canonical and the projection derived — it applies to human and AI contributors alike.
+See [the authoring guide](docs/authoring.md) to add system thinking without editing React code, and [CONTRIBUTING.md](CONTRIBUTING.md) for the process around model and software changes — including the lanes a freshly pointed conversational or coding agent can pick up from the live queues. [AGENTS.md](AGENTS.md) states the rules that keep the model canonical and the projection derived — it applies to human and AI contributors alike.
 
 Every pull request runs content validation, lint, typecheck, and build.

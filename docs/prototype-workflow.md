@@ -60,6 +60,20 @@ reason `npm run research:brief` prints rather than writes.
 Hand its output to whoever is building, together with `AGENTS.md`. That is the
 whole handover; there is no chat summary to reconstruct.
 
+Which bet to brief is itself derived:
+
+```bash
+npm run prototype:queue
+```
+
+prints every bet's place on this workflow's ladder — experiment unshaped,
+ready to build, built and waiting on a person's check, gone stale since the
+stamp, ready to put in front of participants, or reviewed and owing a session
+write-up — with the one next action and whose it is. The scheduled routine
+republishes it twice a day on the same issue that carries the research queue,
+so an agent that cannot run commands still sees when a bet is ready and
+nothing is built.
+
 ### The brief can refuse, and usually should at first
 
 The packet opens with a verdict, because a prototype tests a decision and a Bet
