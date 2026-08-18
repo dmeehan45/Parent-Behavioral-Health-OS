@@ -6,6 +6,10 @@ status: concept
 confidence: medium
 awaiting: [define-selection-handoff]
 metrics: [operating-effort-per-activation, selection-accuracy, candidate-yield]
+prototype:
+  status: working
+  route: /prototypes/evidence-directed-clinician-review
+  builtAgainst: 02af58-0bba7b-952591-cf113c-10be44-11446f
 authority: proposed
 provenance: { source: author, references: [] }
 lastReviewed: 2026-08-17
