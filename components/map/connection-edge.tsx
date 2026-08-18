@@ -145,6 +145,8 @@ export function ConnectionEdge({
               transformOrigin: "center",
               display: "grid",
               gap: 3,
+              minWidth: 80,
+              minHeight: 44,
               maxWidth: 180,
               padding: "4px 5px",
               background: "var(--surface)",
