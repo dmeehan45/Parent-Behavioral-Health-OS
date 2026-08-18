@@ -8,7 +8,7 @@ run:
   question: >
     What does the current canonical model already say about what crosses stage boundaries, return paths, and learning loops, what can the system map show without inventing new claims, and which remaining connection questions are worth investigating next?
   synthesis: >
-    The current model is already materially richer than its stage-to-stage arrows. Cross-stage Step `next` links carry specific work between Clinician Supply and Onboarding, Onboarding and Matching, Matching and Care Initiation, Care Initiation and Practice Operations, and Practice Operations and Retention & Growth. Some of those transitions also carry explicit Entity states, while Care Initiation records several failure routes that return toward Matching. Quality & Outcomes is different: its canonical prose describes observation, interpretation, attribution, and feedback into earlier decisions, while the process graph also carries a direct Practice Operations to Retention & Growth path. That makes it an open modelling question whether Quality & Outcomes is primarily a sequential stage, a cross-cutting learning layer, or both. Participant experience is thinner still. The model names actors, mutual decisions, burden-sensitive exceptions, and several experience-related research questions, but it does not yet define a stable cross-boundary experience payload that can be drawn as though it were known. The useful next map therefore distinguishes what is authored, what is mechanically derived from authored process/state, and what remains an explicit gap. Existing Problems and queued questions already cover much of the uncertainty around selection handoff, matching quality, authority, failed transitions, and performance attribution, so this reflection points back to those rather than creating duplicates.
+    The current model is already materially richer than its stage-to-stage arrows. Cross-stage Step `next` links carry specific work between Clinician Supply and Onboarding, Onboarding and Matching, Matching and Care Initiation, Care Initiation and Practice Operations, and Practice Operations and Retention & Growth. Some of those transitions also carry explicit Entity states, while Care Initiation records several failure routes that return toward Matching. Quality & Outcomes is different: its canonical prose describes observation, interpretation, attribution, and feedback into earlier decisions, while the process graph also carries a direct Practice Operations to Retention & Growth path. That makes it an open modelling question whether Quality & Outcomes is primarily a sequential stage, a cross-cutting learning layer, or both. Participant experience is thinner still. The model names actors, mutual decisions, burden-sensitive exceptions, and several experience-related research questions, but it does not yet define a stable cross-boundary experience payload that can be drawn as though it were known. The useful next map therefore distinguishes what is authored, what is mechanically derived from authored process/state, and what remains an explicit gap. Existing Problems and queued questions already cover much of the uncertainty around selection handoff, matching quality, authority, failed transitions, performance attribution, and participant experience, so this reflection proposes only the boundary questions that do not already have a clear research home.
   createdAt: 2026-08-18
   preparedBy:
     kind: conversational-agent
@@ -86,9 +86,14 @@ notes:
     anchors: [practice-operations, quality-outcomes, retention-growth]
   - id: note-experience-is-present-as-concern-not-handoff-object
     statement: >
-      Participant experience is visible today through roles, mutual acceptance and continuation decisions, exception handling, and research questions about burden, authority, and matching quality, but the model does not define what experience context itself persists from one stage to the next. Painting an experience payload on every boundary would therefore overstate current knowledge.
+      Participant experience is visible today through roles, mutual acceptance and continuation decisions, exception handling, and research questions about burden, authority, and matching quality, but the model does not define what experience context itself persists from one stage to the next. That uncertainty already has a research home in `define-family-patient-caregiver-authority` and `define-matching-quality`; a new generic experience-handoff question would duplicate them before either has been answered.
     sourceIds: [source-current-process, source-questions]
     anchors: [define-family-patient-caregiver-authority, define-matching-quality, matching, care-initiation]
+  - id: note-quality-feedback-belongs-to-existing-quality-questions
+    statement: >
+      Quality feedback cannot safely become a generic clinician score: the signal needs attribution context, case mix, confidence, and permitted downstream use. `define-clinician-quality` already asks what is reasonably attributable to the clinician and how proprietary platform signals should be used, while `define-matching-quality` already targets Quality & Outcomes and rematching. The learning-loop payload should be developed through those questions rather than queued again under a new name.
+    sourceIds: [source-questions]
+    anchors: [define-clinician-quality, define-matching-quality, quality-outcomes, matching]
   - id: note-existing-problems-already-bind-important-boundaries
     statement: >
       The connection view should reuse canonical Problems rather than invent a second handoff-problem system. `activation-without-productivity` already spans Onboarding and Matching, while `clinician-performance-loses-context` spans Onboarding, Matching, and Quality & Outcomes and directly describes context that must survive a learning loop.
@@ -96,9 +101,9 @@ notes:
     anchors: [activation-without-productivity, clinician-performance-loses-context, clinician-onboarding, matching, quality-outcomes]
   - id: note-existing-research-covers-several-boundary-unknowns
     statement: >
-      Selection-to-onboarding persistence, matching quality, and changing family or patient authority already have queued questions. New map work should link those questions during research review rather than create near-duplicate questions merely because the same uncertainty becomes visually obvious on a handoff.
+      Selection-to-onboarding persistence, matching quality, changing family or patient authority, and clinician-quality attribution already have queued questions. New map work should link those questions during research review rather than create near-duplicate questions merely because the same uncertainty becomes visually obvious on a handoff.
     sourceIds: [source-questions]
-    anchors: [define-selection-handoff, define-matching-quality, define-family-patient-caregiver-authority]
+    anchors: [define-selection-handoff, define-matching-quality, define-family-patient-caregiver-authority, define-clinician-quality]
 candidates:
   - id: candidate-quality-topology-role
     kind: question
@@ -118,15 +123,3 @@ candidates:
       What specific information should the authored Family Demand to Clinician Supply `informs` relationship carry, at what level of aggregation and freshness, and which supply decisions is it permitted to change?
     rationale: >
       The relationship is already canonical but its payload is not. Researching the payload is more useful than drawing a generic data arrow that cannot say what information actually influences supply work.
-  - id: candidate-quality-feedback-payload
-    kind: question
-    description: >
-      For feedback from Quality & Outcomes into clinician supply, onboarding, and matching, what signal payload, attribution context, latency, confidence, and permitted decision use are required so that the system learns without turning system-produced outcomes into static clinician traits?
-    rationale: >
-      Existing research already warns about attribution and context loss. This question narrows that concern to the contract a feedback edge would need before the map can show a real learning payload rather than only the existence of a loop.
-  - id: candidate-experience-boundary-persistence
-    kind: question
-    description: >
-      Which participant-experience context, if any, must persist across stage boundaries rather than be re-collected locally, and how can the model distinguish an experience signal from a preference, consent decision, operational state, or outcome measure?
-    rationale: >
-      Experience is central to the intended operating system but is not yet a defined handoff object. This question is meant to prevent the visual layer from creating a vague experience payload before the model can say what should actually persist.
