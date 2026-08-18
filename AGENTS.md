@@ -359,6 +359,15 @@ Three rules keep this from rotting:
 The sections describe the *test*. They never restate the problem or the
 intervention, which are already written down once each.
 
+`npm run prototype:queue` holds the same contract across every Bet at once: it
+prints each bet's derivable state — unshaped, buildable, unstamped, stale,
+reviewable — and the one next action, and the scheduled routine republishes it
+on its issue beside the research queue. That is what lets a build start because
+the model says a bet is ready rather than because somebody remembered. It
+composes and decides nothing: building is work an agent may take from the
+queue, while stamping a build and judging what a session taught stay with a
+person.
+
 ### A built prototype says which experiment it was built against
 
 Readiness is a question about the bet. Once software exists there is a second

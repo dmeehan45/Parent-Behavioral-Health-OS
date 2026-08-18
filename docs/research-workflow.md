@@ -400,7 +400,9 @@ the top of that queue, and keeps one issue up to date with both. It calls no
 model and holds no secret: it publishes the queue so a person or an agent has
 something to open. The brief is folded *into* the issue rather than named as a
 command, because the agent that reads the issue cannot run one — the same reason
-the intake asks for a handoff and nothing else.
+the intake asks for a handoff and nothing else. The same issue carries the
+build half of the loop; [`prototype-workflow.md`](prototype-workflow.md) owns
+that queue.
 
 Everything else is a conversation. Twice a day, in Claude, ChatGPT, or anything
 else wired to this repository:

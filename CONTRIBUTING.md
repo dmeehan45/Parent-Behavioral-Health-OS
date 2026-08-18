@@ -30,9 +30,56 @@ accepted decision authorizes a later, separate model change. Both a
 conversational GitHub connector and a coding agent use the same files; no
 transcript, provider credential, or private material belongs here.
 
-Not sure where a contribution fits, or what is worth doing?
-[`docs/system-state.md`](docs/system-state.md) says where the model is currently
-thin, and `npm run research:queue` says the same thing live.
+Not sure where a contribution fits, or what is worth doing? The repository
+says its own state — see the lanes below.
+
+## Arriving with an agent: pick a lane from the live state
+
+This repository expects to be worked on through a conversational or coding
+agent — pointed at it fresh, with no chat history to lean on. What is useful
+to do next is not fixed; it follows from the state of the loop, and two
+derived commands say that state:
+
+```bash
+npm run research:queue    # what is owed a decision or a sentence, then what to research
+npm run prototype:queue   # every bet, and the next build, check, or review action
+```
+
+The routine issue — *Routine: what to research, build, or review next* —
+republishes both twice a day, for agents that cannot run commands.
+
+Six lanes; the queues say which are live. One rule holds in all of them: the
+agent composes, researches, drafts, and does the clerical half; a named
+person decides what the model believes.
+
+1. **Decide research with the person.** The queue's `undecided` runs are
+   findings waiting on a human disposition. Present each one in conversation
+   and record only what the person states — never a disposition they did not
+   give. → [`docs/research-workflow.md`](docs/research-workflow.md#two-lanes-for-deciding)
+2. **Apply what was accepted.** `unapplied` and `unconverted` are authorized
+   changes nobody made. Compose them at `/review/apply`, with the person
+   supplying belief kind, confidence, and any name.
+   → [`docs/research-workflow.md`](docs/research-workflow.md)
+3. **Write down what the context now supports.** `saturated` records and model
+   gaps — a stage with no steps, an unsupplied state — are answered by a
+   person's sentence, not more research. Help them write it, directly or
+   through a reflection handoff.
+   → [`docs/authoring.md`](docs/authoring.md), [`docs/conversational-review.md`](docs/conversational-review.md)
+4. **Research the top queued question.** Brief first, research in
+   conversation, pressure-test, hand off one file.
+   → [`docs/research-workflow.md`](docs/research-workflow.md)
+5. **Build a bet the queue calls `buildable`** (or rebuild a `stale` one).
+   Coding agents only: run `npm run prototype:brief -- <bet-id>` and build to
+   the packet. The conformance stamp is a person's to write.
+   → [`docs/prototype-workflow.md`](docs/prototype-workflow.md)
+6. **Review a `reviewable` prototype.** Put it in front of participants using
+   its `# Review prompts`, then write the session up as a handoff with a
+   `session` source and let a person decide what it taught.
+   → [`docs/prototype-workflow.md`](docs/prototype-workflow.md#6-review-against-a-learning-script)
+
+The lane that does not exist: editing `content/` to say what the agent's own
+research found. Every path to canonical belief runs through a decision file a
+person wrote — [`AGENTS.md`](AGENTS.md) is the contract.
 
 ## Setup
 

@@ -1,11 +1,12 @@
 name: Research routine
 
-# Twice a day, publish what the research routine should pick up next.
+# Twice a day, publish what the loop should pick up next.
 #
 # This job holds no model key and calls no provider. It runs the repository's
-# own `research:queue` command and keeps a single issue up to date with the
-# result, so a person — or a conversational agent connected through a GitHub
-# connector — has one place to open and one thing to do next.
+# own `research:queue` and `prototype:queue` commands and keeps a single issue
+# up to date with the result, so a person — or a conversational agent connected
+# through a GitHub connector — has one place to open and one thing to do next,
+# on either half of the loop.
 #
 # Deliberately not: a runner that does the research. That would need a provider
 # credential, which is the thing this whole arrangement is built to avoid. The
@@ -64,6 +65,17 @@ jobs:
           npm run --silent research:brief -- "$top" > brief.txt
           cat brief.txt
 
+      # The build half of the loop. Unlike the research brief, nothing is
+      # folded: building needs a coding agent that can run commands, and that
+      # agent runs `prototype:brief` itself. The queue is here so the state —
+      # a bet ready to build, a stamp a person owes, a prototype waiting for
+      # participants — is visible without a checkout.
+      - name: Read the build queue
+        run: |
+          set -euo pipefail
+          npm run --silent prototype:queue > builds.txt
+          cat builds.txt
+
       - name: Publish it to the routine issue
         uses: actions/github-script@v7
         with:
@@ -73,6 +85,7 @@ jobs:
             const read = (file) => (fs.existsSync(file) ? fs.readFileSync(file, "utf8").trim() : "");
             const top = read("top.txt");
             const brief = read("brief.txt");
+            const builds = read("builds.txt");
 
             const marker = "<!-- research-routine -->";
             const body = [
@@ -95,6 +108,19 @@ jobs:
               ...(brief
                 ? ["<details>", `<summary><b>Brief: ${top}</b></summary>`, "", "```text", brief, "```", "", "</details>", ""]
                 : []),
+              ...(builds
+                ? [
+                    "## What to build, check, or review",
+                    "",
+                    "Building runs through `docs/prototype-workflow.md`, starting from `npm run prototype:brief`.",
+                    "Stamping a build and deciding what a session taught stay with a person.",
+                    "",
+                    "```text",
+                    builds,
+                    "```",
+                    "",
+                  ]
+                : []),
               `_Refreshed ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC. This issue is rewritten in place, not reopened._`,
             ].join("\n");
 
@@ -105,15 +131,16 @@ jobs:
               q: `repo:${owner}/${repo} is:issue is:open in:body "${marker}"`,
             });
             const found = existing.data.items[0];
+            const title = "Routine: what to research, build, or review next";
             if (found) {
-              await github.rest.issues.update({ owner, repo, issue_number: found.number, body });
+              await github.rest.issues.update({ owner, repo, issue_number: found.number, title, body });
               core.info(`Updated #${found.number}`);
               return;
             }
             const created = await github.rest.issues.create({
               owner,
               repo,
-              title: "Research routine: what to research next",
+              title,
               body,
             });
             core.info(`Opened #${created.data.number}`);
