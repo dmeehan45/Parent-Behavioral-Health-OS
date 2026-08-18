@@ -1,0 +1,9 @@
+id: define-matching-learning-loop-and-bias-controls
+question: "How can observed match and care outcomes improve future matching without encoding case mix, clinician exposure, constrained supply, patient socioeconomic circumstances, prior matching-policy decisions, or missing follow-up as clinician or match quality?"
+askedBy: accountable-reviewer-2026-08-15
+createdAt: 2026-08-15
+status: open
+priority: high
+targets: [matching, select-clinician, quality-outcomes]
+why: >
+  A learning matcher can reproduce its own earlier choices: clinicians shown more often accumulate more data, difficult cases can look like poor clinician performance, and patients who disappear from care can vanish from the denominator. Research should define valid units of analysis, counterfactual or experimental evaluation where feasible, case-mix and exposure controls, missingness treatment, fairness checks, and boundaries on which observed outcomes may update future matching decisions.
