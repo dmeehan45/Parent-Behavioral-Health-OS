@@ -5,6 +5,7 @@ import {
   EdgeLabelRenderer,
   getBezierPath,
   getSmoothStepPath,
+  useStore,
   type EdgeProps,
 } from "@xyflow/react";
 import type { FlowConnectionDepth, FlowLayerId } from "@/lib/model/types";
@@ -27,7 +28,9 @@ type ChipTone = "neutral" | "data" | "learning" | "gap" | "problem";
  * scales with the canvas. That made the richer connection model technically
  * present but invisible in the overview people actually use. The path remains
  * in React Flow; this DOM control sits over its midpoint and carries only the
- * compact boundary summary. Clicking it opens the full derived connection.
+ * compact boundary summary. At overview zoom the control counter-scales within
+ * a narrow cap so its text remains readable without becoming a second node.
+ * Clicking it opens the full derived connection.
  */
 export function ConnectionEdge({
   id,
@@ -41,6 +44,7 @@ export function ConnectionEdge({
   style,
   data,
 }: EdgeProps) {
+  const zoom = useStore((state) => state.transform[2]);
   const detail = (data ?? {}) as ConnectionEdgeData;
   const pathArgs = { sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition };
   const [path, labelX, labelY] = detail.feedback
@@ -116,6 +120,11 @@ export function ConnectionEdge({
   }
 
   const label = detail.returnLoop ? "return" : detail.feedback ? "feedback" : "handoff";
+  // React Flow scales EdgeLabelRenderer with the viewport. A fitted system map
+  // usually sits below 1x, so without a small inverse scale these labels become
+  // the least legible thing on the screen exactly when the whole system is in
+  // view. Cap the compensation: the handoff should stay subordinate to Stages.
+  const readabilityScale = zoom > 0 && zoom < 1 ? Math.min(1.28, 1 / zoom) : 1;
 
   return (
     <>
@@ -132,7 +141,8 @@ export function ConnectionEdge({
             }}
             style={{
               position: "absolute",
-              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px) scale(${readabilityScale})`,
+              transformOrigin: "center",
               display: "grid",
               gap: 3,
               maxWidth: 180,
@@ -149,7 +159,7 @@ export function ConnectionEdge({
           >
             <span
               style={{
-                fontSize: 8,
+                fontSize: 8.5,
                 lineHeight: 1.2,
                 fontWeight: 750,
                 letterSpacing: "0.08em",
@@ -175,7 +185,7 @@ export function ConnectionEdge({
                   border: `1px solid ${chipBorder(chip.tone)}`,
                   background: chipBackground(chip.tone),
                   color: chipInk(chip.tone),
-                  fontSize: 9,
+                  fontSize: 9.5,
                   lineHeight: 1.25,
                   fontWeight: 650,
                 }}
