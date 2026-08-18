@@ -172,10 +172,6 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [graph.lenses, paletteOpen, layersOpen, legendOpen, open]);
 
-  useEffect(() => {
-    if (lens !== "flow") setLayersOpen(false);
-  }, [lens]);
-
   /* ---- Render ----------------------------------------------------------- */
 
   return (
@@ -196,7 +192,10 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
               role="tab"
               aria-selected={entry.id === lens}
               className={`lens-tab${entry.id === lens ? " active" : ""}`}
-              onClick={() => setLens(entry.id)}
+              onClick={() => {
+                setLayersOpen(false);
+                setLens(entry.id);
+              }}
               title={entry.description}
             >
               {entry.label}
@@ -272,7 +271,7 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
           </div>
         ) : null}
 
-        {layersOpen ? (
+        {lens === "flow" && layersOpen ? (
           <LayerControls
             active={layers}
             counts={layerCounts}
