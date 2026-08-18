@@ -1,0 +1,23 @@
+contractVersion: 1
+runId: 2026-08-18-deepen-matching-quality
+reviewedHandoffHash: 1912e8543300093e692114d0f0d8865e968774fdf33f08c0816321bd463c7d6b
+reviewer: David Meehan
+decidedAt: 2026-08-18
+decidedVia: conversation
+decisions:
+  - id: decide-2026-08-18-deepen-matching-quality-finding-match-quality-dimensions-stay-separate
+    disposition: accept
+  - id: decide-2026-08-18-deepen-matching-quality-finding-contextual-performance-can-inform-pairing-not-rank
+    disposition: accept
+  - id: decide-2026-08-18-deepen-matching-quality-finding-treatment-preference-is-not-clinical-benefit
+    disposition: accept
+  - id: decide-2026-08-18-deepen-matching-quality-finding-racial-concordance-is-preference-not-general-success
+    disposition: accept
+  - id: decide-2026-08-18-deepen-matching-quality-finding-family-perspectives-must-remain-distinct
+    disposition: accept
+  - id: decide-2026-08-18-deepen-matching-quality-finding-early-care-updates-association-not-binary-match
+    disposition: accept
+  - id: decide-2026-08-18-deepen-matching-quality-finding-learning-needs-decision-time-label-context
+    disposition: accept
+notes:
+  disposition: noted
