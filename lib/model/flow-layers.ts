@@ -28,13 +28,15 @@ export const FLOW_LAYER_TERMS: FlowLayerTerm[] = [
     id: "data",
     label: "Data & state",
     shortLabel: "data",
-    description: "Information or state passed between parts of the system.",
+    description: "Information or entity state passed between parts of the system.",
   },
   {
+    // Keep the persisted id for existing shared URLs. What the current model can
+    // prove at this layer is actor continuity, not subjective experience.
     id: "experience",
-    label: "Experience",
-    shortLabel: "experience",
-    description: "Participant experience carried across a boundary. Gaps stay visible rather than inferred.",
+    label: "Actors",
+    shortLabel: "actors",
+    description: "People or operating roles that remain involved across a stage boundary.",
   },
   {
     id: "learning",
@@ -44,7 +46,12 @@ export const FLOW_LAYER_TERMS: FlowLayerTerm[] = [
   },
 ];
 
-export const DEFAULT_FLOW_LAYERS: FlowLayerId[] = [...FLOW_LAYER_IDS];
+/**
+ * Start with the machine and its return/learning loops. Data and actors are
+ * opt-in because painting every layer at once obscures the stage topology before
+ * the reader has asked a more specific question.
+ */
+export const DEFAULT_FLOW_LAYERS: FlowLayerId[] = ["operating", "learning"];
 
 export function isFlowLayerId(value: string): value is FlowLayerId {
   return FLOW_LAYER_IDS.includes(value as FlowLayerId);
@@ -78,7 +85,7 @@ function projectedEdge(first: ModelEdge | Pick<ModelGraph, "nodes" | "edges">, s
   return second ?? (first as ModelEdge);
 }
 
-/** State or information transfers already projected onto a Stage connection. */
+/** State, information, or actor transfers already projected onto a Stage connection. */
 export function edgeFlowTransfers(edge: ModelEdge): FlowTransfer[];
 export function edgeFlowTransfers(graph: Pick<ModelGraph, "nodes" | "edges">, edge: ModelEdge): FlowTransfer[];
 export function edgeFlowTransfers(first: ModelEdge | Pick<ModelGraph, "nodes" | "edges">, second?: ModelEdge): FlowTransfer[] {
@@ -96,14 +103,7 @@ export function edgeProjectedFlowLayers(
   return edge.connection?.layers ?? edgeFlowLayers(edge);
 }
 
-/**
- * Layers worth inspecting on this boundary, including an explicit gap.
- *
- * Experience is deliberately not asserted merely because a Stage connection
- * exists, but an operating handoff can still know that its experience payload
- * is missing. An Experience-only view should expose those unknown boundaries,
- * not clear every edge from the canvas and hide the research surface.
- */
+/** Layers worth inspecting on this boundary, including an explicit gap. */
 export function edgeInspectableFlowLayers(edge: ModelEdge): FlowLayerId[] {
   const visible = new Set<FlowLayerId>(edgeProjectedFlowLayers(edge));
   for (const gap of edge.connection?.gaps ?? []) visible.add(gap);
