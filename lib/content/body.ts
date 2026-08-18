@@ -96,7 +96,7 @@ export type ParsedBody = {
   headings: string[];
 };
 
-const HEADING = /^\s*#\s+(.*)$/;
+const HEADING = /^#\s+(.*)$/;
 
 /**
  * Split a Markdown body into named sections on top-level headings.
