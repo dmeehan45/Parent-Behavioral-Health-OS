@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { GraphCanvas } from "@/components/map/graph-canvas";
 import { CommandPalette } from "@/components/map/command-palette";
+import { ConnectionSheet } from "@/components/map/connection-sheet";
 import { DetailSheet } from "@/components/map/detail-sheet";
 import { useLiveModel } from "@/components/map/use-live-model";
 import { EDGE_COLOR, KIND_COLOR } from "@/components/map/canvas-theme";
@@ -20,6 +21,7 @@ import type { LensId, ModelGraph, ModelNode } from "@/lib/model/types";
 export type MapView = {
   lens: LensId;
   open?: string;
+  connection?: string;
   expand: string[];
   layers: FlowLayerId[];
 };
@@ -29,14 +31,15 @@ export type MapView = {
  *
  * One canvas, four lenses, toggleable operating-flow layers, and a detail layer
  * that never takes the reader off the map. All view state lives in the URL, so
- * a lens, layer isolation, expanded stage, or open primitive is a link someone
- * else can open and see as the same picture.
+ * a lens, layer isolation, expanded stage, open primitive, or open connection
+ * is a link someone else can open and see as the same picture.
  */
 export function MapWorkspace({ initialGraph, initialView }: { initialGraph: ModelGraph; initialView: MapView }) {
   const { graph, status, changed, lastChange, refresh } = useLiveModel(initialGraph);
 
   const [lens, setLens] = useState<LensId>(initialView.lens);
   const [openId, setOpenId] = useState<string | undefined>(initialView.open);
+  const [openConnectionId, setOpenConnectionId] = useState<string | undefined>(initialView.connection);
   const [expanded, setExpanded] = useState<string[]>(initialView.expand);
   const [layers, setLayers] = useState<FlowLayerId[]>(initialView.layers);
   const [trail, setTrail] = useState<string[]>([]);
@@ -46,7 +49,9 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
   const [focusRequest, setFocusRequest] = useState<{ id: string; nonce: number }>();
 
   const nodeById = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
+  const edgeById = useMemo(() => new Map(graph.edges.map((edge) => [edge.id, edge])), [graph.edges]);
   const openNode = openId ? nodeById.get(openId) : undefined;
+  const openConnection = openConnectionId ? edgeById.get(openConnectionId) : undefined;
 
   const layerCounts = useMemo(() => {
     const counts = Object.fromEntries(FLOW_LAYER_IDS.map((id) => [id, 0])) as Record<FlowLayerId, number>;
@@ -63,6 +68,7 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
     const params = new URLSearchParams();
     if (lens !== "flow") params.set("lens", lens);
     if (openId) params.set("open", openId);
+    if (openConnectionId) params.set("connection", openConnectionId);
     if (expanded.length > 0) params.set("expand", expanded.map((id) => id.replace(/^stage:/, "")).join(","));
     const allLayers = layers.length === DEFAULT_FLOW_LAYERS.length && DEFAULT_FLOW_LAYERS.every((id) => layers.includes(id));
     if (!allLayers) params.set("layers", layers.join(","));
@@ -70,7 +76,7 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
     // Written directly to history so panning around the model never triggers a
     // server round trip or scroll reset.
     window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
-  }, [lens, openId, expanded, layers]);
+  }, [lens, openId, openConnectionId, expanded, layers]);
 
   const toggleLayer = useCallback((layer: FlowLayerId) => {
     setLayers((previous) => {
@@ -89,12 +95,20 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
 
   const open = useCallback((nodeId?: string) => {
     setTrail([]);
+    setOpenConnectionId(undefined);
     setOpenId(nodeId);
+  }, []);
+
+  const openEdge = useCallback((edgeId?: string) => {
+    setTrail([]);
+    setOpenId(undefined);
+    setOpenConnectionId(edgeId);
   }, []);
 
   const navigateWithin = useCallback(
     (nodeId: string) => {
       setTrail((previous) => (openId ? [...previous, openId] : previous));
+      setOpenConnectionId(undefined);
       setOpenId(nodeId);
       // Following a link to something the current lens cannot show would leave
       // the reader looking at an unrelated picture, so switch to a lens that can.
@@ -161,21 +175,27 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
         if (paletteOpen) setPaletteOpen(false);
         else if (layersOpen) setLayersOpen(false);
         else if (legendOpen) setLegendOpen(false);
+        else if (openConnectionId) setOpenConnectionId(undefined);
         else open(undefined);
       } else if (/^[1-9]$/.test(event.key)) {
         const target = graph.lenses[Number(event.key) - 1];
-        if (target) setLens(target.id);
+        if (target) {
+          setOpenConnectionId(undefined);
+          setLens(target.id);
+        }
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [graph.lenses, paletteOpen, layersOpen, legendOpen, open]);
+  }, [graph.lenses, paletteOpen, layersOpen, legendOpen, openConnectionId, open]);
 
   /* ---- Render ----------------------------------------------------------- */
 
+  const sheetOpen = Boolean(openId || openConnectionId);
+
   return (
-    <div className={`workspace${openNode || openId ? " sheet-open" : ""}`}>
+    <div className={`workspace${sheetOpen ? " sheet-open" : ""}`}>
       {/* The map is a page and needs a name. It had no h1 at all, so its only
           headings were the ones inside the legend and the detail sheet, and a
           screen reader landed on a document with no top-level label. */}
@@ -194,6 +214,7 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
               className={`lens-tab${entry.id === lens ? " active" : ""}`}
               onClick={() => {
                 setLayersOpen(false);
+                setOpenConnectionId(undefined);
                 setLens(entry.id);
               }}
               title={entry.description}
@@ -290,8 +311,9 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
             expanded={expanded}
             changed={changed}
             focusRequest={focusRequest}
-            sheetOpen={Boolean(openId)}
+            sheetOpen={sheetOpen}
             onSelect={open}
+            onSelectConnection={openEdge}
             onToggleExpand={toggleExpand}
           />
         </ReactFlowProvider>
@@ -307,6 +329,14 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
         onClose={() => open(undefined)}
         onNavigate={navigateWithin}
         onFocus={focus}
+      />
+
+      <ConnectionSheet
+        key={openConnectionId}
+        graph={graph}
+        edge={openConnection}
+        onClose={() => setOpenConnectionId(undefined)}
+        onNavigate={navigateWithin}
       />
 
       {paletteOpen ? (
