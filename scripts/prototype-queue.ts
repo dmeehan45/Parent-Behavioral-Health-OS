@@ -1,5 +1,6 @@
 import { getRepository } from "../lib/content/repository";
 import { prototypeQueue } from "../lib/prototype/queue";
+import { sessionsByBet } from "../lib/research/glance";
 import { run } from "./report";
 
 /**
@@ -11,7 +12,10 @@ import { run } from "./report";
  * whose the next move is. It decides nothing and is printed, never committed.
  */
 run(() => {
-  const queue = prototypeQueue(getRepository().bets);
+  // Through glance, so a malformed staging file costs the session note and
+  // never the queue — the same reason prototype:brief degrades instead of
+  // refusing to print.
+  const queue = prototypeQueue(getRepository().bets, sessionsByBet());
 
   console.log("\n# Every bet, and the one next action\n");
   if (!queue.length) {
