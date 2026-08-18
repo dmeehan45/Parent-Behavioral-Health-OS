@@ -1960,6 +1960,7 @@ p:last-child {
 }
 
 .legend-line-feedback,
+.legend-line-return,
 .legend-line-state {
   height: 0;
   background: none !important;

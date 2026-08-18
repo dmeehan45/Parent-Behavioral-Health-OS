@@ -35,6 +35,7 @@ export const EDGE_COLOR: Record<EdgeKind, string> = {
   flow: "#39a9dc", // blue-medium
   feedback: "#d69a00", // gold-dark
   process: "#0074ac", // blue
+  return: "#0074ac", // blue — same category as process; the dash says it goes backward
   problem: "#f64c57", // coral-medium
   bet: "#9a6100", // gold
   prototype: "#856600", // gold-darkest

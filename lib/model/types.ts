@@ -29,6 +29,7 @@ export type EdgeKind =
   | "flow" // stage to stage, from content/map.yaml
   | "feedback" // stage to stage, where the relationship loops backwards
   | "process" // step to step, from `next`
+  | "return" // step to step, from `exceptions.route` — rework going backward, never ranked
   | "problem" // stage or step to a problem said to bite there
   | "bet" // problem to a bet proposed against it
   | "prototype" // bet to its prototype

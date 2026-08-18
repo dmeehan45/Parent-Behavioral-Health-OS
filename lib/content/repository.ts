@@ -404,6 +404,13 @@ export function getRepository() {
     );
     step.claims?.forEach((id) => requireRef(id, claimIds, step.file, "claims", at(step.id, "step")));
     step.metrics?.forEach((id) => requireRef(id, metricIds, step.file, "metrics", at(step.id, "step")));
+    // An exception's route is where the flow actually goes when the happy path
+    // does not hold — the model's rework loops. Left unchecked, a typo here
+    // validated green and the loop it described existed nowhere but prose.
+    step.exceptions?.forEach((exception, i) => {
+      if (typeof exception === "string" || !exception.route) return;
+      requireRef(exception.route, stepIds, step.file, `exceptions.${i}.route`, at(step.id, "step"));
+    });
   });
 
   stages.forEach((stage) => stage.metrics?.forEach((id) => requireRef(id, metricIds, stage.file, "metrics", at(stage.id, "stage"))));
