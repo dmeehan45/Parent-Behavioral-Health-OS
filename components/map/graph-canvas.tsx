@@ -43,6 +43,7 @@ type Props = {
   /** The detail panel covers the lower canvas on narrow screens. */
   sheetOpen: boolean;
   onSelect: (nodeId?: string) => void;
+  onSelectConnection: (edgeId?: string) => void;
   onToggleExpand: (nodeId: string) => void;
 };
 
@@ -105,6 +106,7 @@ export function GraphCanvas({
   focusRequest,
   sheetOpen,
   onSelect,
+  onSelectConnection,
   onToggleExpand,
 }: Props) {
   const { fitView, getViewport, setViewport, zoomIn, zoomOut } = useReactFlow();
@@ -259,6 +261,7 @@ export function GraphCanvas({
           ? `${transfers.slice(0, 2).map((transfer) => transfer.label).join(", ")}${transfers.length > 2 ? ` +${transfers.length - 2}` : ""}`
           : undefined;
         const label = [edge.label, layerLabel, transferLabel].filter(Boolean).join(" · ");
+        const returnLoop = edge.label?.trim().toLowerCase() === "returns to";
 
         return {
           id: edge.id,
@@ -269,9 +272,9 @@ export function GraphCanvas({
           type: richConnection ? "connection" : feedback ? "default" : "smoothstep",
           pathOptions: richConnection || feedback ? undefined : { borderRadius: 14 },
           data: richConnection
-            ? { connection: edge.connection, activeLayers, dimmed, feedback }
+            ? { connection: edge.connection, activeLayers, dimmed, feedback, returnLoop, onOpen: onSelectConnection }
             : undefined,
-          animated: feedback,
+          animated: feedback && !returnLoop,
           className: `edge edge-${edge.kind}${dimmed ? " edge-dimmed" : ""}${context ? " edge-context" : ""}`,
           label: !richConnection && showLabels && !context && label ? label : undefined,
           labelBgPadding: [5, 3] as [number, number],
@@ -284,7 +287,7 @@ export function GraphCanvas({
           },
         };
       }),
-    [visibleEdges, graph, activeLayers, activeLayerSet, related, showLabels, lens],
+    [visibleEdges, graph, activeLayers, activeLayerSet, related, showLabels, lens, onSelectConnection],
   );
 
   /* ---- Viewport behaviour ----------------------------------------------- */
@@ -444,7 +447,10 @@ export function GraphCanvas({
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
-      onPaneClick={() => onSelect(undefined)}
+      onPaneClick={() => {
+        onSelect(undefined);
+        onSelectConnection(undefined);
+      }}
       // The hint has done its job the moment the reader moves the map. Only a
       // real gesture counts: React Flow reports its own animated `setViewport`
       // through here too, with a null event, and framing the view was cleared
