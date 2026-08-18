@@ -20,6 +20,7 @@ import {
   MINIMAP_MASK,
   UNKNOWN_NODE_COLOR,
 } from "@/components/map/canvas-theme";
+import { ConnectionEdge } from "@/components/map/connection-edge";
 import { useLayoutOverrides } from "@/components/map/layout-overrides";
 import { nodeTypes, type CanvasNode, type DetailTier, type NodeState } from "@/components/map/model-node";
 import {
@@ -44,6 +45,8 @@ type Props = {
   onSelect: (nodeId?: string) => void;
   onToggleExpand: (nodeId: string) => void;
 };
+
+const edgeTypes = { connection: ConnectionEdge };
 
 /**
  * Level of detail, derived from the size text is actually painted at.
@@ -249,6 +252,7 @@ export function GraphCanvas({
               ? EDGE_COLOR.bet
               : EDGE_COLOR[edge.kind];
         const stageConnection = edge.kind === "flow" || edge.kind === "feedback";
+        const richConnection = lens === "flow" && stageConnection && !context && Boolean(edge.connection);
         const layerLabel = lens === "flow" && stageConnection && visibleFlowLayers.length > 0 ? visibleFlowLayers.join(" · ") : undefined;
         const transfers = edgeFlowTransfers(graph, edge).filter((transfer) => activeLayerSet.has(transfer.layer));
         const transferLabel = transfers.length > 0
@@ -262,11 +266,14 @@ export function GraphCanvas({
           target: edge.target,
           sourceHandle: feedback ? "sb" : vertical ? "sb" : "sr",
           targetHandle: feedback ? "tb" : vertical ? "tt" : "tl",
-          type: feedback ? "default" : "smoothstep",
-          pathOptions: feedback ? undefined : { borderRadius: 14 },
+          type: richConnection ? "connection" : feedback ? "default" : "smoothstep",
+          pathOptions: richConnection || feedback ? undefined : { borderRadius: 14 },
+          data: richConnection
+            ? { connection: edge.connection, activeLayers, dimmed, feedback }
+            : undefined,
           animated: feedback,
           className: `edge edge-${edge.kind}${dimmed ? " edge-dimmed" : ""}${context ? " edge-context" : ""}`,
-          label: showLabels && !context && label ? label : undefined,
+          label: !richConnection && showLabels && !context && label ? label : undefined,
           labelBgPadding: [5, 3] as [number, number],
           labelBgBorderRadius: 3,
           markerEnd: context ? undefined : { type: MarkerType.ArrowClosed, width: 14, height: 14, color },
@@ -277,7 +284,7 @@ export function GraphCanvas({
           },
         };
       }),
-    [visibleEdges, graph, activeLayerSet, related, showLabels, lens],
+    [visibleEdges, graph, activeLayers, activeLayerSet, related, showLabels, lens],
   );
 
   /* ---- Viewport behaviour ----------------------------------------------- */
@@ -435,6 +442,7 @@ export function GraphCanvas({
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onPaneClick={() => onSelect(undefined)}
       // The hint has done its job the moment the reader moves the map. Only a
