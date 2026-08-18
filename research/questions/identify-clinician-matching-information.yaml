@@ -1,9 +1,9 @@
 id: identify-clinician-matching-information
-question: "Which clinician attributes predict outcomes or continuity for a particular patient or problem, rather than merely describing clinician quality overall, and how should provenance, recency, sample size, case mix, and uncertainty travel with those attributes?"
+question: "Which evidence already present or expected in the longitudinal clinician profile materially changes predicted appropriateness, outcomes, or continuity for a particular patient or problem; how should contextual strength, attribution context, and evidence confidence be projected into match-specific evidence; and what additional clinician-side information, if any, is uniquely required for matching?"
 askedBy: accountable-reviewer-2026-08-15
 createdAt: 2026-08-15
 status: open
 priority: high
 targets: [clinician-onboarding, become-match-ready, matching, propose-match, quality-outcomes]
 why: >
-  Clinician onboarding may capture many useful facts, but matching needs to know which facts change the expected result for this patient. Research should separate general clinician quality from patient-specific predictive information and determine how historical performance, stated expertise, preferences, observed outcomes, and uncertainty can be used without confusing case mix or sparse evidence with clinician ability.
+  The clinician-quality work now defines one evolving evidence profile that deepens from prospect priors through qualification, onboarding, cold-start matching, and longitudinal observed performance. Matching should consume that record rather than build a competing clinician profile or re-define what makes a clinician good. Research should identify which profile evidence changes the expected result for this patient, how cold-start and longitudinal evidence should differ, how case mix, match conditions, support context, recency, sample depth, missingness, provenance, and uncertainty travel into a match decision, and whether matching requires any clinician-side information not already justified elsewhere in the lifecycle.
