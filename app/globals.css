@@ -4052,7 +4052,7 @@ details.pipeline-guide {
   border-radius: var(--radius-pill);
   background: var(--surface);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .review-choice:hover {
