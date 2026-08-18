@@ -99,7 +99,7 @@ findings:
       Historical clinician performance can be useful as patient-specific matching evidence when it is measured in relevant problem domains and carried with reliability context, but it should not be interpreted as a general clinician rank; direct randomized evidence supports domain-strength matching in adult outpatient psychotherapy, while cold-start clinicians may have no comparable longitudinal performance record available to the platform.
     sourceIds: [source-constantino-strength-matching-rct, source-predictive-selection-run]
     suggestedTargets: [matching, quality-outcomes, clinician-performance-loses-context]
-    classification: qualifying
+    classification: new
     evidenceStance: qualifies
     evidenceQuality: primary
     generalizedApplicability: true
@@ -143,7 +143,7 @@ findings:
       Early care evidence is better used to update dimension-specific expectations about future clinician-patient fit than to validate or invalidate a binary match: alliance is associated with later outcomes, but it is relational, perspective-dependent, and not a pure clinician trait, so active-care observations can deepen future routing evidence without implying that current care should automatically be reassigned.
     sourceIds: [source-roest-alliance-perspectives-meta, source-roest-alliance-outcome-meta, source-predictive-selection-run]
     suggestedTargets: [matching, care-relationship, quality-outcomes]
-    classification: qualifying
+    classification: new
     evidenceStance: contextualizes
     evidenceQuality: secondary
     generalizedApplicability: true
