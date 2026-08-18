@@ -1,0 +1,9 @@
+id: define-matching-objective
+question: "What outcomes should a high-quality clinician-patient match optimize, over what horizons, and which outcomes must remain separate rather than becoming one score?"
+askedBy: accountable-reviewer-2026-08-15
+createdAt: 2026-08-15
+status: open
+priority: high
+targets: [matching, review-match, confirm-care-continuation, quality-outcomes]
+why: >
+  Match acceptance or raw retention can look successful while hiding constrained choice, poor fit, avoidable rematching, successful treatment completion, or an appropriate transition to other care. Research should distinguish clinical benefit, alliance and engagement, appropriate continuity, patient choice, access, burden, rematching, and operational efficiency before deciding which signals may be combined or optimized.
