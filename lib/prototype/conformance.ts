@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
-import { EXPERIMENT_SECTIONS } from "@/lib/content/body";
+import { EXPERIMENT_SECTIONS, SECTION } from "@/lib/content/body";
 import type { Bet } from "@/lib/schemas";
 
 /**
  * Does the software still test the experiment somebody approved?
  *
  * The readiness gate answers a different question. It asks whether the *bet* has
- * been shaped, and once the five sections exist it says "ready to build"
+ * been shaped, and once the six sections exist it says "ready to build"
  * forever. Nothing then compared the artifact to them. A scope could be widened
  * from one mode to two, merged, and the prototype would go on testing the old
  * question with `status: working` still claiming otherwise — no error in
@@ -107,7 +107,7 @@ export function conformanceProblem(bet: Bet): string | undefined {
     return (
       `Unattested prototype in ${bet.file}: prototype.status is '${bet.prototype?.status}', which claims the software ` +
       `tests the experiment this bet approves — and nothing records that anybody checked. Look at the prototype ` +
-      `against the five experiment sections, then say so:\n\n` +
+      `against the six experiment sections, then say so:\n\n` +
       `  prototype:\n    builtAgainst: ${fingerprint}\n\n` +
       `If it does not test them yet, that is fine and is the honest answer: set prototype.status to 'concept' instead.`
     );
@@ -126,4 +126,27 @@ export function conformanceProblem(bet: Bet): string | undefined {
   }
 
   return undefined;
+}
+
+/**
+ * A runnable prototype also owes the reviewer a deliberate way to interrogate
+ * it. "What do you think?" is not an evaluation contract, and a dense artifact
+ * without prompts tends to collect taste and first impressions instead of the
+ * observations that can refine the Bet.
+ *
+ * Review prompts are intentionally not part of `experimentFingerprint`. They
+ * govern how learning is elicited after trying the artifact; tightening a
+ * question should not claim that the interaction itself became stale.
+ */
+export function reviewPromptProblem(bet: Bet): string | undefined {
+  const prototype = bet.prototype;
+  if (!prototype || !prototype.route || !CLAIMS_BUILT.includes(prototype.status)) return undefined;
+  if (bet.sections[SECTION.reviewPrompts]?.trim()) return undefined;
+
+  return (
+    `Unreviewable prototype in ${bet.file}: prototype.status is '${prototype.status}', but the Bet has no ` +
+    `# ${SECTION.reviewPrompts} section. A runnable prototype must name the questions a tester should use to ` +
+    `pressure-test the learning decision. Add a short set of decision-shaping prompts, or set prototype.status ` +
+    `to 'concept' until the evaluation frame exists.`
+  );
 }
