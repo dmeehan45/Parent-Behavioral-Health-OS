@@ -1,9 +1,0 @@
-id: define-human-backed-selection-experience
-question: "What forms of human presence, explanation, timing, and access to a person are sufficient for clinicians to experience automated evidence collection as support for a relationship rather than replacement of one?"
-askedBy: accountable-reviewer-2026-08-17
-createdAt: 2026-08-17
-status: open
-priority: medium
-targets: [attract-candidates, screen-candidates, select-clinician]
-why: >
-  The current selection research supports candidate experience as consequential but does not establish how independent behavioral-health clinicians react when technology replaces parts of a previously human qualification process. The first prototype should treat human-backed augmentation as a constraint while leaving the exact interaction pattern open to clinician testing.
