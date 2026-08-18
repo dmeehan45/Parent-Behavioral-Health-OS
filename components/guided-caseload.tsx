@@ -13,6 +13,12 @@ import { useState } from "react";
  * between them, and abandoning one for the other, is the behaviour worth
  * watching, so it stays available at every point.
  *
+ * The caseload is the centre of the screen. Capacity used to be a sentence
+ * under a list — "3 of 6 weekly slots filled" — which is the constraint the
+ * whole experiment is about, written where it could be skipped. It is now the
+ * thing being built: six slots, filling as families are added, with the empty
+ * ones visible. That is the Bet's `# Fidelity` asking for a limit you can see.
+ *
  * Entirely synthetic and local. Nothing here is a real family, clinician, or
  * match, and nothing is created, sent, or saved.
  */
@@ -61,9 +67,13 @@ export function GuidedCaseload() {
   const [mode, setMode] = useState<Mode>("assembled");
   const [selected, setSelected] = useState<string[]>(ASSEMBLED);
   const [outcome, setOutcome] = useState<Outcome>();
+  /** Which candidate has its reasoning open. One at a time: the list is for
+   *  scanning, and the "why" is what you ask of one row at a time. */
+  const [explain, setExplain] = useState<string>();
 
   const edited = mode === "assembled" && !sameSet(selected, ASSEMBLED);
   const full = selected.length >= WEEKLY_CAPACITY;
+  const byId = (id: string) => FAMILIES.find((family) => family.id === id)!;
 
   const switchTo = (next: Mode) => {
     setMode(next);
@@ -72,6 +82,7 @@ export function GuidedCaseload() {
     // very difference the session is trying to observe.
     setSelected(next === "assembled" ? ASSEMBLED : []);
     setOutcome(undefined);
+    setExplain(undefined);
   };
 
   const toggle = (id: string) =>
@@ -79,22 +90,27 @@ export function GuidedCaseload() {
 
   if (outcome) return <Closing outcome={outcome} onRestart={() => switchTo(outcome.mode)} />;
 
+  /** Every slot the week has, filled or not. The empty ones are the point. */
+  const slots = Array.from({ length: WEEKLY_CAPACITY }, (_, index) => selected[index]);
+
   return (
     <div className="caseload">
       <section className="clinician-card">
-        <span className="eyebrow">New clinician</span>
-        <h2>{CLINICIAN.name}</h2>
-        <p>{CLINICIAN.role}</p>
-        <div className="clinician-facts">
-          <div>
-            <strong>{WEEKLY_CAPACITY}</strong>
-            <span>{CLINICIAN.capacity}</span>
-          </div>
-          <div>
-            <strong>{CLINICIAN.population}</strong>
-            <span>preferred population</span>
-          </div>
+        <div>
+          <span className="eyebrow">New clinician</span>
+          <h2>{CLINICIAN.name}</h2>
+          <p>{CLINICIAN.role}</p>
         </div>
+        <dl className="clinician-facts">
+          <div>
+            <dt>Weekly capacity</dt>
+            <dd>{CLINICIAN.capacity}</dd>
+          </div>
+          <div>
+            <dt>Preferred population</dt>
+            <dd>{CLINICIAN.population}</dd>
+          </div>
+        </dl>
       </section>
 
       {/* The choice under test, made switchable rather than assigned. */}
@@ -119,102 +135,139 @@ export function GuidedCaseload() {
         </button>
       </div>
 
-      <section className="panel">
-        <span className="eyebrow">{mode === "assembled" ? "Proposed starting caseload" : "Available families"}</span>
-        <h2 className="panel-title">
-          {mode === "assembled" ? "We put this together for you" : "Choose who to start with"}
-        </h2>
-        <p className="muted small">
-          {mode === "assembled"
-            ? "Every family below is already in the proposal. Remove any that are wrong, or add another in their place."
-            : "Nothing is selected. Add families up to your weekly capacity."}
-        </p>
+      {/*
+        The caseload itself, and the limit around it.
 
-        {/* The scores are shown, and said to be undecided in the same breath.
-            `define-matching-quality` is queued as open research, so presenting
-            them as settled would make a session teach the wrong thing. */}
-        <p className="provisional" role="note">
-          <strong>Fit scores are under development.</strong> They currently weigh stated availability, population and
-          focus areas — how match quality should really be judged has not been decided, and these numbers will change.
-          Disagree with them freely.
-        </p>
+        Six slots, always all six, so the room left is as visible as the room
+        taken. Removing is done here rather than back in the list, because this
+        is where a clinician is looking at what they have got.
+      */}
+      <section className="tray" aria-label="Your caseload">
+        <div className="tray-head">
+          <h2 className="panel-title">Your week</h2>
+          <p className="tray-count">
+            <strong>{selected.length}</strong> of {WEEKLY_CAPACITY} slots
+            {edited ? <span className="badge-changed">changed from what we proposed</span> : null}
+          </p>
+        </div>
+
+        <ol className="slots">
+          {slots.map((id, index) => {
+            const family = id ? byId(id) : undefined;
+            return (
+              <li key={index} className={`slot${family ? " filled" : ""}`}>
+                {family ? (
+                  <button type="button" className="slot-family" onClick={() => toggle(family.id)}>
+                    <span className="slot-name">{family.name}</span>
+                    <span className="slot-need">{family.need}</span>
+                    <span className="slot-remove" aria-hidden="true">
+                      Remove
+                    </span>
+                    <span className="visually-hidden">Remove {family.name} from your caseload</span>
+                  </button>
+                ) : (
+                  <span className="slot-empty">
+                    <span aria-hidden="true">Open</span>
+                    <span className="visually-hidden">Slot {index + 1}, open</span>
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="tray-actions">
+          <button
+            type="button"
+            className="button"
+            disabled={selected.length === 0}
+            onClick={() => setOutcome({ mode, edited, families: selected })}
+          >
+            {mode === "assembled" && !edited ? "Accept this caseload" : "Propose this caseload"}
+          </button>
+
+          {/* Rejection has to be as easy as acceptance, or the prototype
+              cannot tell willingness from compliance — which is the whole
+              safeguard this experiment is watching for. */}
+          {mode === "assembled" ? (
+            <button type="button" className="button secondary" onClick={() => switchTo("build")}>
+              Reject it and start from scratch
+            </button>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="panel" aria-label="Families waiting to be matched">
+        <div className="panel-head">
+          <h2 className="panel-title">
+            {mode === "assembled" ? "Families we picked, and the rest" : "Families waiting"}
+          </h2>
+          {/* The caveat sits with the numbers it is about rather than in a
+              banner over the whole screen. `define-matching-quality` is queued
+              as open research, and the Bet's `# Restraint` says polish must not
+              make these look decided. */}
+          <p className="provisional">
+            Fit is provisional — it weighs stated availability, population and focus only, and how match quality should
+            be judged is undecided. Disagree with it freely.
+          </p>
+        </div>
 
         <ul className="family-list">
           {FAMILIES.map((family) => {
             const chosen = selected.includes(family.id);
-            const proposedForYou = mode === "assembled" && ASSEMBLED.includes(family.id);
+            const open = explain === family.id;
             return (
-              <li key={family.id}>
-                <button
-                  type="button"
-                  className={`family${chosen ? " chosen" : ""}`}
-                  aria-pressed={chosen}
-                  // Full is full: the constraint is the point, so the interface
-                  // holds it rather than letting the count run past capacity.
-                  disabled={!chosen && full}
-                  onClick={() => toggle(family.id)}
-                >
-                  <span className="family-head">
-                    <span>
-                      <strong>{family.name}</strong>
-                      <br />
-                      <span className="small">{family.need}</span>
-                    </span>
-                    <span className="family-score" title="Provisional fit score">
-                      {family.fit}
-                    </span>
+              <li key={family.id} className={chosen ? "chosen" : undefined}>
+                {/* One line to scan: who, what they need, how it scored, and
+                    the one action. The reasoning is a second click, on the row
+                    a clinician is actually questioning. */}
+                <div className="family-row">
+                  <span className="family-id">
+                    <strong>{family.name}</strong>
+                    <span className="family-need">{family.need}</span>
                   </span>
-                  <span className="muted small family-why">{family.because}</span>
-                  <span className="muted small">{family.context}</span>
-                  <span className="family-state">
-                    {chosen
-                      ? proposedForYou
-                        ? "In your proposed caseload — remove"
-                        : "Added ✓ — remove"
-                      : full
-                        ? "No capacity left"
-                        : "Add to caseload"}
-                  </span>
-                </button>
+
+                  <button
+                    type="button"
+                    className="family-fit"
+                    aria-expanded={open}
+                    onClick={() => setExplain(open ? undefined : family.id)}
+                  >
+                    <span className="fit-value">{family.fit}</span>
+                    <span className="fit-label">fit, provisional</span>
+                    <span className="visually-hidden">— why this score?</span>
+                  </button>
+
+                  {/* Removing belongs to the tray, where the caseload is.
+                      Two "Remove" controls for one family — one here, one in
+                      the week above — read as two different actions. This row
+                      says where the family already is, and still removes, so
+                      nothing is lost by not going up. */}
+                  <button
+                    type="button"
+                    className={`family-act${chosen ? " chosen" : ""}`}
+                    // Full is full: the constraint is the point, so the
+                    // interface holds it rather than letting the count run
+                    // past capacity.
+                    disabled={!chosen && full}
+                    onClick={() => toggle(family.id)}
+                  >
+                    {chosen ? "In your week" : full ? "No room" : "Add"}
+                    <span className="visually-hidden">
+                      {chosen ? ` — remove ${family.name}` : ` ${family.name}`}
+                    </span>
+                  </button>
+                </div>
+
+                {open ? (
+                  <p className="family-why">
+                    {family.because}. <span className="muted">{family.context}</span>
+                  </p>
+                ) : null}
               </li>
             );
           })}
         </ul>
-
-        <div className="capacity">
-          <strong>
-            {selected.length} of {WEEKLY_CAPACITY} weekly slots filled
-          </strong>
-          {edited ? <span className="badge-changed">changed from what we proposed</span> : null}
-
-          <div className="capacity-actions">
-            <button
-              type="button"
-              className="button"
-              disabled={selected.length === 0}
-              onClick={() => setOutcome({ mode, edited, families: selected })}
-            >
-              {mode === "assembled" && !edited ? "Accept this caseload" : "Propose this caseload"}
-            </button>
-
-            {/* Rejection has to be as easy as acceptance, or the prototype
-                cannot tell willingness from compliance — which is the whole
-                safeguard this experiment is watching for. */}
-            {mode === "assembled" ? (
-              <button type="button" className="button secondary" onClick={() => switchTo("build")}>
-                Reject it and start from scratch
-              </button>
-            ) : null}
-          </div>
-
-          <span className="muted small">
-            {selected.length === 0
-              ? "Add at least one family to continue."
-              : full
-                ? "Capacity reached."
-                : `Room for ${WEEKLY_CAPACITY - selected.length} more.`}
-          </span>
-        </div>
       </section>
     </div>
   );
@@ -238,7 +291,7 @@ function Closing({ outcome, onRestart }: { outcome: Outcome; onRestart: () => vo
     <section className="panel closing" role="status">
       <span className="eyebrow">Caseload proposed</span>
       <h2 className="panel-title">
-        {count} {count === 1 ? "family" : "families"}, {WEEKLY_CAPACITY - count} {" "}
+        {count} {count === 1 ? "family" : "families"}, {WEEKLY_CAPACITY - count}{" "}
         {WEEKLY_CAPACITY - count === 1 ? "slot" : "slots"} still open
       </h2>
       <p>{how}</p>
@@ -249,7 +302,7 @@ function Closing({ outcome, onRestart }: { outcome: Outcome; onRestart: () => vo
       <p className="muted small">
         Nothing was sent. Nothing was saved. No match was made, and nobody here is a real family or clinician.
       </p>
-      <div className="capacity-actions">
+      <div className="tray-actions">
         <button type="button" className="button secondary" onClick={onRestart}>
           Start over
         </button>

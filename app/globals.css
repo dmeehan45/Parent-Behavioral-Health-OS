@@ -2758,23 +2758,22 @@ details.pipeline-guide {
  * never the only signal.
  */
 .provisional {
-  margin: 12px 0 0;
-  padding: 12px 14px;
+  margin: 6px 0 0;
+  max-width: 62ch;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  border-left: 3px solid var(--kind-bet);
+  padding-left: 10px;
+}
+
+/* The reasoning behind one score, opened on the row being questioned. */
+.family-why {
+  margin: 0;
+  padding: 8px 12px 10px 14px;
   font-size: 13px;
   line-height: 1.5;
   color: var(--ink-2);
-  background: var(--warn-soft);
-  border-left: 3px solid var(--kind-bet);
-  border-radius: 0 var(--radius) var(--radius) 0;
-}
-
-.family-why {
-  display: block;
-  margin-top: 6px;
-}
-
-.family.chosen .family-state {
-  color: var(--accent);
 }
 
 /* Departing from what was proposed is the most informative thing a participant
@@ -2851,85 +2850,241 @@ details.pipeline-guide {
   padding: 0;
 }
 
-.family {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
+/*
+ * One candidate, one line.
+ *
+ * This was a card carrying four stacked lines — name, score, why it scored,
+ * when they are available, and what clicking would do — seven of them down the
+ * page. Nobody compares seven of those; they read the first and take it. Who,
+ * what they need, how it scored, and the one action now sit on a single row,
+ * and the reasoning is a second click on the row somebody actually questions.
+ */
+.family-list > li {
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  text-align: left;
+  background: var(--surface);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.family:hover {
-  border-color: var(--accent);
-}
-
-.family[aria-pressed="true"] {
+.family-list > li.chosen {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
 
-.family-head {
+.family-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+}
+
+.family-id {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
 }
 
-.family-score {
-  font-size: 21px;
-  font-weight: 750;
-  color: var(--accent);
-  letter-spacing: -0.03em;
+.family-need {
+  font-size: 12.5px;
+  color: var(--ink-2);
 }
 
-/* Block, not inline-block: the context line before it is inline, so this ran
-   straight on from it — "Parent participationIn your proposed caseload —
-   remove" — and its `margin-top` did nothing, because the two were on one
-   line. */
-.family-state {
-  display: block;
-  margin-top: 8px;
-  font-size: 12px;
+/*
+ * The score, and the fact that it is not settled, in the same control.
+ *
+ * A big confident number is exactly what the Bet's `# Restraint` says not to
+ * build: it is the least decided thing here. So it is set at reading size
+ * rather than display size, labelled every time it appears, and it is a button
+ * — the invitation is to interrogate it, not to trust it.
+ */
+.family-fit {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: var(--ds-touch-target);
+  padding: 0 8px;
+  border-radius: var(--radius);
+  color: var(--ink-2);
+  text-align: left;
+}
+
+.family-fit:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.fit-value {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--kind-bet);
+}
+
+.fit-label {
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.family-act {
+  min-height: var(--ds-touch-target);
+  min-width: 84px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  font-size: 13px;
   font-weight: 650;
   color: var(--accent);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.capacity {
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
+.family-act:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+/* Already in the week: a state that still acts, so it is quieter than the
+   invitation to add and does not compete with the tray's own Remove. */
+.family-act.chosen {
+  color: var(--ink-2);
+  border-color: var(--line);
+  background: transparent;
+}
+
+.family-act:disabled {
+  color: var(--ink-3);
+  cursor: not-allowed;
+}
+
+/*
+ * The caseload, and the room left in it.
+ *
+ * Capacity was a sentence under a list — "3 of 6 weekly slots filled" — which
+ * is the constraint the whole experiment is about, written where it can be
+ * skipped. Every slot the week has is drawn, so what is still open is as
+ * visible as what is taken.
+ */
+.tray {
+  padding: 18px 20px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.tray-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.tray-head .panel-title {
+  margin: 0;
+}
+
+.tray-count {
+  margin: 0;
   font-size: 13px;
+  color: var(--ink-2);
 }
 
-.capacity-actions,
-.capacity-done {
+.tray-count strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 8px;
+  margin: 14px 0 16px;
+  padding: 0;
+  list-style: none;
+  counter-reset: slot;
+}
+
+.slot {
+  min-height: 62px;
+}
+
+.slot-family,
+.slot-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  min-height: 62px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  text-align: left;
+}
+
+.slot-family {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--ink);
+}
+
+.slot-name {
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.slot-need,
+.slot-remove {
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+.slot-remove {
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.slot-family:hover .slot-need {
+  visibility: hidden;
+}
+
+/* An open slot is drawn, not implied by absence. Dashed so it reads as room
+   rather than as a thing that failed to load. */
+.slot-empty {
+  border: 1px dashed var(--line-strong);
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.tray-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin: 12px 0 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
 
-.capacity-done {
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 14px;
-  background: var(--evidence-soft);
-  border: 1px solid color-mix(in srgb, var(--evidence) 30%, transparent);
-  border-radius: var(--radius);
+.panel-head {
+  margin-bottom: 4px;
 }
 
-/* A full caseload is a real constraint, so a card that would exceed it reads as
-   unavailable rather than merely not working when tapped. */
-.family:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+@media (max-width: 620px) {
+  .family-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 8px;
+  }
 
-.family:disabled:hover {
-  border-color: var(--line-strong);
+  .family-fit {
+    grid-column: 1;
+    padding-left: 0;
+  }
 }
 
 .button:disabled {
@@ -3243,7 +3398,6 @@ details.pipeline-guide {
   }
 }
 
-
 /* Where things stand, in the same shape the home page counts the model. */
 .review-summary {
   display: grid;
@@ -3369,7 +3523,6 @@ details.pipeline-guide {
   margin: 0 0 12px;
   max-width: 68ch;
 }
-
 
 /* One line of standing, rather than a band of three big numbers saying what the
    section headings below already say. */

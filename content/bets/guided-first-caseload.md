@@ -9,7 +9,11 @@ awaiting: [define-matching-quality]
 claims: [claim-first-caseload-retention]
 metrics: [time-to-first-match, time-to-first-session]
 prototype:
-  status: working
+  # Rebuilt against the revised `# Fidelity`, and not yet looked at by a person
+  # against it. `working` would be claiming a check nobody has made — see the
+  # conformance rule in AGENTS.md. Restamping `builtAgainst` is the reviewer's
+  # assertion, and this returns to `working` when they make it.
+  status: concept
   route: /prototypes/guided-first-caseload
   builtAgainst: deea66-ce20fd-92aff0-f1a58e-127106-acd1c7
 authority: proposed
@@ -99,4 +103,12 @@ report against either and must not be read as evidence about them.
 - **Interaction.** High for the mode switch and for accept, edit and reject —
   that is the decision under test. Everything else can be static.
 - **System.** Faked locally and disclosed. Nothing sends, saves, or matches.
-- **Visual.** The repository design system, and no polish beyond it.
+- **Visual.** A surface a clinician would recognise as software they use, not a
+  diagram of one. The caseload is the centre of the screen and fills as it is
+  built; capacity is a limit you can see rather than a sentence you read; a
+  candidate is scannable in one line. Built from the repository design system,
+  which raises the bar for craft and not for ornament.
+- **Restraint.** Polish must not make the fit scores look decided. They are the
+  least settled thing here, and a surface that reads as finished product is
+  exactly what makes an undecided number look measured. If the two pull against
+  each other, the scores lose the argument.
