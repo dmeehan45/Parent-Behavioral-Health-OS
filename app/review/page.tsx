@@ -2,7 +2,13 @@ import Link from "next/link";
 import { Badge, Breadcrumb } from "@/components/model/badges";
 import { SinceLastLook } from "@/components/review/since-last-look";
 import { projectReview } from "@/lib/research/projection";
-import { FINDING_STATE_LABEL, FINDING_STATE_TONE, allFindings, runStatus } from "@/lib/research/view";
+import {
+  FINDING_STATE_LABEL,
+  FINDING_STATE_TONE,
+  allFindings,
+  runStatus,
+  type QueueEntry,
+} from "@/lib/research/view";
 
 /**
  * Research is staging, and staging changes whenever somebody pushes a handoff.
@@ -15,25 +21,23 @@ export const metadata = {
   description: "What research has proposed, what is waiting on a decision, and what is worth investigating next.",
 };
 
-/** How much of the queue is worth showing before it becomes a wall. */
-const QUEUE_PREVIEW = 5;
-
 /**
  * The operator's surface.
  *
  * Ordered by what is owed, not by what exists: decide, then apply, then choose
- * what to look into. Everything already settled is one disclosure away rather
- * than on the page — history is worth keeping and is almost never what somebody
- * opened this to read.
+ * what to look into. Open research is grouped around the product decision or
+ * operating stage it is meant to improve. Model-detected gaps are inventory,
+ * collapsed by default, rather than fifty apparent assignments for a reviewer.
  */
 export default function ReviewIndexPage() {
-  const { runs, queue } = projectReview();
+  const { runs, queue, families, inventoryGroups, researchBlocked } = projectReview();
   const findings = allFindings(runs);
 
   const awaiting = findings.filter(({ finding }) => finding.state === "awaiting");
   const accepted = findings.filter(({ finding }) => finding.state === "accepted");
   const settled = runs.filter((run) => run.total > 0 && run.decided === run.total);
   const openRuns = runs.filter((run) => run.decided < run.total);
+  const inventoryCount = inventoryGroups.reduce((count, group) => count + group.gaps.length, 0);
 
   // What is owed, in the same units as the navigation badge: undecided
   // findings *and* undecided proposals. The page once counted findings alone,
@@ -50,8 +54,8 @@ export default function ReviewIndexPage() {
         <div className="page-head-main">
           <h1>Research</h1>
           <p className="lede">
-            Research arrives as a proposal, never as a change. Deciding what it means is where the model actually learns
-            something, and it is the only step a person does.
+            Research exists to improve a decision, Bet, or prototype. Review what we already learned first; then work
+            the smallest research family that can change what we build or test next.
           </p>
         </div>
       </header>
@@ -67,7 +71,9 @@ export default function ReviewIndexPage() {
             {proposalsAwaiting === 1 ? "" : "s"})
           </span>
         ) : null}{" "}
-        · <strong>{accepted.length}</strong> ready to apply · <strong>{queue.length}</strong> worth investigating
+        · <strong>{accepted.length}</strong> ready to apply · <strong>{queue.length}</strong> queued across{" "}
+        <strong>{families.length}</strong> research famil{families.length === 1 ? "y" : "ies"} ·{" "}
+        <strong>{inventoryCount}</strong> parked gap{inventoryCount === 1 ? "" : "s"}
       </p>
 
       {runs.length === 0 ? (
@@ -81,6 +87,10 @@ export default function ReviewIndexPage() {
           <h2 className="field-label">
             Waiting on you <span className="field-count">{undecided}</span>
           </h2>
+          <p className="small muted">
+            Clear this before starting another run. Research that has already returned is more valuable than another
+            question until somebody decides what it changes.
+          </p>
           <div className="card-grid">
             {openRuns.map((run) => {
               const status = runStatus(run);
@@ -131,21 +141,60 @@ export default function ReviewIndexPage() {
       ) : null}
 
       {queue.length ? (
-        <section className="review-section" aria-label="Worth investigating">
+        <section className="review-section" aria-label="Research families">
           <h2 className="field-label">
-            Worth investigating <span className="field-count">{queue.length}</span>
+            Research families <span className="field-count">{families.length}</span>
           </h2>
           <p className="small muted">
-            Questions somebody asked, then gaps the model has in itself. A scheduled run picks from the top.
+            {researchBlocked
+              ? "New research is paused while review or application debt remains. The first marked question is what rises next once that debt is cleared."
+              : "These are the questions intentionally admitted to research, grouped by the product decision or operating area they are meant to improve."}
           </p>
-          <QueueList entries={queue.slice(0, QUEUE_PREVIEW)} />
-          {queue.length > QUEUE_PREVIEW ? (
-            <details className="disclosure">
-              <summary>The other {queue.length - QUEUE_PREVIEW}</summary>
-              <QueueList entries={queue.slice(QUEUE_PREVIEW)} />
-            </details>
-          ) : null}
+
+          <div className="card-grid">
+            {families.map((family) => (
+              <article className="card" key={family.id}>
+                <div className="card-badges">
+                  <Badge tone={family.kind === "bet" ? "accent" : "quiet"}>
+                    {family.kind === "bet" ? "Bet-linked" : family.kind === "stage" ? "Stage-linked" : "Cross-cutting"}
+                  </Badge>
+                  {family.prototypeStatus ? <Badge tone="evidence">prototype · {family.prototypeStatus}</Badge> : null}
+                </div>
+                <h3>{family.href ? <Link href={family.href}>{family.title}</Link> : family.title}</h3>
+                <p className="small muted">{family.detail}</p>
+                <QueueList
+                  entries={family.questions}
+                  nextId={queue[0]?.id}
+                  researchBlocked={researchBlocked}
+                />
+              </article>
+            ))}
+          </div>
         </section>
+      ) : (
+        <section className="review-section" aria-label="Research families">
+          <h2 className="field-label">Research families</h2>
+          <p className="empty-note">No unanswered question is currently admitted to research.</p>
+        </section>
+      )}
+
+      {inventoryCount ? (
+        <details className="disclosure review-section">
+          <summary>
+            Research inventory <span className="field-count">{inventoryCount}</span>
+          </summary>
+          <p className="small muted">
+            These are gaps the model or an earlier run noticed. They are not active research work and do not compete
+            with the prioritized families above. Promote one only when answering it would change a decision, Bet, or
+            prototype.
+          </p>
+          {inventoryGroups.map((group) => (
+            <div key={group.id}>
+              <h3>{group.href ? <Link href={group.href}>{group.title}</Link> : group.title}</h3>
+              <QueueList entries={group.gaps} />
+            </div>
+          ))}
+        </details>
       ) : null}
 
       {settled.length ? (
@@ -176,25 +225,34 @@ export default function ReviewIndexPage() {
   );
 }
 
-function QueueList({ entries }: { entries: ReturnType<typeof projectReview>["queue"] }) {
+function QueueList({
+  entries,
+  nextId,
+  researchBlocked = false,
+}: {
+  entries: QueueEntry[];
+  nextId?: string;
+  researchBlocked?: boolean;
+}) {
   return (
     <ul className="review-list">
       {entries.map((entry) => (
-        <li key={entry.id}>
+        <li key={entry.id} id={entry.kind === "question" ? entry.id : undefined}>
           <p className="review-list-title">
-            <Badge tone={entry.kind === "question" ? "accent" : "quiet"}>
-              {entry.kind === "question" ? "asked" : "gap"}
-            </Badge>{" "}
-            {/* A question something is already waiting on is the one worth
-                answering first, and priority alone cannot say that. */}
-            {entry.blocking?.length ? <Badge tone="warn">a bet is waiting</Badge> : null}{" "}
+            {entry.priority ? (
+              <Badge tone={entry.priority === "high" ? "warn" : "quiet"}>{entry.priority} priority</Badge>
+            ) : null}{" "}
+            {entry.id === nextId ? (
+              <Badge tone="accent">{researchBlocked ? "next after review" : "next research"}</Badge>
+            ) : null}{" "}
+            {entry.blocking?.length ? <Badge tone="warn">a Bet is waiting</Badge> : null}{" "}
+            {entry.kind === "gap" ? <Badge tone="quiet">parked gap</Badge> : null}{" "}
             {entry.question}
           </p>
           <p className="small muted">
             {entry.blocking?.length ? `${entry.blocking.join(", ")} is scoped around not knowing this. ` : ""}
             {entry.detail}
-            {/* The question already names the subject, so the link is a way in
-                rather than a repeat of it. */}
+            {entry.targets?.length ? ` Touches ${entry.targets.map((target) => target.title).join(", ")}.` : ""}
             {entry.subject ? (
               <>
                 {" "}
@@ -204,9 +262,6 @@ function QueueList({ entries }: { entries: ReturnType<typeof projectReview>["que
               </>
             ) : null}
           </p>
-          {/* A gap is something the model noticed about itself; nobody has
-              asked it yet. The command carries what raised it, so the queued
-              question knows what it bites instead of arriving anonymous. */}
           {entry.kind === "gap" ? <code className="queue-command">{askCommand(entry)}</code> : null}
         </li>
       ))}
@@ -214,8 +269,8 @@ function QueueList({ entries }: { entries: ReturnType<typeof projectReview>["que
   );
 }
 
-/** The exact line that queues this gap as a question, ready to paste. */
-function askCommand(entry: ReturnType<typeof projectReview>["queue"][number]) {
+/** The exact line that promotes this parked gap into an authored question. */
+function askCommand(entry: QueueEntry) {
   return [
     "npm run research:ask --",
     JSON.stringify(entry.question),

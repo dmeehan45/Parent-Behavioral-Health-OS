@@ -1,6 +1,7 @@
 import { getRepository } from "@/lib/content/repository";
-import { findGaps } from "./gaps";
+import { findGaps, type GapKind } from "./gaps";
 import { decisionId, loadDecisions, loadHandoffs, supersededDecisions } from "./intake";
+import { blocksNewResearch, prioritizeQuestions, researchFamilies } from "./priorities";
 import { buildQueue, loadQuestions, nextUp } from "./questions";
 import { findingState, type QueueEntry, type ReviewFinding, type ReviewIndex, type ReviewRun, type ReviewSource } from "./view";
 
@@ -46,6 +47,34 @@ export function projectReview(): ReviewIndex {
                 : "entity";
     const title = "title" in record ? record.title : "statement" in record ? record.statement : id;
     return { title, href: `/${kind}s/${id}`, kind };
+  };
+
+  // Research families are derived from the operating model rather than stored
+  // as a second taxonomy. A Bet is the strongest family boundary because it
+  // names the product decision the research is supposed to improve. When no Bet
+  // is waiting on a question, its first resolvable Stage is the fallback.
+  const stageById = new Map(repo.stages.map((stage) => [stage.id, stage]));
+  const stepById = new Map(repo.steps.map((step) => [step.id, step]));
+  const problemById = new Map(repo.problems.map((problem) => [problem.id, problem]));
+  const betById = new Map(repo.bets.map((bet) => [bet.id, bet]));
+  const claimById = new Map(repo.claims.map((claim) => [claim.id, claim]));
+  const metricById = new Map(repo.metrics.map((metric) => [metric.id, metric]));
+
+  const stageForTarget = (id: string, seen = new Set<string>()): string | undefined => {
+    if (seen.has(id)) return undefined;
+    seen.add(id);
+    if (stageById.has(id)) return id;
+    const step = stepById.get(id);
+    if (step) return step.stage;
+    const problem = problemById.get(id);
+    if (problem) return problem.targets.map((target) => stageForTarget(target, seen)).find(Boolean);
+    const bet = betById.get(id);
+    if (bet) return stageForTarget(bet.problem, seen);
+    const claim = claimById.get(id);
+    if (claim) return claim.targets.map((target) => stageForTarget(target, seen)).find(Boolean);
+    const metric = metricById.get(id);
+    if (metric) return (metric.targets ?? []).map((target) => stageForTarget(target, seen)).find(Boolean);
+    return undefined;
   };
 
   // Which canonical records already cite which decision. This is what separates
@@ -216,34 +245,132 @@ export function projectReview(): ReviewIndex {
       .map((finding) => ({ id: finding.decisionId, run: run.id, statement: finding.statement })),
   );
 
-  // The same queue `npm run research:queue` prints. Asked questions first,
-  // then gaps the model has in itself — so somebody deciding what is worth
-  // investigating is looking at the same list a scheduled run would pick from,
-  // rather than at a terminal they have to remember to open.
-  // Which bets are already held up by which question. A question nothing is
-  // waiting on and a question blocking a build look identical in a list ordered
-  // by priority alone, and the second is the one worth answering first.
+  // Which Bets are explicitly waiting on which research question. This is a
+  // stronger prioritization signal than authored priority alone because it ties
+  // the question to a concrete product-learning decision.
   const awaiting = new Map<string, string[]>();
   for (const bet of repo.bets) {
     for (const id of bet.awaiting ?? []) awaiting.set(id, [...(awaiting.get(id) ?? []), bet.title]);
   }
 
-  const queue: QueueEntry[] = [
-    ...nextUp(buildQueue(questions, handoffs)).map((item) => ({
-      kind: "question" as const,
-      id: item.id,
-      question: item.question,
-      detail: item.why ?? `Asked by ${item.askedBy}.`,
-      blocking: awaiting.get(item.id) ?? [],
-    })),
-    ...findGaps(repo, handoffs, questions, decisions).map((gap) => ({
-      kind: "gap" as const,
+  const open = prioritizeQuestions(nextUp(buildQueue(questions, handoffs)), repo.bets);
+  const queue: QueueEntry[] = open.map((item) => ({
+    kind: "question" as const,
+    id: item.id,
+    question: item.question,
+    detail: item.why ?? `Asked by ${item.askedBy}.`,
+    priority: item.priority,
+    targets: item.targets.map((target) => ({ id: target, ...titleOf(target) })),
+    blocking: awaiting.get(item.id) ?? [],
+  }));
+  const queueById = new Map(queue.map((entry) => [entry.id, entry]));
+
+  // A question appears in exactly one family. If several Bets wait on it, the
+  // highest-ranked Bet owns the visible family and the other Bet names remain on
+  // the question itself. This avoids turning one open question into several
+  // apparent pieces of work.
+  const assigned = new Set<string>();
+  const families: ReviewIndex["families"] = [];
+  for (const family of researchFamilies(open, repo.bets)) {
+    const familyQuestions = family.questions
+      .filter((item) => !assigned.has(item.id))
+      .map((item) => queueById.get(item.id))
+      .filter((entry): entry is QueueEntry => Boolean(entry));
+    if (!familyQuestions.length) continue;
+    familyQuestions.forEach((entry) => assigned.add(entry.id));
+    families.push({
+      id: `bet:${family.betId}`,
+      title: family.title,
+      kind: "bet",
+      href: `/bets/${family.betId}`,
+      prototypeStatus: family.prototypeStatus,
+      detail:
+        family.prototypeStatus === "working"
+          ? "A working prototype is waiting on this knowledge. These questions should change what we test or how we interpret the result."
+          : "This Bet explicitly names these questions as unresolved. Answer them when they would change the experiment or the next product decision.",
+      questions: familyQuestions,
+    });
+  }
+
+  // Questions not explicitly blocking a Bet still get an operating-home rather
+  // than falling back into one long miscellaneous list. Their first resolvable
+  // Stage is enough for navigation; it does not create a new canonical taxonomy.
+  const stageFamilies = new Map<string, ReviewIndex["families"][number]>();
+  let generalFamily: ReviewIndex["families"][number] | undefined;
+  for (const item of open) {
+    if (assigned.has(item.id)) continue;
+    const entry = queueById.get(item.id);
+    if (!entry) continue;
+    const stageId = item.targets.map((target) => stageForTarget(target)).find(Boolean);
+    const stage = stageId ? stageById.get(stageId) : undefined;
+    if (stage) {
+      const id = `stage:${stage.id}`;
+      const existing = stageFamilies.get(id);
+      if (existing) existing.questions.push(entry);
+      else {
+        const created = {
+          id,
+          title: stage.title,
+          kind: "stage" as const,
+          href: `/stages/${stage.id}`,
+          detail: "Queued research tied to this operating stage, but not currently named as a blocker by a Bet.",
+          questions: [entry],
+        };
+        stageFamilies.set(id, created);
+        families.push(created);
+      }
+      continue;
+    }
+    if (!generalFamily) {
+      generalFamily = {
+        id: "general:research",
+        title: "Cross-cutting research",
+        kind: "general",
+        detail: "Admitted questions that do not yet resolve to one Bet or operating stage. Keep this group small; stronger product linkage should usually come before another run.",
+        questions: [],
+      };
+      families.push(generalFamily);
+    }
+    generalFamily.questions.push(entry);
+  }
+
+  const gaps = findGaps(repo, handoffs, questions, decisions);
+  const researchBlocked = blocksNewResearch(gaps);
+  const OWED: GapKind[] = ["undecided", "unapplied", "unconverted", "saturated"];
+  const inventory = gaps.filter((gap) => !OWED.includes(gap.kind));
+  const inventoryMap = new Map<string, ReviewIndex["inventoryGroups"][number]>();
+
+  for (const gap of inventory) {
+    const entry: QueueEntry = {
+      kind: "gap",
       id: `${gap.kind}-${gap.subject}`,
       question: gap.suggestedQuestion,
       detail: gap.why,
       subject: gap.subjectKind === "run" ? undefined : { id: gap.subject, ...titleOf(gap.subject) },
-    })),
-  ];
+    };
+    const stageId = gap.subjectKind === "run" ? undefined : stageForTarget(gap.subject);
+    const stage = stageId ? stageById.get(stageId) : undefined;
+    const id = stage ? `stage:${stage.id}` : gap.subjectKind === "run" ? "raised-by-research" : "cross-cutting";
+    const title = stage ? stage.title : gap.subjectKind === "run" ? "Raised by previous research" : "Cross-cutting model gaps";
+    const existing = inventoryMap.get(id);
+    if (existing) existing.gaps.push(entry);
+    else {
+      inventoryMap.set(id, {
+        id,
+        title,
+        href: stage ? `/stages/${stage.id}` : undefined,
+        gaps: [entry],
+      });
+    }
+  }
 
-  return { runs, supersedable, queue, sourceUrl: process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL };
+  return {
+    runs,
+    supersedable,
+    queue,
+    families,
+    inventoryGroups: [...inventoryMap.values()],
+    researchBlocked,
+    sourceUrl: process.env.NEXT_PUBLIC_CONTENT_SOURCE_URL,
+  };
 }

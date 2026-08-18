@@ -58,7 +58,7 @@ jobs:
           set -euo pipefail
           top="$(npm run --silent research:queue -- --top)"
           if [ -z "$top" ]; then
-            echo "Nothing is queued and the model shows no gaps."
+            echo "No new research run is admitted. Read the queue for the next knowledge action."
             exit 0
           fi
           printf '%s' "$top" > top.txt
@@ -90,11 +90,11 @@ jobs:
             const marker = "<!-- research-routine -->";
             const body = [
               marker,
-              "## What to research next",
+              "## What the knowledge loop needs next",
               "",
               top
-                ? `Top of the queue: **${top}**. Its brief is below — read it before researching.`
-                : "Nothing is queued and the model shows no gaps. Add a question with `npm run research:ask`.",
+                ? `Top research question: **${top}**. Its brief is below — read it before researching.`
+                : "No new research run is admitted right now. The queue below says whether the next action is review, writing, or question triage.",
               "",
               "Commit the handoff and nothing else. The review packet is derived, and CI renders it onto the",
               "pull request. `docs/research-workflow.md` describes the loop; `docs/research-practice.md` the craft.",
