@@ -1,0 +1,56 @@
+contractVersion: 1
+run:
+  id: 2026-08-17-evidence-directed-review-reflection
+  question: >
+    What scope and experience constraints should carry into the first prototype for allocating scarce human review across clinician prospects?
+  synthesis: >
+    The first prototype should begin after a clinician prospect already exists rather than treating sourcing or inbound prospect generation as part of the same problem. Prospect generation remains a separate workstream. The prototype should test whether a comparable evidence profile and explicit next-step routing help operators allocate scarce review time, while treating clinician-facing automation as human-backed augmentation rather than replacement of a relational selection experience. Automated evidence collection may be useful, but the experience should preserve a visible human relationship, explain the bounded role of automation, and avoid positioning the system as an AI interviewer or autonomous contracting decision-maker.
+  createdAt: 2026-08-17
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: conversational-reflection
+    context: >
+      Structured from the accountable reviewer's reflection after the trustworthy-selection research run and before shaping the first Bet and prototype. It narrows prototype scope and records experience constraints; it does not add external evidence.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+  kind: reflection
+  reflectsOn:
+    - 2026-08-17-design-trustworthy-clinician-selection
+sources:
+  - id: source-trustworthy-selection-run
+    identity: trustworthy-selection-run
+    kind: repository
+    title: Trustworthy clinician selection research handoff
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: research/handoffs/2026-08-17-design-trustworthy-clinician-selection.yaml
+    access: available
+findings: []
+notes:
+  - id: note-prospect-generation-out-of-scope
+    statement: >
+      The first selection-workspace prototype starts from a clinician prospect already in the pool. Role posting, outbound sourcing, inbound prospect generation, and the machinery that creates prospect volume are a separate workstream and should not be implied by the word prospect in this prototype.
+    sourceIds: [source-trustworthy-selection-run]
+    anchors: [scarce-review-time-without-comparable-evidence, evidence-directed-clinician-review]
+  - id: note-clinician-automation-needs-human-presence
+    statement: >
+      Clinician-facing automation should be designed as human-backed augmentation. If technology gathers additional evidence, the experience should preserve a visible human relationship, explain why the automated step exists, and avoid branding the interaction as AI interviewing or autonomous selection.
+    sourceIds: [source-trustworthy-selection-run]
+    anchors: [evidence-directed-clinician-review, design-trustworthy-clinician-selection]
+candidates:
+  - id: candidate-human-backed-selection-experience-question
+    kind: question
+    description: >
+      Determine which forms of human presence, explanation, timing, and access to a person are sufficient for clinicians to experience automated evidence collection as support for a relationship rather than replacement of one.
+    targets: []
+    restsOn: []
+    rationale: >
+      The research supports candidate experience as consequential but does not tell us what human-backed augmentation should look like for independent behavioral-health clinicians. The first prototype can expose this uncertainty without solving it in advance.
+    wouldWeakenIf: >
+      Clinician testing shows that bounded automated evidence collection is accepted equally well without any visible human presence or relationship cue.
+questions: []
