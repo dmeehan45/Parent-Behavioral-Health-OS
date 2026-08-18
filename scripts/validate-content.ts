@@ -1,5 +1,5 @@
 import { getRepository } from "../lib/content/repository";
-import { conformanceProblem } from "../lib/prototype/conformance";
+import { conformanceProblem, reviewPromptProblem } from "../lib/prototype/conformance";
 import { run } from "./report";
 
 run(() => {
@@ -15,8 +15,10 @@ run(() => {
    * changed and what to build to. A gate that breaks the tool for fixing it is
    * not a gate.
    */
-  const drifted = repo.bets.map(conformanceProblem).filter((problem): problem is string => Boolean(problem));
-  if (drifted.length) throw new Error(`\n${drifted.join("\n\n")}`);
+  const prototypeProblems = repo.bets
+    .flatMap((bet) => [conformanceProblem(bet), reviewPromptProblem(bet)])
+    .filter((problem): problem is string => Boolean(problem));
+  if (prototypeProblems.length) throw new Error(`\n${prototypeProblems.join("\n\n")}`);
 
   console.log(
     `Validated ${repo.stages.length} stages, ${repo.steps.length} steps, ${repo.entities.length} entities, ` +

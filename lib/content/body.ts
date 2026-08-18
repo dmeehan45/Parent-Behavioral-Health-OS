@@ -27,6 +27,7 @@ export const SECTION = {
   assumptions: "Assumptions",
   signals: "Signals and safeguards",
   fidelity: "Fidelity",
+  reviewPrompts: "Review prompts",
 } as const;
 
 /**
@@ -77,7 +78,10 @@ export const RENDERED_SECTIONS: Record<string, readonly string[]> = {
   // is where that is written. Two statements of the same trouble would drift.
   // The experiment sections describe the test, which is the one thing no other
   // primitive holds — they never restate the problem or the intervention.
-  bets: [SECTION.bet, SECTION.questions, ...EXPERIMENT_SECTIONS],
+  // Review prompts are separate from the experiment fingerprint. They shape how
+  // learning is elicited after somebody tries the software; refining a prompt
+  // should not falsely claim that the software itself became stale.
+  bets: [SECTION.bet, SECTION.questions, ...EXPERIMENT_SECTIONS, SECTION.reviewPrompts],
   // Entities, claims, and metrics render their body as a single block of prose.
   // Any heading in them would be invisible, so none are permitted.
   entities: [],

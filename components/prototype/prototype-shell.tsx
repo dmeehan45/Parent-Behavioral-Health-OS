@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Breadcrumb, KindBadge } from "@/components/model/badges";
 import { DetailBlocks } from "@/components/model/detail-blocks";
-import { EXPERIMENT_SECTIONS } from "@/lib/content/body";
+import { EXPERIMENT_SECTIONS, SECTION } from "@/lib/content/body";
 import { projectModel } from "@/lib/model/graph";
 
 /**
@@ -55,6 +55,13 @@ export function PrototypeShell({ route, children }: { route: string; children: R
       (block.type === "markdown" && (experiment.has(block.label) || block.label.toLowerCase().includes("question"))),
   );
 
+  // Evaluation guidance is its own lane. It is shown only after the runnable
+  // interaction and stays collapsed by default so it cannot teach a participant
+  // what the reviewer hopes to hear before they have formed their own reaction.
+  const reviewPrompts = bet.blocks.filter(
+    (block) => block.type === "markdown" && block.label === SECTION.reviewPrompts,
+  );
+
   return (
     <main className="shell prototype-run">
       {/* The page needs a name, but the participant does not need a title
@@ -74,6 +81,17 @@ export function PrototypeShell({ route, children }: { route: string; children: R
       <section className="prototype-stage" aria-label="Prototype">
         {children}
       </section>
+
+      {reviewPrompts.length ? (
+        <details className="disclosure run-review">
+          <summary>After trying it: pressure-test this prototype</summary>
+          <p className="small muted">
+            Answer from what you just experienced. Separate what you observed from what you think it means and what you
+            would change in the next iteration.
+          </p>
+          <DetailBlocks blocks={reviewPrompts} />
+        </details>
+      ) : null}
 
       {/* Collapsed so a participant never reads what the session is watching
           for before the session. Native disclosure, keyboard-operable as-is. */}
