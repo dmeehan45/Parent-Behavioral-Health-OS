@@ -14,6 +14,8 @@ type ConnectionEdgeData = {
   dimmed?: boolean;
 };
 
+type ChipTone = "neutral" | "data" | "gap" | "problem";
+
 /**
  * A Stage handoff that stays readable at the map's normal fitted zoom.
  *
@@ -54,7 +56,7 @@ export function ConnectionEdge({
     return <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} />;
   }
 
-  const chips: Array<{ key: string; text: string; title?: string; tone: "neutral" | "data" | "gap" | "problem" }> = [];
+  const chips: Array<{ key: string; text: string; title?: string; tone: ChipTone }> = [];
 
   if (active.has("operating") && connection.layers.includes("operating")) {
     if (connection.processHandoffs.length > 0) {
@@ -170,21 +172,21 @@ export function ConnectionEdge({
   );
 }
 
-function chipBorder(tone: ConnectionEdgeData extends never ? never : "neutral" | "data" | "gap" | "problem") {
+function chipBorder(tone: ChipTone) {
   if (tone === "data") return "color-mix(in srgb, var(--kind-metric) 45%, var(--line))";
   if (tone === "problem") return "color-mix(in srgb, var(--kind-problem) 45%, var(--line))";
   if (tone === "gap") return "var(--line-strong)";
   return "color-mix(in srgb, var(--kind-stage) 40%, var(--line))";
 }
 
-function chipBackground(tone: "neutral" | "data" | "gap" | "problem") {
+function chipBackground(tone: ChipTone) {
   if (tone === "data") return "color-mix(in srgb, var(--kind-metric) 10%, var(--surface))";
   if (tone === "problem") return "color-mix(in srgb, var(--kind-problem) 10%, var(--surface))";
   if (tone === "gap") return "var(--surface-2)";
   return "color-mix(in srgb, var(--kind-stage) 8%, var(--surface))";
 }
 
-function chipInk(tone: "neutral" | "data" | "gap" | "problem") {
+function chipInk(tone: ChipTone) {
   if (tone === "data") return "var(--kind-metric)";
   if (tone === "problem") return "var(--kind-problem)";
   if (tone === "gap") return "var(--ink-3)";
