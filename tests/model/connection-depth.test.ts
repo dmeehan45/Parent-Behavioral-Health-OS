@@ -51,8 +51,16 @@ test("the direct practice to retention path already present in Steps is projecte
   assert.ok(depth.transfers.some((transfer) => transfer.label === "Clinician: establishing"));
 });
 
-test("feedback relationships remain explicit while their learning payload stays a gap", () => {
+test("an operating return is not misclassified as a learning loop", () => {
   const depth = connection("care-initiation", "matching");
+  assert.deepEqual(depth.layers, ["operating"]);
+  assert.ok(depth.gaps.includes("operating"));
+  assert.ok(depth.gaps.includes("experience"));
+  assert.ok(!depth.gaps.includes("learning"));
+});
+
+test("quality feedback remains learning and exposes its unspecified payload", () => {
+  const depth = connection("quality-outcomes", "matching");
   assert.deepEqual(depth.layers, ["learning"]);
   assert.ok(depth.gaps.includes("learning"));
 });
