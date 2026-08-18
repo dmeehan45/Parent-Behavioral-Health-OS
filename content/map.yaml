@@ -8,7 +8,7 @@ edges:
   - { from: family-demand, to: matching, relationship: supplies }
   - { from: matching, to: care-initiation, relationship: flows_to }
   - { from: care-initiation, to: practice-operations, relationship: flows_to }
-  - { from: care-initiation, to: matching, relationship: feedback_to }
+  - { from: care-initiation, to: matching, relationship: returns_to }
   - { from: practice-operations, to: quality-outcomes, relationship: flows_to }
   - { from: practice-operations, to: retention-growth, relationship: flows_to }
   - { from: quality-outcomes, to: retention-growth, relationship: flows_to }
