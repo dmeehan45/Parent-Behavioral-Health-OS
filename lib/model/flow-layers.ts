@@ -1,4 +1,4 @@
-import type { FlowLayerId, FlowTransfer, ModelEdge } from "@/lib/model/types";
+import type { FlowLayerId, FlowTransfer, ModelEdge, ModelGraph } from "@/lib/model/types";
 
 export type { FlowLayerId, FlowTransfer } from "@/lib/model/types";
 
@@ -68,17 +68,46 @@ export function edgeFlowLayers(edge: Pick<ModelEdge, "kind" | "label">): FlowLay
   return relationship && DATA_RELATIONSHIPS.has(relationship) ? ["data"] : ["operating"];
 }
 
+/**
+ * Resolve the old `(graph, edge)` call shape as well as the new `(edge)` shape.
+ * The graph argument is deliberately ignored: connection depth now ships on the
+ * edge from `projectModel()` rather than being re-derived by a React consumer.
+ */
+function projectedEdge(first: ModelEdge | Pick<ModelGraph, "nodes" | "edges">, second?: ModelEdge): ModelEdge {
+  return second ?? (first as ModelEdge);
+}
+
 /** State or information transfers already projected onto a Stage connection. */
-export function edgeFlowTransfers(edge: ModelEdge): FlowTransfer[] {
-  return edge.connection?.transfers ?? [];
+export function edgeFlowTransfers(edge: ModelEdge): FlowTransfer[];
+export function edgeFlowTransfers(graph: Pick<ModelGraph, "nodes" | "edges">, edge: ModelEdge): FlowTransfer[];
+export function edgeFlowTransfers(first: ModelEdge | Pick<ModelGraph, "nodes" | "edges">, second?: ModelEdge): FlowTransfer[] {
+  return projectedEdge(first, second).connection?.transfers ?? [];
 }
 
 /** Layers visible on an edge after the projection has assembled connection depth. */
-export function edgeProjectedFlowLayers(edge: ModelEdge): FlowLayerId[] {
+export function edgeProjectedFlowLayers(edge: ModelEdge): FlowLayerId[];
+export function edgeProjectedFlowLayers(graph: Pick<ModelGraph, "nodes" | "edges">, edge: ModelEdge): FlowLayerId[];
+export function edgeProjectedFlowLayers(
+  first: ModelEdge | Pick<ModelGraph, "nodes" | "edges">,
+  second?: ModelEdge,
+): FlowLayerId[] {
+  const edge = projectedEdge(first, second);
   return edge.connection?.layers ?? edgeFlowLayers(edge);
 }
 
-export function hasActiveProjectedFlowLayer(edge: ModelEdge, active: Set<FlowLayerId>): boolean {
+export function hasActiveProjectedFlowLayer(edge: ModelEdge, active: Set<FlowLayerId>): boolean;
+export function hasActiveProjectedFlowLayer(
+  graph: Pick<ModelGraph, "nodes" | "edges">,
+  edge: ModelEdge,
+  active: Set<FlowLayerId>,
+): boolean;
+export function hasActiveProjectedFlowLayer(
+  first: ModelEdge | Pick<ModelGraph, "nodes" | "edges">,
+  second: ModelEdge | Set<FlowLayerId>,
+  third?: Set<FlowLayerId>,
+): boolean {
+  const edge = third ? (second as ModelEdge) : (first as ModelEdge);
+  const active = third ?? (second as Set<FlowLayerId>);
   const layers = edgeProjectedFlowLayers(edge);
   return layers.length === 0 || layers.some((layer) => active.has(layer));
 }
