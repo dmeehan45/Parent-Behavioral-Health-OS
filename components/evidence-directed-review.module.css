@@ -1,60 +1,11 @@
-.workspace {
+.reviewWorkspace {
   display: grid;
-  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
-  gap: var(--ds-space-6);
-  align-items: start;
-}
-
-.queue,
-.detail {
-  min-width: 0;
-}
-
-.queue {
-  position: sticky;
-  top: calc(var(--header-h) + var(--header-gap));
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-5);
-  padding: var(--ds-space-6);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
-}
-
-.queueHead h2,
-.detailHead h2,
-.routePanel h3,
-.sectionHead h3,
-.unknowns h3,
-.overridePanel h3,
-.requestHead h3 {
-  margin: 0;
-}
-
-.queueHead h2 {
-  margin-top: var(--ds-space-2);
-  font-size: 20px;
-  line-height: 1.25;
-}
-
-.queueIntro,
-.focusLine,
-.sectionNote,
-.humanRole,
-.previewFoot {
-  color: var(--ink-2);
-}
-
-.queueIntro {
-  margin: var(--ds-space-3) 0 0;
-  font-size: 13px;
-  line-height: 1.55;
+  gap: 20px;
 }
 
 .eyebrow {
-  margin: 0;
+  display: block;
+  margin-bottom: 5px;
   color: var(--ink-2);
   font-size: 11px;
   font-weight: 700;
@@ -62,20 +13,130 @@
   text-transform: uppercase;
 }
 
-.queueSummary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ds-space-2) var(--ds-space-3);
-  padding-block: var(--ds-space-3);
-  border-block: 1px solid var(--line);
-  color: var(--ink-2);
-  font-size: 12px;
+.workflowContext {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
 }
 
-.prospectList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-2);
+.workflowIntro {
+  max-width: var(--ds-container-text);
+}
+
+.workflowIntro h2,
+.queueHeading h2,
+.prospectHeader h2,
+.decisionCard h3,
+.handoff h3,
+.sectionHeading h3,
+.clinicianCard h2 {
+  margin: 0;
+}
+
+.workflowIntro p,
+.queueHeading p,
+.prospectHeader p,
+.decisionCard p,
+.handoff p,
+.clinicianCard p {
+  margin: 7px 0 0;
+}
+
+.workflowIntro p,
+.queueHeading p {
+  color: var(--ink-2);
+}
+
+.workflowRail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workflowRail li {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.workflowRail li > span {
+  color: var(--ink-2);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.workflowRail li strong {
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.workflowRail li small {
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.workflowRail .workflowCurrent {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.workflowRail .workflowCurrent > span,
+.workflowRail .workflowCurrent strong {
+  color: var(--accent-ink);
+}
+
+.workflowDone strong {
+  color: var(--ink-2);
+}
+
+.workArea {
+  display: grid;
+  grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.attentionQueue,
+.prospectDetail {
+  min-width: 0;
+}
+
+.attentionQueue {
+  display: grid;
+  gap: 16px;
+}
+
+.queueHeading {
+  padding: 4px 2px 0;
+}
+
+.queueHeading h2 {
+  font-size: 20px;
+}
+
+.queueHeading p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.attentionList {
+  display: grid;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -83,448 +144,596 @@
 
 .prospectButton {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--ds-space-1) var(--ds-space-2);
+  gap: 4px;
   width: 100%;
   min-height: var(--ds-touch-target);
-  padding: var(--ds-space-3);
+  padding: 13px 14px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
   text-align: left;
-  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .prospectButton:hover {
   border-color: var(--line-strong);
-  background: var(--surface-2);
 }
 
 .prospectSelected {
-  border-color: var(--accent);
   background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 .prospectName {
-  min-width: 0;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 1.35;
 }
 
 .prospectFocus {
-  grid-column: 1 / -1;
   color: var(--ink-2);
   font-size: 12px;
   line-height: 1.4;
 }
 
-.routeTag,
-.kindTag,
-.maturity {
-  display: inline-flex;
-  align-items: center;
+.routeLabel {
   width: fit-content;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.routeTag {
-  padding: var(--ds-space-1) var(--ds-space-2);
-  white-space: nowrap;
-}
-
-.route_advance {
-  background: var(--evidence-soft);
-  color: var(--evidence);
-}
-
-.route_request {
-  background: var(--warn-soft);
-  color: var(--warn);
-}
-
-.route_review {
-  background: var(--accent-soft);
+  margin-top: 5px;
   color: var(--accent-ink);
-}
-
-.route_stop {
-  background: var(--surface-2);
-  color: var(--kind-problem);
-  border: 1px solid var(--kind-problem);
-}
-
-.detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-6);
-}
-
-.detailHead {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--ds-space-4);
-  padding: var(--ds-space-2) 0 var(--ds-space-5);
-  border-bottom: 1px solid var(--line);
-}
-
-.detailHead h2 {
-  margin-top: var(--ds-space-2);
-  font-size: clamp(24px, 3vw, 32px);
-  line-height: 1.15;
-}
-
-.focusLine {
-  margin: var(--ds-space-2) 0 0;
-}
-
-.routePanel,
-.overridePanel,
-.requestPreview {
-  padding: var(--ds-space-6);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
-}
-
-.routePanel {
-  border-left: 3px solid var(--kind-prototype);
-}
-
-.routePanel h3 {
-  margin-top: var(--ds-space-2);
-  font-size: 20px;
-}
-
-.routePanel > p:not(.eyebrow):not(.provisional) {
-  max-width: var(--ds-container-text);
-  margin: var(--ds-space-3) 0 0;
-}
-
-.provisional {
-  max-width: var(--ds-container-text);
-  margin: var(--ds-space-4) 0 0;
-  padding: var(--ds-space-3) var(--ds-space-4);
-  background: var(--warn-soft);
-  border-left: 3px solid var(--kind-bet);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  color: var(--ink-2);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.section {
-  min-width: 0;
-}
-
-.sectionHead {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: var(--ds-space-5);
-  margin-bottom: var(--ds-space-4);
-}
-
-.sectionHead h3,
-.unknowns h3 {
-  margin-top: var(--ds-space-2);
-  font-size: 18px;
-}
-
-.sectionNote {
-  max-width: 34ch;
-  margin: 0;
-  font-size: 12px;
-  text-align: right;
-}
-
-.evidenceList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-3);
-}
-
-.evidenceRow {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(280px, 1.1fr);
-  gap: var(--ds-space-5);
-  padding: var(--ds-space-5);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-}
-
-.evidenceLabels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ds-space-2);
-  align-items: center;
-  margin-bottom: var(--ds-space-3);
-}
-
-.kindTag,
-.maturity {
-  padding: var(--ds-space-1) var(--ds-space-2);
-}
-
-.kindEligibility {
-  background: var(--surface-2);
-  color: var(--ink);
-  border: 1px solid var(--line-strong);
-}
-
-.kindPredictive {
-  background: var(--warn-soft);
-  color: var(--warn);
-}
-
-.maturity {
-  color: var(--ink-2);
-  border: 1px solid var(--line);
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.evidenceLead h4 {
-  margin: 0 0 var(--ds-space-1);
-  font-size: 14px;
-}
-
-.evidenceLead > strong {
-  display: block;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-.evidenceContext {
-  min-width: 0;
-}
-
-.evidenceContext dl {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--ds-space-3);
-  margin: 0 0 var(--ds-space-3);
-}
-
-.evidenceContext dt {
-  color: var(--ink-2);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 
-.evidenceContext dd {
-  margin: var(--ds-space-1) 0 0;
-  font-size: 13px;
-  line-height: 1.4;
+.handledCases {
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
 }
 
-.evidenceContext p {
-  max-width: 62ch;
-  margin: 0;
-  color: var(--ink-2);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.unknowns {
-  padding: var(--ds-space-5);
-  background: var(--surface-2);
-  border-left: 3px solid var(--kind-problem);
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-}
-
-.unknowns ul {
-  max-width: var(--ds-container-text);
-  margin: var(--ds-space-3) 0 0;
-  padding-left: var(--ds-space-5);
-}
-
-.unknowns li + li {
-  margin-top: var(--ds-space-2);
-}
-
-.actions,
-.inlineActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ds-space-3);
-  align-items: center;
-}
-
-.actions {
-  padding-top: var(--ds-space-2);
-}
-
-.overridePanel h3,
-.requestHead h3 {
-  margin-top: var(--ds-space-2);
-  font-size: 19px;
-}
-
-.overridePanel > p:not(.eyebrow) {
-  max-width: var(--ds-container-text);
-}
-
-.overrideReasons {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--ds-space-2);
-  margin: var(--ds-space-4) 0;
-}
-
-.overrideReason {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--ds-space-3);
-  min-height: var(--ds-touch-target);
-  padding: var(--ds-space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+.handledCases summary,
+.routeReason summary,
+.evidenceItem summary {
   cursor: pointer;
 }
 
-.overrideReason:has(input:checked) {
+.handledCases summary {
+  min-height: var(--ds-touch-target);
+  padding: 12px 2px;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.handledCases ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.handledCases li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.handledCases li strong,
+.handledCases li span,
+.handledCases li small {
+  line-height: 1.4;
+}
+
+.handledCases li strong {
+  font-size: 12px;
+}
+
+.handledCases li span {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.handledCases li small {
+  color: var(--ink-2);
+  font-size: 11px;
+}
+
+.prospectDetail {
+  display: grid;
+  gap: 16px;
+}
+
+.prospectHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0 4px;
+}
+
+.prospectHeader h2 {
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.prospectHeader p {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.routeBadge {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  background: var(--warn-soft);
+  border-radius: var(--radius-pill);
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.decisionCard {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.decisionCard h3 {
+  font-size: 21px;
+}
+
+.decisionQuestion {
+  max-width: 62ch;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.decisionCard .why {
+  max-width: 68ch;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.primaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.routeReason {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.routeReason summary {
+  min-height: var(--ds-touch-target);
+  padding: 12px 0;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.routeReason p {
+  max-width: 68ch;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.handoff {
+  padding: 16px 18px;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+}
+
+.handoff h3 {
+  font-size: 16px;
+}
+
+.handoffFlow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.handoffFlow > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.handoffFlow span {
+  color: var(--ink-2);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.handoffFlow strong {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.handoff .handoffCaveat {
+  margin-top: 10px;
+  color: var(--ink-2);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.evidenceSection {
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.sectionHeading h3 {
+  font-size: 16px;
+}
+
+.sectionHint {
+  color: var(--ink-2);
+  font-size: 11px;
+}
+
+.evidenceList {
+  display: grid;
+}
+
+.evidenceItem {
+  border-top: 1px solid var(--line);
+}
+
+.evidenceItem summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--ds-touch-target);
+  padding: 11px 0;
+  list-style: none;
+}
+
+.evidenceItem summary::-webkit-details-marker {
+  display: none;
+}
+
+.evidenceItem summary > span:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.evidenceItem summary strong {
+  font-size: 13px;
+}
+
+.evidenceItem summary small {
+  color: var(--ink-2);
+  font-size: 11px;
+}
+
+.evidenceReady,
+.evidenceNeedsAttention {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.evidenceReady {
+  color: var(--evidence);
+}
+
+.evidenceNeedsAttention {
+  color: var(--warn);
+}
+
+.evidenceDetail {
+  max-width: 68ch;
+  padding: 0 0 13px 14px;
+  border-left: 2px solid var(--line-strong);
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.evidenceDetail p {
+  margin: 3px 0;
+}
+
+.evidenceDetail strong {
+  color: var(--ink);
+}
+
+.status {
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--evidence-soft);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.prototypeBoundary {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.clinicianView {
+  display: grid;
+  gap: 20px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.perspectiveBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+}
+
+.perspectiveBar > div {
+  display: grid;
+}
+
+.perspectiveBar strong {
+  font-size: 14px;
+}
+
+.clinicianCard {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+}
+
+.humanHeader {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.humanInitials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-touch-target);
+  height: var(--ds-touch-target);
+  background: var(--brand-surface);
+  border-radius: var(--radius-pill);
+  color: var(--brand-on-surface);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.humanHeader > div {
+  display: grid;
+}
+
+.humanHeader strong {
+  font-size: 14px;
+}
+
+.humanHeader span:last-child {
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.messageBody {
+  max-width: 650px;
+  padding: 24px 24px 16px;
+}
+
+.messageBody h2 {
+  max-width: 24ch;
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.messageBody p {
+  max-width: 62ch;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.messageBody blockquote {
+  margin: 18px 0;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.clinicianChoices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 24px 18px;
+}
+
+.choiceCard {
+  display: grid;
+  gap: 5px;
+  min-height: var(--ds-touch-target);
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  text-align: left;
+}
+
+.choiceCard:hover,
+.choiceSelected {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
 
-.overrideReason input {
-  flex: 0 0 auto;
-  margin-top: var(--ds-space-1);
-  accent-color: var(--accent);
+.choiceCard strong {
+  font-size: 14px;
 }
 
-.requestPreview {
-  border-left: 3px solid var(--accent);
-}
-
-.requestHead {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-4);
-  padding-bottom: var(--ds-space-4);
-  border-bottom: 1px solid var(--line);
-}
-
-.humanMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: var(--ds-touch-target);
-  height: var(--ds-touch-target);
-  border-radius: var(--radius-pill);
-  background: var(--brand-surface);
-  color: var(--brand-on-surface);
-  font-weight: 750;
-}
-
-.humanRole {
-  margin: var(--ds-space-1) 0 0;
-  font-size: 12px;
-}
-
-.message {
-  max-width: var(--ds-container-text);
-  margin: var(--ds-space-5) 0;
-}
-
-.message p {
-  margin: 0 0 var(--ds-space-3);
-}
-
-.technologyBoundary {
-  max-width: var(--ds-container-text);
-  padding: var(--ds-space-4);
-  background: var(--surface-2);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-}
-
-.technologyBoundary p {
-  margin: var(--ds-space-2) 0 0;
+.choiceCard span {
   color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
-.requestQuestion {
+.answerPanel {
   display: grid;
-  gap: var(--ds-space-2);
-  max-width: var(--ds-container-text);
-  margin: var(--ds-space-5) 0;
-  padding: var(--ds-space-4) 0;
-  border-block: 1px solid var(--line);
+  gap: 10px;
+  margin: 0 24px 18px;
+  padding: 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
 }
 
-.previewFoot {
-  margin: var(--ds-space-4) 0 0;
-  font-size: 12px;
-}
-
-.status {
-  min-height: 24px;
-  max-width: var(--ds-container-text);
-  margin: 0;
-  color: var(--ink-2);
+.answerPanel label,
+.answerPanel > strong {
   font-size: 13px;
+  font-weight: 700;
+}
+
+.answerPanel textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font: inherit;
   line-height: 1.5;
 }
 
-@media (max-width: 900px) {
-  .workspace {
+.answerPanel p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.answerPanel .button {
+  width: fit-content;
+}
+
+.clinicianBoundary {
+  margin: 0;
+  padding: 13px 24px 18px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+@media (max-width: 860px) {
+  .workflowRail,
+  .handoffFlow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workArea {
     grid-template-columns: 1fr;
   }
 
-  .queue {
-    position: static;
+  .attentionQueue {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
   }
 
-  .prospectList {
-    display: grid;
+  .attentionList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 640px) {
-  .prospectList,
-  .overrideReasons {
+@media (max-width: 560px) {
+  .workflowContext,
+  .decisionCard,
+  .handoff,
+  .evidenceSection {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .workflowRail,
+  .handoffFlow,
+  .attentionList,
+  .clinicianChoices {
     grid-template-columns: 1fr;
   }
 
-  .detailHead,
-  .sectionHead {
-    align-items: flex-start;
+  .prospectHeader,
+  .sectionHeading,
+  .perspectiveBar {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .sectionNote {
-    max-width: var(--ds-container-text);
-    text-align: left;
+  .routeBadge {
+    width: fit-content;
   }
 
-  .evidenceRow {
-    grid-template-columns: 1fr;
-    gap: var(--ds-space-4);
+  .primaryActions {
+    display: grid;
   }
 
-  .evidenceContext dl {
-    grid-template-columns: 1fr;
+  .primaryActions > button {
+    width: 100%;
   }
 
-  .routePanel,
-  .overridePanel,
-  .requestPreview,
-  .queue {
-    padding: var(--ds-space-4);
+  .perspectiveBar > button {
+    width: 100%;
   }
 
-  .requestHead {
-    align-items: flex-start;
+  .messageBody {
+    padding: 20px 18px 14px;
+  }
+
+  .messageBody h2 {
+    font-size: 23px;
+  }
+
+  .clinicianChoices {
+    padding: 0 18px 16px;
+  }
+
+  .answerPanel {
+    margin: 0 18px 16px;
+  }
+
+  .clinicianBoundary {
+    padding-left: 18px;
+    padding-right: 18px;
   }
 }

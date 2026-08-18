@@ -75,6 +75,7 @@ Held for this prototype only:
 
 Use these after working through the prototype rather than before it. Where possible, tie the answer to the specific prospect, evidence item, or route that caused the reaction.
 
+- **Workflow comprehension.** Can you tell what entered this queue, what decision belongs to you here, and where each action hands the prospect next? What still feels disconnected from the surrounding clinician-supply workflow?
 - **Evidence sufficiency.** Does the evidence profile give you enough information to trust the suggested next action? What is missing, over-weighted, or harder to interpret than it should be?
 - **Allocation of human judgment.** Which cases genuinely deserve structured human review, and which feel safe to resolve without it? Where is the current routing too cautious or too aggressive?
 - **Value of targeted evidence collection.** When the system asks for one more piece of evidence, does that feel meaningfully better than reviewing the prospect yourself? What would make that step useful rather than added process?
