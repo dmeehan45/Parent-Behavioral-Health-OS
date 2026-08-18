@@ -22,7 +22,12 @@ import {
 } from "@/components/map/canvas-theme";
 import { useLayoutOverrides } from "@/components/map/layout-overrides";
 import { nodeTypes, type CanvasNode, type DetailTier, type NodeState } from "@/components/map/model-node";
-import { edgeFlowLayers, hasActiveFlowLayer, type FlowLayerId } from "@/lib/model/flow-layers";
+import {
+  edgeFlowTransfers,
+  edgeProjectedFlowLayers,
+  hasActiveProjectedFlowLayer,
+  type FlowLayerId,
+} from "@/lib/model/flow-layers";
 import type { LensId, ModelGraph, ModelNode } from "@/lib/model/types";
 
 type Props = {
@@ -133,8 +138,8 @@ export function GraphCanvas({
   }, [graph.edges, lens, lensNodes]);
 
   const visibleEdges = useMemo(
-    () => (lens === "flow" ? lensEdges.filter((edge) => hasActiveFlowLayer(edge, activeLayerSet)) : lensEdges),
-    [lens, lensEdges, activeLayerSet],
+    () => (lens === "flow" ? lensEdges.filter((edge) => hasActiveProjectedFlowLayer(graph, edge, activeLayerSet)) : lensEdges),
+    [lens, lensEdges, graph, activeLayerSet],
   );
 
   const layout = useMemo(
@@ -225,16 +230,17 @@ export function GraphCanvas({
     () =>
       visibleEdges.map((edge) => {
         const feedback = edge.kind === "feedback";
-        const vertical = edge.kind !== "flow" && edge.kind !== "feedback";
+        const flowLayers = edgeProjectedFlowLayers(graph, edge);
+        const visibleFlowLayers = flowLayers.filter((layer) => activeLayerSet.has(layer));
+        const informational = lens === "flow" && edge.kind === "flow" && visibleFlowLayers.length === 1 && visibleFlowLayers[0] === "data";
+        const vertical = (edge.kind !== "flow" && edge.kind !== "feedback") || informational;
         const dimmed = related ? !(related.has(edge.source) && related.has(edge.target)) : false;
         // The stage chain is the flow lens's argument; on every other lens it
         // is context for a vertical spine. Context keeps the row reading as a
         // sequence but drops the arrowheads and the relationship labels, so
         // the ink spends itself on the connections the lens is actually about.
         const context = lens !== "flow" && edge.kind === "flow";
-        const flowLayers = edgeFlowLayers(edge);
-        const informational = lens === "flow" && edge.kind === "flow" && flowLayers.length === 1 && flowLayers[0] === "data";
-        const experiential = flowLayers.includes("experience");
+        const experiential = visibleFlowLayers.includes("experience");
         const color = feedback
           ? EDGE_COLOR.feedback
           : informational
@@ -243,8 +249,12 @@ export function GraphCanvas({
               ? EDGE_COLOR.bet
               : EDGE_COLOR[edge.kind];
         const stageConnection = edge.kind === "flow" || edge.kind === "feedback";
-        const layerLabel = lens === "flow" && stageConnection && flowLayers.length > 0 ? flowLayers.join(" · ") : undefined;
-        const label = [edge.label, layerLabel].filter(Boolean).join(" · ");
+        const layerLabel = lens === "flow" && stageConnection && visibleFlowLayers.length > 0 ? visibleFlowLayers.join(" · ") : undefined;
+        const transfers = edgeFlowTransfers(graph, edge).filter((transfer) => activeLayerSet.has(transfer.layer));
+        const transferLabel = transfers.length > 0
+          ? `${transfers.slice(0, 2).map((transfer) => transfer.label).join(", ")}${transfers.length > 2 ? ` +${transfers.length - 2}` : ""}`
+          : undefined;
+        const label = [edge.label, layerLabel, transferLabel].filter(Boolean).join(" · ");
 
         return {
           id: edge.id,
@@ -267,7 +277,7 @@ export function GraphCanvas({
           },
         };
       }),
-    [visibleEdges, related, showLabels, lens],
+    [visibleEdges, graph, activeLayerSet, related, showLabels, lens],
   );
 
   /* ---- Viewport behaviour ----------------------------------------------- */
