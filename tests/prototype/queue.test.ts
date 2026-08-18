@@ -105,6 +105,25 @@ test("the open questions a bet is scoped around ride along", () => {
   assert.deepEqual(item.awaiting, ["define-matching-quality"]);
 });
 
+test("a recorded session changes the ask from reviewing to deciding", () => {
+  const built = bet("session-bet", { ...EXPERIMENT, [SECTION.reviewPrompts]: "What surprised you?" }, {
+    prototype: { status: "working", route: "/prototypes/session-bet", builtAgainst: FINGERPRINT },
+  });
+
+  const [undecided] = prototypeQueue([built], new Map([["session-bet", { runs: 1, undecided: 5 }]]));
+  assert.equal(undecided.state, "reviewable");
+  assert.match(undecided.why, /1 session recorded in staging, 5 finding\(s\) undecided/);
+  assert.match(undecided.next, /Decide the session's findings/);
+  assert.doesNotMatch(undecided.next, /Put it in front of participants/);
+
+  const [decided] = prototypeQueue([built], new Map([["session-bet", { runs: 1, undecided: 0 }]]));
+  assert.match(decided.why, /findings decided/);
+  assert.match(decided.next, /next iteration builds from what was accepted/);
+
+  const [none] = prototypeQueue([built]);
+  assert.match(none.next, /Put it in front of participants/);
+});
+
 test("a reviewable bet without review prompts is sent back for them", () => {
   const [item] = prototypeQueue([
     bet("promptless-bet", EXPERIMENT, {

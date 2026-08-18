@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { checkFlowContinuity } from "../../lib/content/flow";
 import { getRepository } from "../../lib/content/repository";
-import { projectModel } from "../../lib/model/graph";
 import { openEnds } from "../../lib/model/open-ends";
 
 function step(id: string, overrides: Record<string, unknown> = {}) {
@@ -145,12 +144,27 @@ test("the model's own flow carries every handoff it claims", () => {
 // The other half of the same idea: what validation deliberately allows, the
 // interface has to say out loud, or an unmodelled part of the system is
 // indistinguishable from a finished one.
+//
+// A fixture rather than the live model: the first version of this test read
+// `propose-match` out of `projectModel()` and pinned its unsupplied Family
+// input — so the day `family-demand` got Steps and the gap closed, which is
+// the outcome the invitation exists to invite, the test went red. Describing
+// a part of the system must never turn a content edit into a failing build.
 test("a state nothing produces is offered to the reader as an open end", () => {
-  const graph = projectModel();
-  const proposeMatch = graph.nodes.find((node) => node.id === "step:propose-match");
-  assert.ok(proposeMatch, "expected the matching step to be projected");
+  const consumer = { id: "step:propose", kind: "step", title: "Propose a Match", coverage: { total: 0, filled: 0, missing: [] } };
+  const producer = { id: "step:prepare", kind: "step", title: "Become Ready", coverage: { total: 0, filled: 0, missing: [] } };
+  const family = { id: "entity:family", kind: "entity", title: "Family", coverage: { total: 0, filled: 0, missing: [] } };
+  const input = { kind: "state", source: family.id, target: consumer.id, label: "match-ready" };
+  const output = { kind: "state", source: producer.id, target: family.id, label: "match-ready" };
+  const graph = (nodes: unknown[], edges: unknown[]) =>
+    ({ nodes, edges } as unknown as Parameters<typeof openEnds>[0]);
+  const node = consumer as unknown as Parameters<typeof openEnds>[1];
 
-  const unsupplied = openEnds(graph, proposeMatch).filter((end) => end.kind === "unsupplied");
+  const unsupplied = openEnds(graph([consumer, family], [input]), node).filter((end) => end.kind === "unsupplied");
   assert.equal(unsupplied.length, 1);
   assert.match(unsupplied[0].invitation, /Family in match-ready/);
+
+  // One producer is enough, and the invitation withdraws itself.
+  const supplied = openEnds(graph([consumer, producer, family], [input, output]), node);
+  assert.deepEqual(supplied.filter((end) => end.kind === "unsupplied"), []);
 });

@@ -86,6 +86,7 @@ export const EDGE_LEGEND: Array<{ kind: EdgeKind; label: string; description: st
   { kind: "flow", label: "Operating flow", description: "How work moves between stages." },
   { kind: "feedback", label: "Return / feedback loop", description: "A backward relationship: operating rework or learning sent to earlier work." },
   { kind: "process", label: "Process sequence", description: "Step order inside an expanded stage." },
+  { kind: "return", label: "Return route", description: "Where an exception sends the work back — rework, not sequence." },
   { kind: "problem", label: "Problem", description: "Where a stage or step is thought to break." },
   { kind: "bet", label: "Bet", description: "A solution proposed against a problem." },
   { kind: "prototype", label: "Prototype", description: "Working software that makes a bet concrete." },

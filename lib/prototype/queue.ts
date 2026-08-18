@@ -41,6 +41,9 @@ export type BuildItem = {
   awaiting: string[];
 };
 
+/** What staging already holds about a bet's review sessions. */
+export type SessionGlance = { runs: number; undecided: number };
+
 /**
  * Claims that are currently wrong come first, then work only a person can
  * finish, then work an agent can pick up, then shaping the person still owes.
@@ -55,13 +58,13 @@ const BUILD_ORDER: Record<BuildState, number> = {
   unshaped: 6,
 };
 
-export function prototypeQueue(bets: Bet[]): BuildItem[] {
+export function prototypeQueue(bets: Bet[], sessions?: Map<string, SessionGlance>): BuildItem[] {
   return bets
-    .map(itemFor)
+    .map((bet) => itemFor(bet, sessions?.get(bet.id)))
     .sort((a, b) => BUILD_ORDER[a.state] - BUILD_ORDER[b.state] || a.bet.localeCompare(b.bet));
 }
 
-function itemFor(bet: Bet): BuildItem {
+function itemFor(bet: Bet, sessions?: SessionGlance): BuildItem {
   const { state, drifted } = conformance(bet);
   const base = { bet: bet.id, title: bet.title, awaiting: bet.awaiting ?? [] };
   const brief = `npm run prototype:brief -- ${bet.id}`;
@@ -116,16 +119,39 @@ function itemFor(bet: Bet): BuildItem {
     };
   }
 
+  // A session already in staging changes the ask. Recorded but undecided, the
+  // next move is a person's judgement over what it taught — another session,
+  // or a build against undecided observations, would run ahead of the gate.
+  const recorded = sessions?.runs ?? 0;
+  const sessionNote = (glance: SessionGlance) =>
+    `${glance.runs} session${glance.runs === 1 ? "" : "s"} recorded in staging` +
+    (glance.undecided > 0 ? `, ${glance.undecided} finding(s) undecided` : ", findings decided");
+
   if (bet.prototype?.status === "tested") {
     return {
       ...base,
       state: "reviewed",
-      why: "Built, current, and reviewed with participants.",
-      next: "What the sessions taught enters as a handoff with a 'session' source and is decided at /review — docs/prototype-workflow.md, closing the loop.",
+      why: `Built, current, and reviewed with participants${recorded ? ` — ${sessionNote(sessions as SessionGlance)}` : ""}.`,
+      next:
+        recorded && (sessions as SessionGlance).undecided > 0
+          ? "Decide the session's findings at /review — what a review taught cannot change anything until a person says what it means."
+          : "What the sessions taught enters as a handoff with a 'session' source and is decided at /review — docs/prototype-workflow.md, closing the loop.",
     };
   }
 
   const prompts = Boolean(bet.sections[SECTION.reviewPrompts]?.trim());
+  if (recorded) {
+    const glance = sessions as SessionGlance;
+    return {
+      ...base,
+      state: "reviewable",
+      why: `Built and current, and ${sessionNote(glance)}.`,
+      next:
+        glance.undecided > 0
+          ? "Decide the session's findings at /review before the next session or build — undecided observations cannot authorize anything."
+          : "The session's findings are decided. A person updates prototype.status if the review used the named script, and the next iteration builds from what was accepted.",
+    };
+  }
   return {
     ...base,
     state: "reviewable",

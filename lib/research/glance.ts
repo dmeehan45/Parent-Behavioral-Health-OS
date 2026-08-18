@@ -56,3 +56,44 @@ export function notesAboutRecord(nodeId: string): Array<{ run: ReviewRun; note: 
     return [];
   }
 }
+
+/**
+ * Prototype review sessions recorded in staging, keyed by the bet observed.
+ *
+ * The build queue asks this so it stops requesting a session that already
+ * happened: a `session` source names its bet in the locator, and whether the
+ * run's findings have been decided is the difference between "review this"
+ * and "decide what the review taught".
+ */
+export function sessionsByBet(): Map<string, { runs: number; undecided: number }> {
+  try {
+    const decided = new Map(
+      loadDecisions().map((record) => [
+        record.decisions.runId,
+        new Set(record.decisions.decisions.map((decision) => decision.id)),
+      ]),
+    );
+    const byBet = new Map<string, { runs: number; undecided: number }>();
+    for (const { handoff } of loadHandoffs()) {
+      const bets = new Set(
+        handoff.sources
+          .filter((source) => source.kind === "session" && source.locator.bet)
+          .map((source) => source.locator.bet as string),
+      );
+      if (bets.size === 0) continue;
+      const dispositions = decided.get(handoff.run.id) ?? new Set<string>();
+      const undecided = [...handoff.findings, ...handoff.candidates].filter(
+        (item) => !dispositions.has(`decide-${handoff.run.id}-${item.id}`),
+      ).length;
+      for (const bet of bets) {
+        const tally = byBet.get(bet) ?? { runs: 0, undecided: 0 };
+        tally.runs += 1;
+        tally.undecided += undecided;
+        byBet.set(bet, tally);
+      }
+    }
+    return byBet;
+  } catch {
+    return new Map();
+  }
+}

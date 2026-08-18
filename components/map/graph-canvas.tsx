@@ -235,6 +235,10 @@ export function GraphCanvas({
     () =>
       visibleEdges.map((edge) => {
         const feedback = edge.kind === "feedback";
+        // Step-level rework: drawn like a loop, because it is one — bottom to
+        // bottom, unranked, never animated. Animation is the learning-feedback
+        // signal, and a returned proposal is work, not learning.
+        const returns = edge.kind === "return";
         const flowLayers = edgeProjectedFlowLayers(graph, edge);
         const visibleFlowLayers = flowLayers.filter((layer) => activeLayerSet.has(layer));
         const informational = lens === "flow" && edge.kind === "flow" && visibleFlowLayers.length === 1 && visibleFlowLayers[0] === "data";
@@ -267,10 +271,10 @@ export function GraphCanvas({
           id: edge.id,
           source: edge.source,
           target: edge.target,
-          sourceHandle: feedback ? "sb" : vertical ? "sb" : "sr",
-          targetHandle: feedback ? "tb" : vertical ? "tt" : "tl",
-          type: richConnection ? "connection" : feedback ? "default" : "smoothstep",
-          pathOptions: richConnection || feedback ? undefined : { borderRadius: 14 },
+          sourceHandle: feedback || returns ? "sb" : vertical ? "sb" : "sr",
+          targetHandle: feedback || returns ? "tb" : vertical ? "tt" : "tl",
+          type: richConnection ? "connection" : feedback || returns ? "default" : "smoothstep",
+          pathOptions: richConnection || feedback || returns ? undefined : { borderRadius: 14 },
           data: richConnection
             ? { connection: edge.connection, activeLayers, dimmed, feedback, returnLoop, onOpen: onSelectConnection }
             : undefined,
@@ -283,7 +287,7 @@ export function GraphCanvas({
           style: {
             stroke: color,
             strokeWidth: context ? 1.1 : edge.kind === "flow" ? 1.6 : 1.2,
-            strokeDasharray: feedback ? "6 5" : informational || edge.kind === "state" ? "3 4" : undefined,
+            strokeDasharray: feedback || returns ? "6 5" : informational || edge.kind === "state" ? "3 4" : undefined,
           },
         };
       }),

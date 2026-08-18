@@ -37,6 +37,13 @@ export const RELATIONSHIPS: Record<string, Resolution> = {
 
   "step.stage": { structural: true, note: "Containment, not a relation between peers. Becomes the step node's parentId." },
   "step.next": { edge: "process", note: "The order work moves through a stage." },
+  "step.exceptions.route": {
+    edge: "return",
+    note:
+      "Where an exception sends the work — the model's rework loops, the step-level `returns_to`. Drawn apart from " +
+      "the forward sequence and never ranked, so an expanded stage stops showing a straight ladder the model itself " +
+      "contradicts.",
+  },
   "step.entity": { edge: "state", note: "What a step consumes and leaves behind." },
   "step.claims": { edge: "evidence", note: "What a step rests on. The same link as claim.targets, from the other side." },
   "step.metrics": { edge: "evidence", note: "What would tell us this step is working." },
@@ -105,6 +112,7 @@ function hasEdge(graph: ModelGraph, a: string, b: string, kind: string) {
 
 const NODE_KIND_OF_FIELD: Record<string, string> = {
   "step.next": "step",
+  "step.exceptions.route": "step",
   "step.entity": "entity",
   "step.claims": "claim",
   "step.metrics": "metric",

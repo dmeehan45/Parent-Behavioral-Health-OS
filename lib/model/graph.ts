@@ -327,6 +327,24 @@ export function projectModel(): ModelGraph {
       });
     }
 
+    // Rework going backward: where an exception sends the flow. A separate
+    // kind, not `process`, so the interior ranking never reads it — a return
+    // to an earlier step is a loop, and ranking on it would scramble the
+    // sequence it loops over. Deduplicated because two exceptions may
+    // legitimately route to the same step.
+    const routed = new Set<string>();
+    for (const exception of step.exceptions ?? []) {
+      if (typeof exception === "string" || !exception.route || routed.has(exception.route)) continue;
+      routed.add(exception.route);
+      edges.push({
+        id: `return:${step.id}->${exception.route}`,
+        source: nodeId("step", step.id),
+        target: nodeId("step", exception.route),
+        kind: "return",
+        lenses: ["flow"],
+      });
+    }
+
     for (const io of step.inputs ?? []) {
       edges.push({
         id: `state:${io.entity}->${step.id}`,

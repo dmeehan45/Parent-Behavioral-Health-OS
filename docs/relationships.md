@@ -64,6 +64,7 @@ read from both ends, which is why the feature landed on them.
 | --- | --- | --- | --- |
 | `map.yaml` `edges` | stage → stage | `flow` | every lens |
 | `step.next` | step → step | `process` | flow |
+| `step.exceptions.route` | step → step | `return` | flow |
 | `step.stage` | step → stage | — (becomes `parentId`) | containment |
 | `step.inputs` / `outputs` | step ↔ entity | `state` | entities |
 | `problem.targets` | problem → stage/step | `problem` | bets |
