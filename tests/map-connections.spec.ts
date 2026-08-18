@@ -1,33 +1,42 @@
 import { expect, test } from "@playwright/test";
 
-test("stage connections expose their projected depth without leaving the map", async ({ page }) => {
+test("default and all-layer overviews keep connection text off the stage map", async ({ page }) => {
   await page.goto("/map");
+  await expect(page.getByRole("button", { name: "Layers" })).toBeVisible({ timeout: 15_000 });
 
-  const connection = page.getByRole("button", { name: /Inspect (handoff|return|feedback)/ }).first();
-  await expect(connection).toBeVisible({ timeout: 15_000 });
-  await connection.click();
+  // The overview should communicate topology with lines, not repeat a label box
+  // between every Stage. This is the state that previously obscured node text.
+  await expect(page.locator(".connection-detail-label")).toHaveCount(0);
 
-  const sheet = page.getByRole("complementary", { name: "Stage connection detail" });
-  await expect(sheet).toBeVisible();
-  await expect(sheet).toContainText("Connection");
-  await expect(sheet).toContainText(/Operating handoffs|Data & state crossing|Still unmodelled|Problems that span this boundary/);
+  await page.getByRole("button", { name: "Layers" }).click();
+  await page.getByRole("checkbox", { name: "Show Data & state" }).check();
+  await page.getByRole("checkbox", { name: "Show Actors" }).check();
 
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  expect(overflow, `opening a connection makes the page overflow by ${overflow}px`).toBeLessThanOrEqual(1);
-
-  // Connection selection is part of the shareable view just like an open node.
-  await expect.poll(() => new URL(page.url()).searchParams.has("connection")).toBe(true);
+  // Even with every layer enabled, the canvas stays an overview. Layer-specific
+  // payload text appears only after the reader isolates a question.
+  await expect(page.locator(".connection-detail-label")).toHaveCount(0);
 });
 
-test("isolating Experience shows unmodelled experience boundaries instead of an empty map", async ({ page }) => {
+test("isolating Actors exposes real role continuity and keeps the connection inspectable", async ({ page }) => {
   await page.goto("/map");
   await expect(page.getByRole("button", { name: "Layers" })).toBeVisible({ timeout: 15_000 });
   await page.getByRole("button", { name: "Layers" }).click();
 
+  await page.getByRole("checkbox", { name: "Show Actors" }).check();
   await page.getByRole("checkbox", { name: "Hide Operating flow" }).uncheck();
-  await page.getByRole("checkbox", { name: "Hide Data & state" }).uncheck();
   await page.getByRole("checkbox", { name: "Hide Learning" }).uncheck();
+  await page.getByRole("button", { name: "Close layer controls" }).click();
 
-  await expect(page.getByText("experience · gap").first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Inspect handoff" }).first()).toBeVisible();
+  const connection = page.getByRole("button", { name: "Inspect actor connection" }).first();
+  await expect(connection).toBeVisible();
+  await expect(connection).toContainText(/Clinician|Family/);
+  await connection.click();
+
+  const sheet = page.getByRole("complementary", { name: "Stage connection detail" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet).toContainText("Actors continuing across the boundary");
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow, `opening a connection makes the page overflow by ${overflow}px`).toBeLessThanOrEqual(1);
+  await expect.poll(() => new URL(page.url()).searchParams.has("connection")).toBe(true);
 });
