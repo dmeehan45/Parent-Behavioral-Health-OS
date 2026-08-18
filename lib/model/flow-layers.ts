@@ -34,7 +34,7 @@ export const FLOW_LAYER_TERMS: FlowLayerTerm[] = [
     id: "experience",
     label: "Experience",
     shortLabel: "experience",
-    description: "Participant experience carried across a boundary. Gaps stay explicit rather than inferred.",
+    description: "Participant experience carried across a boundary. Gaps stay visible rather than inferred.",
   },
   {
     id: "learning",
@@ -85,7 +85,7 @@ export function edgeFlowTransfers(first: ModelEdge | Pick<ModelGraph, "nodes" | 
   return projectedEdge(first, second).connection?.transfers ?? [];
 }
 
-/** Layers visible on an edge after the projection has assembled connection depth. */
+/** Layers whose movement is explicitly asserted on an edge. */
 export function edgeProjectedFlowLayers(edge: ModelEdge): FlowLayerId[];
 export function edgeProjectedFlowLayers(graph: Pick<ModelGraph, "nodes" | "edges">, edge: ModelEdge): FlowLayerId[];
 export function edgeProjectedFlowLayers(
@@ -94,6 +94,20 @@ export function edgeProjectedFlowLayers(
 ): FlowLayerId[] {
   const edge = projectedEdge(first, second);
   return edge.connection?.layers ?? edgeFlowLayers(edge);
+}
+
+/**
+ * Layers worth inspecting on this boundary, including an explicit gap.
+ *
+ * Experience is deliberately not asserted merely because a Stage connection
+ * exists, but an operating handoff can still know that its experience payload
+ * is missing. An Experience-only view should expose those unknown boundaries,
+ * not clear every edge from the canvas and hide the research surface.
+ */
+export function edgeInspectableFlowLayers(edge: ModelEdge): FlowLayerId[] {
+  const visible = new Set<FlowLayerId>(edgeProjectedFlowLayers(edge));
+  for (const gap of edge.connection?.gaps ?? []) visible.add(gap);
+  return FLOW_LAYER_IDS.filter((layer) => visible.has(layer));
 }
 
 export function hasActiveProjectedFlowLayer(edge: ModelEdge, active: Set<FlowLayerId>): boolean;
@@ -109,7 +123,7 @@ export function hasActiveProjectedFlowLayer(
 ): boolean {
   const edge = third ? (second as ModelEdge) : (first as ModelEdge);
   const active = third ?? (second as Set<FlowLayerId>);
-  const layers = edgeProjectedFlowLayers(edge);
+  const layers = edgeInspectableFlowLayers(edge);
   return layers.length === 0 || layers.some((layer) => active.has(layer));
 }
 
