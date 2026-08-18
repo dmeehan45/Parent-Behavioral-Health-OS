@@ -1,0 +1,202 @@
+contractVersion: 1
+run:
+  id: 2026-08-18-deepen-matching-quality
+  question: >
+    What makes clinician-patient matching high quality under incomplete patient, clinician, relationship, and supply evidence; which signals can legitimately inform a particular pairing; and how should later care evidence improve future routing without collapsing match quality into acceptance, retention, or a clinician rank?
+  synthesis: >
+    The evidence supports treating matching as a multidimensional, uncertainty-bearing routing problem rather than a binary compatibility verdict or a clinician leaderboard. Engagement, alliance, clinical benefit, access, and continuity should remain distinguishable because preference accommodation can improve dropout and alliance without showing corresponding average clinical benefit. Historical problem-domain clinician performance can improve assignment when sufficiently observed, but this evidence is contextual and sparse at cold start rather than a general clinician score. In child and family care, patient, parent, and therapist perspectives do not collapse cleanly, so the system should preserve actor-specific evidence without defaulting authority to one participant. Early care can update dimension-specific beliefs about future fit, but it does not validate a binary match or imply mid-care reassignment. Finally, downstream learning must preserve the conditions under which observations became available because prior decisions and resource constraints can bias labels. Reviewer-supplied operating constraints about non-gamified clinician evidence, confidence visibility, and realistic data availability are retained as anchored context rather than represented as externally established findings.
+  createdAt: 2026-08-18
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: public-research
+    context: >
+      Deep research on clinician-patient matching was oriented from the current repository and pressure-tested conversationally with the accountable reviewer. Sources prioritize direct psychotherapy matching evidence, meta-analyses of preference and youth alliance, and primary clinical-ML work on label-selection bias. The handoff deliberately separates externally supported findings from reviewer-provided product and operating constraints.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+  answers: [define-matching-quality]
+sources:
+  - id: source-windle-treatment-preference-meta
+    identity: windle-treatment-preference-meta-2019
+    kind: publication
+    title: "Association of Patient Treatment Preference With Dropout and Clinical Outcomes in Adult Psychosocial Mental Health Interventions: A Systematic Review and Meta-analysis"
+    locator:
+      url: https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2756319
+      doi: 10.1001/jamapsychiatry.2019.3750
+    access: available
+    publishedAt: 2019-12-04
+  - id: source-constantino-strength-matching-rct
+    identity: constantino-measurement-based-matching-rct-2021
+    kind: publication
+    title: "Effect of Matching Therapists to Patients vs Assignment as Usual on Adult Psychotherapy Outcomes: A Randomized Clinical Trial"
+    locator:
+      url: https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2780658
+      doi: 10.1001/jamapsychiatry.2021.1221
+    access: available
+    publishedAt: 2021-06-09
+  - id: source-cabral-racial-concordance-meta
+    identity: cabral-smith-racial-ethnic-matching-meta-2011
+    kind: publication
+    title: "Racial/ethnic matching of clients and therapists in mental health services: a meta-analytic review of preferences, perceptions, and outcomes"
+    locator:
+      url: https://pubmed.ncbi.nlm.nih.gov/21875181/
+      doi: 10.1037/a0025266
+    access: available
+    publishedAt: 2011-10-01
+  - id: source-roest-alliance-perspectives-meta
+    identity: roest-alliance-ratings-meta-2023
+    kind: publication
+    title: "A Meta-Analysis on Differences and Associations between Alliance Ratings in Child and Adolescent Psychotherapy"
+    locator:
+      url: https://pubmed.ncbi.nlm.nih.gov/35862768/
+      doi: 10.1080/15374416.2022.2093210
+    access: available
+    publishedAt: 2022-07-21
+  - id: source-roest-alliance-outcome-meta
+    identity: roest-alliance-outcome-meta-2023
+    kind: publication
+    title: "A Three-level Meta-analysis on the Alliance-Outcome Association in Child and Adolescent Psychotherapy"
+    locator:
+      url: https://pubmed.ncbi.nlm.nih.gov/36394705/
+      doi: 10.1007/s10802-022-00986-2
+    access: available
+    publishedAt: 2022-11-17
+  - id: source-chang-disparate-censorship
+    identity: chang-disparate-censorship-clinical-ml-2022
+    kind: publication
+    title: "Disparate Censorship & Undertesting: A Source of Label Bias in Clinical Machine Learning"
+    locator:
+      url: https://proceedings.mlr.press/v182/chang22a.html
+    access: available
+    publishedAt: 2022-08-05
+  - id: source-predictive-selection-run
+    identity: repo-predictive-selection-signals-2026-08-17
+    kind: repository
+    title: "Research handoff: identify predictive clinician selection signals"
+    locator:
+      repository: dmeehan45/Parent-Behavioral-Health-OS
+      path: research/handoffs/2026-08-17-identify-predictive-selection-signals.yaml
+    access: available
+    publishedAt: 2026-08-17
+findings:
+  - id: finding-match-quality-dimensions-stay-separate
+    statement: >
+      High-quality matching should keep feasibility, engagement and alliance, clinical benefit, access or burden, and continuity outcomes distinguishable rather than treating acceptance, attendance, dropout, or retention as a single success measure; in adult psychosocial care, receiving a preferred treatment was associated with lower dropout and stronger alliance without evidence of significant improvement in the clinical outcomes studied.
+    sourceIds: [source-windle-treatment-preference-meta]
+    suggestedTargets: [matching, propose-match, review-match, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The meta-analysis concerns adult treatment preference rather than therapist-person matching, and its searches ended in 2019. It strongly separates engagement from clinical benefit but does not establish a complete matching-quality dimension set for parent, child, or family care.
+  - id: finding-contextual-performance-can-inform-pairing-not-rank
+    statement: >
+      Historical clinician performance can be useful as patient-specific matching evidence when it is measured in relevant problem domains and carried with reliability context, but it should not be interpreted as a general clinician rank; direct randomized evidence supports domain-strength matching in adult outpatient psychotherapy, while cold-start clinicians may have no comparable longitudinal performance record available to the platform.
+    sourceIds: [source-constantino-strength-matching-rct, source-predictive-selection-run]
+    suggestedTargets: [matching, quality-outcomes, clinician-performance-loses-context]
+    classification: qualifying
+    evidenceStance: qualifies
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The randomized trial used one outcome system in adult outpatient care and required at least 15 historical cases. It does not establish transfer across parent, child, family, modality, acuity, or platform contexts, nor does it solve cold start when prior systems of record are inaccessible.
+  - id: finding-treatment-preference-is-not-clinical-benefit
+    statement: >
+      Patient preference should remain a distinct matching input unless stronger evidence supports a clinical interpretation: accommodation of preferred psychosocial treatment is associated with lower dropout and stronger therapeutic alliance, but the same meta-analysis found no significant association with depression or anxiety outcomes, global outcomes, satisfaction, or remission.
+    sourceIds: [source-windle-treatment-preference-meta]
+    suggestedTargets: [matching, propose-match, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      This evidence concerns treatment choice rather than every kind of therapist preference. It supports preserving preference as preference and does not establish how much any individual preference should influence a clinician shortlist.
+  - id: finding-racial-concordance-is-preference-not-general-success
+    statement: >
+      Racial or ethnic concordance is better treated as a patient preference or experience consideration than as a general clinical-success criterion: meta-analytic evidence found substantial same-race or same-ethnicity therapist preference and more positive perceptions, but little average treatment-outcome benefit and meaningful heterogeneity.
+    sourceIds: [source-cabral-racial-concordance-meta]
+    suggestedTargets: [matching, propose-match, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The evidence is older and heterogeneous, and average null effects can conceal important subgroup, context, identity, discrimination, or trust effects. The finding argues against using concordance as a universal outcome predictor, not against honoring a person's expressed preference.
+  - id: finding-family-perspectives-must-remain-distinct
+    statement: >
+      Child, parent, and therapist perspectives on therapeutic alliance should remain distinguishable rather than being collapsed into one relationship signal; meta-analytic evidence shows only small-to-moderate convergence across raters, while alliance-outcome associations in youth care are themselves modest and vary by perspective.
+    sourceIds: [source-roest-alliance-perspectives-meta, source-roest-alliance-outcome-meta]
+    suggestedTargets: [matching, quality-outcomes]
+    classification: new
+    evidenceStance: supports
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      Alliance is observed after care begins rather than at initial matching. Divergent perspectives establish a need to preserve actor-specific evidence but do not establish which patient, parent, caregiver, clinician, or other care-web actor should hold authority in a particular matching decision.
+  - id: finding-early-care-updates-association-not-binary-match
+    statement: >
+      Early care evidence is better used to update dimension-specific expectations about future clinician-patient fit than to validate or invalidate a binary match: alliance is associated with later outcomes, but it is relational, perspective-dependent, and not a pure clinician trait, so active-care observations can deepen future routing evidence without implying that current care should automatically be reassigned.
+    sourceIds: [source-roest-alliance-perspectives-meta, source-roest-alliance-outcome-meta, source-predictive-selection-run]
+    suggestedTargets: [matching, care-relationship, quality-outcomes]
+    classification: qualifying
+    evidenceStance: contextualizes
+    evidenceQuality: secondary
+    generalizedApplicability: true
+    uncertainty: >
+      The literature supports alliance as an informative relationship signal but does not validate one platform-specific associative-spectrum model, update rate, or intervention threshold. Treating this as reusable routing evidence is an operating-model inference that requires later validation.
+  - id: finding-learning-needs-decision-time-label-context
+    statement: >
+      When whether an outcome label is observed depends on prior decisions, access, or resource use, naive learning can encode those processes as if they were outcome truth; a matching learning loop should therefore retain decision-time context about assignment, exposure, available alternatives, supply constraints, and observation missingness before using downstream labels to update clinician or pairing associations.
+    sourceIds: [source-chang-disparate-censorship]
+    suggestedTargets: [matching, quality-outcomes, clinician-performance-loses-context]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: true
+    uncertainty: >
+      The cited clinical-ML work directly studies diagnostic testing and undertesting rather than psychotherapy matching. The selective-label mechanism transfers conceptually, but the exact matching confounders and correction methods must be established empirically rather than imported from that setting.
+notes:
+  - id: note-cold-start-is-the-default-entry-condition
+    statement: >
+      Prospect evaluation should assume that a usable longitudinal clinician performance record may not be available from prior systems of record. Cold start should remain explicit, and platform-specific evidence should deepen through observed care rather than being fabricated from resume similarity or pedigree.
+    sourceIds: [source-predictive-selection-run]
+    anchors: [matching, define-matching-quality, define-clinician-quality]
+  - id: note-clinician-profile-is-not-a-leaderboard
+    statement: >
+      Reviewer operating constraint: the clinician evidence profile exists to support contextual decisions, not to become a public or internal leaderboard. Do not expose a gamified quality score for clinicians to optimize, and do not confuse matching activity with rank-ordering clinicians across contexts where performance may not transfer.
+    anchors: [matching, clinician-performance-loses-context, define-matching-quality]
+  - id: note-confidence-is-primarily-operator-audit-context
+    statement: >
+      Reviewer product direction: patients and clinicians do not need a numerical match-confidence score or the matching algorithm. They may need a useful explanation of why a pairing appears relevant. Operators need deeper auditability, visibility into evidence quality and supply constraints, and the ability to inspect or adjust routing logic when balancing demand across the network.
+    anchors: [matching, propose-match, review-match, define-matching-quality]
+  - id: note-confidence-representation-is-prototypeable
+    statement: >
+      How uncertainty should be represented on each decision surface is better treated as a product-learning question than another broad literature question. Preserve enough underlying evidence and uncertainty for multiple representations, then test whether explanations, missing-information cues, alternatives, or operator controls improve the relevant decision.
+    anchors: [matching, propose-match, review-match, define-matching-quality]
+  - id: note-match-is-an-associative-record-not-a-verdict
+    statement: >
+      Reviewer model direction: do not treat Match as a binary validation event. Active-care evidence should update reusable associations between clinician strengths and future demand dimensions; it should not imply automatic mid-care switching or a claim that a clinician is categorically matched to a fixed set of families.
+    anchors: [matching, care-relationship, define-matching-quality]
+  - id: note-care-web-authority-must-not-default-to-parent
+    statement: >
+      The existing authority question should distinguish the primary client, primary clinician, and secondary care web such as parents, caregivers, children, or other family participants. Matching should not silently default authority to the parent when those roles or interests differ.
+    anchors: [define-family-patient-caregiver-authority, matching]
+  - id: note-data-origin-precedes-data-design
+    statement: >
+      Before specifying an ideal matching profile, the model should make realistic supply and demand entry paths explicit: where clinicians and patients or families come from, which information is available or verifiable at that point, and which additional question is worth the burden because it can change a matching decision.
+    anchors: [clinician-supply, family-demand, matching, define-matching-quality]
+questions:
+  - id: question-pre-match-evidence-availability
+    question: >
+      Which patient, caregiver, family, and clinician evidence is realistically available or obtainable at each supply and demand entry path before matching, and which additional inputs materially change a decision enough to justify collecting them?
+  - id: question-clinician-evidence-reliability-for-matching
+    question: >
+      What recency, sample depth, outcome coverage, case-mix or context similarity, missingness, and attribution conditions make a clinician performance observation sufficiently reliable to influence a specific future match, including how a cold-start profile should deepen while the clinician is in active care?
+  - id: question-associative-match-dimensions
+    question: >
+      Which dimension-specific clinician-patient association estimates are useful enough to persist and reuse for future routing without collapsing them into a global clinician score, a global patient fit score, or a binary matched or unmatched verdict?
