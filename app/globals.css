@@ -3087,7 +3087,7 @@ details.pipeline-guide {
   font-size: 13px;
   font-weight: 650;
   color: var(--accent);
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .family-act:hover:not(:disabled) {
