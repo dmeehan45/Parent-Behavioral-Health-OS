@@ -22,11 +22,13 @@ import {
 } from "@/components/map/canvas-theme";
 import { useLayoutOverrides } from "@/components/map/layout-overrides";
 import { nodeTypes, type CanvasNode, type DetailTier, type NodeState } from "@/components/map/model-node";
+import { edgeFlowLayers, hasActiveFlowLayer, type FlowLayerId } from "@/lib/model/flow-layers";
 import type { LensId, ModelGraph, ModelNode } from "@/lib/model/types";
 
 type Props = {
   graph: ModelGraph;
   lens: LensId;
+  activeLayers: FlowLayerId[];
   selectedId?: string;
   expanded: string[];
   changed: Set<string>;
@@ -88,6 +90,7 @@ function tierForZoom(zoom: number): DetailTier {
 export function GraphCanvas({
   graph,
   lens,
+  activeLayers,
   selectedId,
   expanded,
   changed,
@@ -108,6 +111,7 @@ export function GraphCanvas({
   const { overrides, merge: mergeOverrides, reset: resetOverrides, hasOverrides } = useLayoutOverrides(lens);
 
   const expandedSet = useMemo(() => new Set(expanded), [expanded]);
+  const activeLayerSet = useMemo(() => new Set(activeLayers), [activeLayers]);
 
   /* ---- What this lens shows -------------------------------------------- */
 
@@ -118,12 +122,20 @@ export function GraphCanvas({
     return visible.filter((node) => node.kind !== "step" || (node.parentId && expandedSet.has(node.parentId)));
   }, [graph.nodes, lens, expandedSet]);
 
+  // Keep the whole lens for layout. Layer toggles change ink, not topology, so
+  // isolating data or learning never moves a node and accidentally tells a new
+  // story about the same system.
   const lensEdges = useMemo(() => {
     const present = new Set(lensNodes.map((node) => node.id));
     return graph.edges.filter(
       (edge) => edge.lenses.includes(lens) && present.has(edge.source) && present.has(edge.target),
     );
   }, [graph.edges, lens, lensNodes]);
+
+  const visibleEdges = useMemo(
+    () => (lens === "flow" ? lensEdges.filter((edge) => hasActiveFlowLayer(edge, activeLayerSet)) : lensEdges),
+    [lens, lensEdges, activeLayerSet],
+  );
 
   const layout = useMemo(
     () => layoutGraph(lens, lensNodes, lensEdges, expandedSet),
@@ -135,7 +147,7 @@ export function GraphCanvas({
   const related = useMemo(() => {
     if (!selectedId) return undefined;
     const set = new Set([selectedId]);
-    for (const edge of lensEdges) {
+    for (const edge of visibleEdges) {
       if (edge.source === selectedId) set.add(edge.target);
       if (edge.target === selectedId) set.add(edge.source);
     }
@@ -146,7 +158,7 @@ export function GraphCanvas({
       }
     }
     return set;
-  }, [selectedId, lensEdges, lensNodes]);
+  }, [selectedId, visibleEdges, lensNodes]);
 
   const stateFor = useCallback(
     (node: ModelNode): NodeState => {
@@ -211,7 +223,7 @@ export function GraphCanvas({
 
   const edges: Edge[] = useMemo(
     () =>
-      lensEdges.map((edge) => {
+      visibleEdges.map((edge) => {
         const feedback = edge.kind === "feedback";
         const vertical = edge.kind !== "flow" && edge.kind !== "feedback";
         const dimmed = related ? !(related.has(edge.source) && related.has(edge.target)) : false;
@@ -220,7 +232,19 @@ export function GraphCanvas({
         // sequence but drops the arrowheads and the relationship labels, so
         // the ink spends itself on the connections the lens is actually about.
         const context = lens !== "flow" && edge.kind === "flow";
-        const color = EDGE_COLOR[edge.kind];
+        const flowLayers = edgeFlowLayers(edge);
+        const informational = lens === "flow" && edge.kind === "flow" && flowLayers.length === 1 && flowLayers[0] === "data";
+        const experiential = flowLayers.includes("experience");
+        const color = feedback
+          ? EDGE_COLOR.feedback
+          : informational
+            ? EDGE_COLOR.evidence
+            : experiential
+              ? EDGE_COLOR.bet
+              : EDGE_COLOR[edge.kind];
+        const stageConnection = edge.kind === "flow" || edge.kind === "feedback";
+        const layerLabel = lens === "flow" && stageConnection && flowLayers.length > 0 ? flowLayers.join(" · ") : undefined;
+        const label = [edge.label, layerLabel].filter(Boolean).join(" · ");
 
         return {
           id: edge.id,
@@ -232,18 +256,18 @@ export function GraphCanvas({
           pathOptions: feedback ? undefined : { borderRadius: 14 },
           animated: feedback,
           className: `edge edge-${edge.kind}${dimmed ? " edge-dimmed" : ""}${context ? " edge-context" : ""}`,
-          label: showLabels && !context ? edge.label : undefined,
+          label: showLabels && !context && label ? label : undefined,
           labelBgPadding: [5, 3] as [number, number],
           labelBgBorderRadius: 3,
           markerEnd: context ? undefined : { type: MarkerType.ArrowClosed, width: 14, height: 14, color },
           style: {
             stroke: color,
             strokeWidth: context ? 1.1 : edge.kind === "flow" ? 1.6 : 1.2,
-            strokeDasharray: feedback ? "6 5" : edge.kind === "state" ? "3 4" : undefined,
+            strokeDasharray: feedback ? "6 5" : informational || edge.kind === "state" ? "3 4" : undefined,
           },
         };
       }),
-    [lensEdges, related, showLabels, lens],
+    [visibleEdges, related, showLabels, lens],
   );
 
   /* ---- Viewport behaviour ----------------------------------------------- */
