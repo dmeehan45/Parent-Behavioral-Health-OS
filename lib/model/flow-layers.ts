@@ -22,7 +22,7 @@ export const FLOW_LAYER_TERMS: FlowLayerTerm[] = [
     id: "operating",
     label: "Operating flow",
     shortLabel: "work",
-    description: "Primary progression and process sequence through the system.",
+    description: "Primary progression, process sequence, and rework through the system.",
   },
   {
     id: "data",
@@ -57,14 +57,15 @@ export function isFlowLayerId(value: string): value is FlowLayerId {
  * in `graph.ts` so every consumer, including `/api/model`, sees the same answer.
  */
 const DATA_RELATIONSHIPS = new Set(["informs", "influences", "depends on", "constrains"]);
+const RETURN_RELATIONSHIPS = new Set(["returns to"]);
 
 export function edgeFlowLayers(edge: Pick<ModelEdge, "kind" | "label">): FlowLayerId[] {
-  if (edge.kind === "feedback") return ["learning"];
+  const relationship = edge.label?.trim().toLowerCase();
+  if (edge.kind === "feedback") return relationship && RETURN_RELATIONSHIPS.has(relationship) ? ["operating"] : ["learning"];
   if (edge.kind === "state" || edge.kind === "evidence") return ["data"];
   if (edge.kind === "process") return ["operating"];
   if (edge.kind !== "flow") return [];
 
-  const relationship = edge.label?.trim().toLowerCase();
   return relationship && DATA_RELATIONSHIPS.has(relationship) ? ["data"] : ["operating"];
 }
 
@@ -113,9 +114,9 @@ export function hasActiveProjectedFlowLayer(
 }
 
 /**
- * Only operating progression determines left-to-right rank. Data couplings and
- * feedback remain real edges, but they overlay the topology instead of turning
- * every relationship into another step in a funnel.
+ * Only forward operating progression determines left-to-right rank. Data
+ * couplings, return loops, and learning feedback overlay the topology instead
+ * of turning every relationship into another step in a funnel.
  */
 export function isOperatingProgression(edge: Pick<ModelEdge, "kind" | "label" | "connection">): boolean {
   const layers = edge.connection?.layers ?? edgeFlowLayers(edge);
