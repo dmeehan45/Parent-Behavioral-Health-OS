@@ -3,6 +3,7 @@
 import {
   BaseEdge,
   EdgeLabelRenderer,
+  getBezierPath,
   getSmoothStepPath,
   type EdgeProps,
 } from "@xyflow/react";
@@ -12,9 +13,10 @@ type ConnectionEdgeData = {
   connection?: FlowConnectionDepth;
   activeLayers?: FlowLayerId[];
   dimmed?: boolean;
+  feedback?: boolean;
 };
 
-type ChipTone = "neutral" | "data" | "gap" | "problem";
+type ChipTone = "neutral" | "data" | "learning" | "gap" | "problem";
 
 /**
  * A Stage handoff that stays readable at the map's normal fitted zoom.
@@ -38,17 +40,12 @@ export function ConnectionEdge({
   style,
   data,
 }: EdgeProps) {
-  const [path, labelX, labelY] = getSmoothStepPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-    borderRadius: 14,
-  });
-
   const detail = (data ?? {}) as ConnectionEdgeData;
+  const pathArgs = { sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition };
+  const [path, labelX, labelY] = detail.feedback
+    ? getBezierPath(pathArgs)
+    : getSmoothStepPath({ ...pathArgs, borderRadius: 14 });
+
   const connection = detail.connection;
   const active = new Set(detail.activeLayers ?? []);
 
@@ -97,6 +94,17 @@ export function ConnectionEdge({
     });
   }
 
+  if (active.has("learning") && connection.layers.includes("learning")) {
+    chips.push({
+      key: "learning",
+      text: connection.gaps.includes("learning") ? "learning · gap" : "learning",
+      title: connection.gaps.includes("learning")
+        ? "The feedback relationship is explicit; its signal payload and permitted use are not."
+        : undefined,
+      tone: connection.gaps.includes("learning") ? "gap" : "learning",
+    });
+  }
+
   if (connection.problems.length > 0) {
     chips.push({
       key: "problems",
@@ -139,7 +147,7 @@ export function ConnectionEdge({
                 color: "var(--ink-3)",
               }}
             >
-              handoff
+              {detail.feedback ? "feedback" : "handoff"}
             </span>
             {chips.map((chip) => (
               <span
@@ -174,6 +182,7 @@ export function ConnectionEdge({
 
 function chipBorder(tone: ChipTone) {
   if (tone === "data") return "color-mix(in srgb, var(--kind-metric) 45%, var(--line))";
+  if (tone === "learning") return "color-mix(in srgb, var(--kind-bet) 45%, var(--line))";
   if (tone === "problem") return "color-mix(in srgb, var(--kind-problem) 45%, var(--line))";
   if (tone === "gap") return "var(--line-strong)";
   return "color-mix(in srgb, var(--kind-stage) 40%, var(--line))";
@@ -181,6 +190,7 @@ function chipBorder(tone: ChipTone) {
 
 function chipBackground(tone: ChipTone) {
   if (tone === "data") return "color-mix(in srgb, var(--kind-metric) 10%, var(--surface))";
+  if (tone === "learning") return "color-mix(in srgb, var(--kind-bet) 10%, var(--surface))";
   if (tone === "problem") return "color-mix(in srgb, var(--kind-problem) 10%, var(--surface))";
   if (tone === "gap") return "var(--surface-2)";
   return "color-mix(in srgb, var(--kind-stage) 8%, var(--surface))";
@@ -188,6 +198,7 @@ function chipBackground(tone: ChipTone) {
 
 function chipInk(tone: ChipTone) {
   if (tone === "data") return "var(--kind-metric)";
+  if (tone === "learning") return "var(--kind-bet)";
   if (tone === "problem") return "var(--kind-problem)";
   if (tone === "gap") return "var(--ink-3)";
   return "var(--ink-2)";
