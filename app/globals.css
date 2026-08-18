@@ -3572,15 +3572,28 @@ details.pipeline-guide {
    comes last. Every value here is an alias — no literal colours.
    ========================================================================== */
 
+/* The guarantee, how the page is meant to be worked, and the control that
+   carries a run into a conversation — one block. They were two stacked blue
+   callouts of near-identical weight, which reads as an advisory nobody
+   finishes rather than as the one sentence that matters. */
 .review-gate {
-  margin: 0 0 24px;
-  padding: 12px 16px;
+  margin: 0 0 28px;
+  padding: 14px 18px;
   border-left: 3px solid var(--accent);
   background: var(--accent-soft);
   color: var(--accent-ink);
   border-radius: 0 var(--radius) var(--radius) 0;
   font-size: 14px;
   max-width: 68ch;
+}
+
+.review-gate p {
+  margin: 0 0 8px;
+  line-height: 1.55;
+}
+
+.review-gate .review-actions {
+  margin-top: 14px;
 }
 
 .review-findings,
@@ -3708,6 +3721,73 @@ details.pipeline-guide {
   line-height: 1.45;
 }
 
+/*
+ * The review page's compact choice, which is a different control from the row
+ * above even though it decides a similar thing.
+ *
+ * `/review/apply` explains each option beside it on purpose — choosing between
+ * `reported`, `observed` and `inference` is where somebody learns what a Claim
+ * is, and that is a rule this repository states. A finding's five dispositions
+ * are the opposite case: the same five sentences on every card, thirty of them
+ * on a page holding six findings. So the meanings are stated once above the
+ * list and the control is only the choice.
+ */
+.review-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.review-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.review-choice:hover {
+  background: var(--surface-2);
+}
+
+.review-choice.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.review-choice:has(:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The vocabulary block above the findings: the five words with what each one
+   authorizes, stated once for the page. */
+.review-vocab {
+  margin: 0 0 20px;
+}
+
+.review-vocab .define-list {
+  margin-top: 12px;
+  max-width: var(--ds-container-text);
+}
+
+@media (max-width: 640px) {
+  .review-option {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  .review-option-meaning {
+    grid-column: 1 / -1;
+  }
+}
+
 .field {
   margin: 0 0 12px;
 }
@@ -3762,13 +3842,4 @@ textarea.text-input {
   white-space: pre;
 }
 
-@media (max-width: 640px) {
-  .review-option {
-    grid-template-columns: auto 1fr;
-    align-items: start;
-  }
 
-  .review-option-meaning {
-    grid-column: 1 / -1;
-  }
-}
