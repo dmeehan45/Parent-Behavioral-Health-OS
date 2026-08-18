@@ -27,19 +27,20 @@ Authority (`reference`, `proposed`, `validated`, or `policy`) keeps tentative id
 
 ### Topology and flow layers
 
-A relationship between two Stages does not automatically mean one Stage happens after the other. The relationship vocabulary carries two different jobs and the projection keeps them separate:
+A relationship between two Stages does not automatically mean one Stage happens after the other. The relationship vocabulary carries several jobs and the projection keeps them separate:
 
-- `flows_to`, `supplies`, and `enables` describe **operating progression**. These edges determine left-to-right stage rank.
+- `flows_to`, `supplies`, and `enables` describe **forward operating progression**. These edges determine left-to-right stage rank.
+- `returns_to` describes **operating rework or return**. It loops back through the operating layer and does not participate in forward ranking.
 - `informs`, `influences`, `depends_on`, and `constrains` describe **data or contextual coupling**. They stay visible but do not push the target into a later rank.
-- `feedback_to` describes **learning or return flow**. It is drawn as feedback and never participates in forward ranking.
+- `feedback_to` describes **learning feedback**. It is drawn as feedback and never participates in forward ranking.
 
-That distinction is what allows parallel parts of the system to stay parallel. Family Demand may inform Clinician Supply while both ultimately converge on Matching; the informational link remains real without turning Demand into a prerequisite stage for Supply.
+That distinction is what allows parallel parts of the system to stay parallel and keeps rematching from being mislabeled as learning. Family Demand may inform Clinician Supply while both ultimately converge on Matching; the informational link remains real without turning Demand into a prerequisite stage for Supply. Care can return to Matching without claiming that the return itself is a learning signal.
 
 The Operating flow lens can toggle **Operating flow**, **Data & state**, **Experience**, and **Learning** independently. Toggling changes which relationships are painted, never node position. A shared URL preserves the active layers so two readers can inspect the same slice of the system.
 
 Stage arrows are only headlines. When a `next` transition crosses a Stage boundary and the producing and consuming Steps agree on an Entity state, the map derives that state transfer and shows it on the Stage handoff. For example, if one Step outputs a Clinician in `match-ready` and the next Step consumes that same state across the Onboarding → Matching boundary, the map can say so without repeating the handoff in `map.yaml`.
 
-The Experience layer is deliberately allowed to be empty. Participant experience should become visible when the model has an explicit way to say what is carried across a boundary; the projection must not infer an experience handoff merely because two Stages are adjacent.
+The same projection attaches canonical Problems that target both sides of a boundary and marks missing boundary detail as a gap rather than inventing it. The Experience layer is deliberately allowed to be empty. Participant experience should become visible when the model has an explicit way to say what is carried across a boundary; the projection must not infer an experience handoff merely because two Stages are adjacent.
 
 ## Problem space is modelled, not implied
 
@@ -90,7 +91,10 @@ in both directions:
 
 On the map the same traversal happens without leaving the canvas: selecting a
 primitive opens it in a panel, and following a link inside that panel moves
-within it. The pages remain the shareable, linkable form of the same projection.
+within it. Stage connections can also be opened in place to inspect what the
+projection knows crosses the boundary, which canonical Problems span it, and
+which layers are still unmodelled. The pages remain the shareable, linkable form
+of the primitive projection.
 
 An Entity shows which Steps produce and consume it, and in which states — the
 lifecycle the model actually claims, assembled from the Steps rather than
@@ -102,7 +106,7 @@ what they concern and which Bets rest on them.
 The same graph is shown four ways, so the map can hold more context than a single
 diagram could without becoming unreadable:
 
-- **Operating flow** — stages ranked by operating progression, with contextual and feedback relationships overlaid; each Stage can expand in place to reveal its Steps in `next` order.
+- **Operating flow** — stages ranked by forward operating progression, with contextual, return, and learning relationships overlaid; each Stage can expand in place to reveal its Steps in `next` order.
 - **Problems & solutions** — the stage spine, then the problems pinned to it, then the bets proposed against those problems, then whatever has been built. It reads downward as the argument runs.
 - **Evidence** — the stage spine with claims and metrics beneath what they describe.
 - **Entities** — entities as the nouns of the system, with the steps that transform them.
