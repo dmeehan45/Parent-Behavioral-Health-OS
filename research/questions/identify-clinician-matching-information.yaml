@@ -1,0 +1,9 @@
+id: identify-clinician-matching-information
+question: "Which clinician attributes predict outcomes or continuity for a particular patient or problem, rather than merely describing clinician quality overall, and how should provenance, recency, sample size, case mix, and uncertainty travel with those attributes?"
+askedBy: accountable-reviewer-2026-08-15
+createdAt: 2026-08-15
+status: open
+priority: high
+targets: [clinician-onboarding, become-match-ready, matching, propose-match, quality-outcomes]
+why: >
+  Clinician onboarding may capture many useful facts, but matching needs to know which facts change the expected result for this patient. Research should separate general clinician quality from patient-specific predictive information and determine how historical performance, stated expertise, preferences, observed outcomes, and uncertainty can be used without confusing case mix or sparse evidence with clinician ability.
