@@ -1,0 +1,9 @@
+id: define-early-match-validation-and-recovery
+question: "Which signals after a match is proposed and during the first encounters provide useful evidence that the match is working or failing, and how should that evidence affect continuation, support, rematching, or transition to other care?"
+askedBy: accountable-reviewer-2026-08-15
+createdAt: 2026-08-15
+status: open
+priority: high
+targets: [review-match, care-initiation, confirm-care-continuation, quality-outcomes]
+why: >
+  Pre-match prediction cannot establish relationship quality. Research should identify the earliest trustworthy signals of appropriateness, alliance, engagement, access friction, non-continuation, or need for a different care path without treating every early dropout as a matching failure. When a proposal or first transition fails, the system should preserve enough reason and changed context to choose the next useful action without forcing patients, families, or clinicians to repeat work.
