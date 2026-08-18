@@ -109,6 +109,7 @@ candidates:
     kind: question
     description: >
       Should Quality & Outcomes remain a sequential operating stage, become a cross-cutting observation and learning layer, or intentionally be both, given the direct Practice Operations to Retention & Growth process path and the stage's feedback responsibilities to earlier decisions?
+    targets: [practice-operations, quality-outcomes, retention-growth]
     rationale: >
       The canonical stage prose and canonical process topology currently imply different structural roles. Resolving that ambiguity would change how later connections are represented, so it should be investigated before redesigning the stage model around either interpretation.
   - id: candidate-minimum-handoff-contract
@@ -121,5 +122,6 @@ candidates:
     kind: question
     description: >
       What specific information should the authored Family Demand to Clinician Supply `informs` relationship carry, at what level of aggregation and freshness, and which supply decisions is it permitted to change?
+    targets: [family-demand, clinician-supply]
     rationale: >
       The relationship is already canonical but its payload is not. Researching the payload is more useful than drawing a generic data arrow that cannot say what information actually influences supply work.
