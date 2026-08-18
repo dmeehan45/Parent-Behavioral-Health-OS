@@ -17,7 +17,12 @@ export const metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 /** View state arrives in the URL, so a shared link opens the same picture. */
-function readView(params: Record<string, string | string[] | undefined>, lensIds: LensId[], nodeIds: Set<string>): MapView {
+function readView(
+  params: Record<string, string | string[] | undefined>,
+  lensIds: LensId[],
+  nodeIds: Set<string>,
+  edgeIds: Set<string>,
+): MapView {
   const single = (key: string) => (typeof params[key] === "string" ? (params[key] as string) : undefined);
 
   const lensParam = single("lens") as LensId | undefined;
@@ -32,6 +37,11 @@ function readView(params: Record<string, string | string[] | undefined>, lensIds
   // they are not looking at what they were sent.
   const openParam = single("open");
   const open = openParam?.includes(":") ? openParam : undefined;
+
+  // Connections are derived and have no "removed" record page, so a stale edge
+  // deep link falls back to the map rather than opening an empty side panel.
+  const connectionParam = single("connection");
+  const connection = connectionParam && edgeIds.has(connectionParam) ? connectionParam : undefined;
 
   const expand = (single("expand") ?? "")
     .split(",")
@@ -51,7 +61,7 @@ function readView(params: Record<string, string | string[] | undefined>, lensIds
   ];
   const layers = requestedLayers.length > 0 ? requestedLayers : [...DEFAULT_FLOW_LAYERS];
 
-  return { lens, open, expand, layers };
+  return { lens, open, connection, expand, layers };
 }
 
 export default async function MapPage({ searchParams }: { searchParams: Search }) {
@@ -61,6 +71,7 @@ export default async function MapPage({ searchParams }: { searchParams: Search }
     params,
     graph.lenses.map((lens) => lens.id),
     new Set(graph.nodes.map((node) => node.id)),
+    new Set(graph.edges.map((edge) => edge.id)),
   );
 
   return <MapWorkspace initialGraph={graph} initialView={view} />;
