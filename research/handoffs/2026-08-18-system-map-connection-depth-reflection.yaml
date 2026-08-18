@@ -99,19 +99,34 @@ notes:
       Selection-to-onboarding persistence, matching quality, and changing family or patient authority already have queued questions. New map work should link those questions during research review rather than create near-duplicate questions merely because the same uncertainty becomes visually obvious on a handoff.
     sourceIds: [source-questions]
     anchors: [define-selection-handoff, define-matching-quality, define-family-patient-caregiver-authority]
-questions:
-  - id: question-quality-topology-role
-    question: >
+candidates:
+  - id: candidate-quality-topology-role
+    kind: question
+    description: >
       Should Quality & Outcomes remain a sequential operating stage, become a cross-cutting observation and learning layer, or intentionally be both, given the direct Practice Operations to Retention & Growth process path and the stage's feedback responsibilities to earlier decisions?
-  - id: question-minimum-handoff-contract
-    question: >
+    rationale: >
+      The canonical stage prose and canonical process topology currently imply different structural roles. Resolving that ambiguity would change how later connections are represented, so it should be investigated before redesigning the stage model around either interpretation.
+  - id: candidate-minimum-handoff-contract
+    kind: question
+    description: >
       What minimum boundary contract should every stage connection be able to represent across operating trigger, transferred state or information, participant experience, ownership, failure or rework, and learning without duplicating the canonical Step and Entity model?
-  - id: question-demand-supply-information-payload
-    question: >
+    rationale: >
+      The current projection can derive process and state for some boundaries, but not every important kind of transfer. A small explicit contract would let the map deepen consistently without turning handoffs into a second source of truth.
+  - id: candidate-demand-supply-information-payload
+    kind: question
+    description: >
       What specific information should the authored Family Demand to Clinician Supply `informs` relationship carry, at what level of aggregation and freshness, and which supply decisions is it permitted to change?
-  - id: question-quality-feedback-payload
-    question: >
+    rationale: >
+      The relationship is already canonical but its payload is not. Researching the payload is more useful than drawing a generic data arrow that cannot say what information actually influences supply work.
+  - id: candidate-quality-feedback-payload
+    kind: question
+    description: >
       For feedback from Quality & Outcomes into clinician supply, onboarding, and matching, what signal payload, attribution context, latency, confidence, and permitted decision use are required so that the system learns without turning system-produced outcomes into static clinician traits?
-  - id: question-experience-boundary-persistence
-    question: >
+    rationale: >
+      Existing research already warns about attribution and context loss. This question narrows that concern to the contract a feedback edge would need before the map can show a real learning payload rather than only the existence of a loop.
+  - id: candidate-experience-boundary-persistence
+    kind: question
+    description: >
       Which participant-experience context, if any, must persist across stage boundaries rather than be re-collected locally, and how can the model distinguish an experience signal from a preference, consent decision, operational state, or outcome measure?
+    rationale: >
+      Experience is central to the intended operating system but is not yet a defined handoff object. This question is meant to prevent the visual layer from creating a vague experience payload before the model can say what should actually persist.
