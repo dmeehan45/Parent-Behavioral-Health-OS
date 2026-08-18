@@ -14,6 +14,8 @@ type ConnectionEdgeData = {
   activeLayers?: FlowLayerId[];
   dimmed?: boolean;
   feedback?: boolean;
+  returnLoop?: boolean;
+  onOpen?: (edgeId: string) => void;
 };
 
 type ChipTone = "neutral" | "data" | "learning" | "gap" | "problem";
@@ -24,9 +26,8 @@ type ChipTone = "neutral" | "data" | "learning" | "gap" | "problem";
  * The old SVG label was intentionally hidden until near 1x because SVG text
  * scales with the canvas. That made the richer connection model technically
  * present but invisible in the overview people actually use. The path remains
- * in React Flow; this DOM label sits over its midpoint and carries only the
- * compact boundary summary. Full explanation belongs in an inspector, not in
- * a larger node wedged between the stages.
+ * in React Flow; this DOM control sits over its midpoint and carries only the
+ * compact boundary summary. Clicking it opens the full derived connection.
  */
 export function ConnectionEdge({
   id,
@@ -114,14 +115,21 @@ export function ConnectionEdge({
     });
   }
 
+  const label = detail.returnLoop ? "return" : detail.feedback ? "feedback" : "handoff";
+
   return (
     <>
       <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} />
       {chips.length > 0 ? (
         <EdgeLabelRenderer>
-          <div
+          <button
+            type="button"
             className="nodrag nopan"
-            aria-label="Handoff detail"
+            aria-label={`Inspect ${label}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              detail.onOpen?.(id);
+            }}
             style={{
               position: "absolute",
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
@@ -134,7 +142,9 @@ export function ConnectionEdge({
               borderRadius: "var(--radius)",
               boxShadow: "var(--shadow-sm)",
               opacity: detail.dimmed ? 0.28 : 0.96,
-              pointerEvents: "none",
+              textAlign: "left",
+              cursor: "pointer",
+              pointerEvents: "all",
             }}
           >
             <span
@@ -147,7 +157,7 @@ export function ConnectionEdge({
                 color: "var(--ink-3)",
               }}
             >
-              {detail.feedback ? "feedback" : "handoff"}
+              {label}
             </span>
             {chips.map((chip) => (
               <span
@@ -173,7 +183,7 @@ export function ConnectionEdge({
                 {chip.text}
               </span>
             ))}
-          </div>
+          </button>
         </EdgeLabelRenderer>
       ) : null}
     </>
