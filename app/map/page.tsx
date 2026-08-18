@@ -38,10 +38,17 @@ function readView(params: Record<string, string | string[] | undefined>, lensIds
     .map((id) => `stage:${id.trim()}`)
     .filter((id) => nodeIds.has(id));
 
-  const requestedLayers = (single("layers") ?? "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter(isFlowLayerId);
+  // A repeated layer in a shared URL is still one logical layer. Deduplicate
+  // before state is initialized so the "keep at least one active" guard and
+  // the URL round-trip both reason about the same set the reader sees.
+  const requestedLayers = [
+    ...new Set(
+      (single("layers") ?? "")
+        .split(",")
+        .map((id) => id.trim())
+        .filter(isFlowLayerId),
+    ),
+  ];
   const layers = requestedLayers.length > 0 ? requestedLayers : [...DEFAULT_FLOW_LAYERS];
 
   return { lens, open, expand, layers };
