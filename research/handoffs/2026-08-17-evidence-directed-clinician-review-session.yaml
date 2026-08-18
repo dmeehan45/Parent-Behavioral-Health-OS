@@ -45,8 +45,8 @@ findings:
       The prototype did not establish what state a prospect is in when they enter the review queue, what work has already happened, or what operational state each route hands off to, making the routing labels difficult to evaluate as real workflow decisions.
     sourceIds: [source-review-session]
     suggestedTargets: [screen-candidates, select-clinician, selection-complete]
-    classification: qualifying
-    evidenceStance: qualifies
+    classification: new
+    evidenceStance: contextualizes
     evidenceQuality: primary
     generalizedApplicability: false
     uncertainty: >
