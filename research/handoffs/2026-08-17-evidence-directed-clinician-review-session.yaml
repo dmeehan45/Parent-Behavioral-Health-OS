@@ -92,8 +92,11 @@ notes:
     anchors: [screen-candidates, select-clinician, selection-complete]
 questions:
   - id: question-review-queue-entry-state
-    question: What exact prospect state and minimum evidence package should enter the evidence-directed review queue after screening?
+    question: >
+      What exact prospect state and minimum evidence package should enter the evidence-directed review queue after screening?
   - id: question-route-handoff-states
-    question: What explicit downstream state, owner, and next action should each route produce: progress, request evidence, human review, or eligibility stop?
+    question: >
+      What explicit downstream state, owner, and next action should each route produce: progress, request evidence, human review, or eligibility stop?
   - id: question-human-backed-evidence-request
-    question: How should a targeted clinician evidence request divide asynchronous collection from a named human interaction so the process saves reviewer time without replacing the relational experience?
+    question: >
+      How should a targeted clinician evidence request divide asynchronous collection from a named human interaction so the process saves reviewer time without replacing the relational experience?
