@@ -544,6 +544,8 @@ npm run test:model         # the projection contract: edges, flow continuity, co
 npm run scan:safety        # credentials, contact details, confidentiality markers
 npm run lint
 npm run lint:design        # brand values outside the token layer
+npm run scan:design-tells  # AI-default drift the colour rule cannot see
+npm run test:design        # the scanner's own contract
 npm run typecheck
 npm run build
 npm run test:responsive    # phone and desktop: does it fit, and can it be read

@@ -75,6 +75,7 @@
   --sheet-w: 400px;
   --radius: var(--ds-radius-sm);
   --radius-lg: var(--ds-radius-lg);
+  --radius-soft: var(--ds-radius-2xl);
   --radius-card: var(--ds-card-radius);
   --radius-pill: var(--ds-radius-pill);
 
@@ -946,7 +947,7 @@ p:last-child {
   padding: 7px 11px;
   background: transparent;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--radius-soft);
   font-size: 12px;
   font-weight: 600;
   color: var(--ink-2);
@@ -961,6 +962,7 @@ p:last-child {
 }
 
 .live-syncing .live-dot {
+  /* ds-allow: live-sync heartbeat — one beat per second is the signal */
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -1034,11 +1036,11 @@ p:last-child {
   padding: 9px 14px;
   background: var(--ink);
   color: var(--paper);
-  border-radius: 20px;
+  border-radius: var(--radius-soft);
   font-size: 12px;
   font-weight: 600;
   box-shadow: var(--shadow-md);
-  animation: toast-in 0.3s ease;
+  animation: toast-in var(--ds-duration-slow) var(--ds-ease);
 }
 
 @keyframes toast-in {
@@ -1140,7 +1142,7 @@ p:last-child {
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  transition: box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+  transition: box-shadow var(--ds-duration) var(--ds-ease), border-color var(--ds-duration) var(--ds-ease), opacity var(--ds-duration) var(--ds-ease);
 }
 
 .node-stage {
@@ -1207,6 +1209,7 @@ p:last-child {
 }
 
 .node-changed {
+  /* ds-allow: changed-node highlight — three slow beats, visible across the map */
   animation: changed 2.4s ease-in-out 3;
 }
 
@@ -1377,7 +1380,7 @@ p:last-child {
   padding: 0 8px;
   background: var(--surface-2);
   border: 1px solid var(--line-strong);
-  border-radius: 13px;
+  border-radius: var(--radius-lg);
   color: var(--ink-2);
   font-size: 12px;
   font-weight: 700;
@@ -1715,7 +1718,7 @@ p:last-child {
   text-align: left;
   text-decoration: none;
   font-size: 13px;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .link-list a,
@@ -2171,6 +2174,7 @@ p:last-child {
   display: block;
   background: var(--surface-2);
   border-radius: var(--radius);
+  /* ds-allow: skeleton shimmer — slower than interaction motion on purpose */
   animation: skeleton-pulse 1.4s var(--ds-ease) infinite;
 }
 
@@ -2880,7 +2884,7 @@ details.pipeline-guide {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   text-align: left;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .mode:hover {
@@ -2931,7 +2935,7 @@ details.pipeline-guide {
   font-weight: 650;
   color: var(--ink);
   background: var(--warn-soft);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .closing p {
@@ -3008,7 +3012,7 @@ details.pipeline-guide {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .family-list > li.chosen {
@@ -3083,7 +3087,7 @@ details.pipeline-guide {
   font-size: 13px;
   font-weight: 650;
   color: var(--accent);
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .family-act:hover:not(:disabled) {
@@ -3424,6 +3428,7 @@ details.pipeline-guide {
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     box-shadow: var(--shadow-lg);
     transform: translateY(calc(86dvh - var(--sheet-peek, 46dvh)));
+    /* ds-allow: phone-sheet spring on the platform's own curve */
     transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
     touch-action: none;
   }
@@ -3529,7 +3534,7 @@ details.pipeline-guide {
   .node-expand {
     min-width: 44px;
     height: 40px;
-    border-radius: 20px;
+    border-radius: var(--radius-soft);
   }
 }
 
@@ -3996,7 +4001,7 @@ details.pipeline-guide {
   border-radius: var(--radius);
   background: var(--surface);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .review-option:hover {
@@ -4047,7 +4052,7 @@ details.pipeline-guide {
   border-radius: var(--radius-pill);
   background: var(--surface);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease), background var(--ds-duration) var(--ds-ease);
 }
 
 .review-choice:hover {
@@ -4107,7 +4112,7 @@ details.pipeline-guide {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  transition: border-color 0.15s ease;
+  transition: border-color var(--ds-duration) var(--ds-ease);
 }
 
 .text-input:hover {
