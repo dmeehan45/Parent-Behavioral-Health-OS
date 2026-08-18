@@ -1,0 +1,102 @@
+contractVersion: 1
+run:
+  id: 2026-08-17-evidence-directed-clinician-review-session
+  question: >
+    What did the first review of the Evidence-Directed Clinician Review prototype reveal about operator orientation, workflow handoffs, evidence routing, and the clinician-facing evidence-request experience?
+  synthesis: >
+    The prototype exposed the intended routing concepts but did not make the operating workflow legible enough for the reviewer to judge them. The screen presented queue state, route rationale, evidence provenance, unknowns, disclaimers, and actions with insufficient hierarchy or progressive disclosure, so the reviewer could not quickly tell where the prospect was in the lifecycle, what decision they were responsible for, or what state each route produced. The four route outcomes were visible but operationally disconnected: progress, request one detail, human review, and eligibility stop all occupied the same queue without a clear handoff into or out of the review step. The targeted evidence-request path was the most promising area for the next iteration, but the clinician-facing preview was not visually distinct enough from the operator interface and its two human-backed options were not developed enough to judge whether the experience would feel relational rather than automated. The next prototype iteration should therefore reduce simultaneous content, place the review queue inside the canonical Screen Candidates to Evaluate & Select workflow, make each route's destination explicit, and deepen the targeted evidence-request handoff before spending more time on override mechanics or dense evidence provenance displays.
+  createdAt: 2026-08-17
+  preparedBy:
+    kind: conversational-agent
+    provider: openai
+    model: gpt-5.6-sol
+  provenance:
+    method: prototype-review
+    context: >
+      Structured from one live review of the synthetic Evidence-Directed Clinician Review prototype. The reviewer worked through the queue and Jamie Park evidence-request path and provided direct feedback immediately afterward. No raw transcript, identifying participant information, private company material, or real clinician data is included.
+  safety:
+    containsSensitiveData: false
+    containsPrivateCompanyMaterial: false
+    rawTranscriptIncluded: false
+sources:
+  - id: source-review-session
+    identity: session-evidence-directed-review-2026-08-17
+    kind: session
+    title: Evidence-Directed Clinician Review first prototype session
+    locator:
+      bet: evidence-directed-clinician-review
+      observedAt: 2026-08-17
+      participants: One product reviewer accountable for the prototype bet
+    access: available
+findings:
+  - id: finding-prototype-lacks-action-hierarchy
+    statement: >
+      The operator could not quickly determine what to do next because route explanation, disclaimers, evidence details, unknowns, and reviewer actions were all presented at similar visual weight instead of being progressively disclosed around the immediate decision.
+    sourceIds: [source-review-session]
+    suggestedTargets: [screen-candidates, select-clinician, scarce-review-time-without-comparable-evidence]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: false
+    uncertainty: >
+      This is one reviewer using a synthetic prototype. It is strong evidence of an interaction defect in this artifact, not evidence that every operator would experience the same confusion.
+  - id: finding-review-queue-needs-workflow-location
+    statement: >
+      The prototype did not establish what state a prospect is in when they enter the review queue, what work has already happened, or what operational state each route hands off to, making the routing labels difficult to evaluate as real workflow decisions.
+    sourceIds: [source-review-session]
+    suggestedTargets: [screen-candidates, select-clinician, selection-complete]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: false
+    uncertainty: >
+      The canonical model already distinguishes screening from deeper selection, but the prototype has not yet proven the exact product boundary or whether this review queue is one screen, several screens, or a background routing service.
+  - id: finding-route-outcomes-are-not-yet-operationally-legible
+    statement: >
+      The reviewer could distinguish the labels Can progress, Needs one detail, Human review, and Eligibility stop, but could not tell what each outcome meant in terms of who acts next, what evidence or decision is produced, or whether the operator should focus only on the human-review cases.
+    sourceIds: [source-review-session]
+    suggestedTargets: [screen-candidates, select-clinician]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: false
+    uncertainty: >
+      Some confusion may disappear once the surrounding workflow and handoff states are shown; this session does not establish that the four-route model itself is wrong.
+  - id: finding-evidence-request-preview-does-not-read-as-clinician-facing
+    statement: >
+      When the reviewer opened the evidence-request preview, it was not immediately obvious that the surface represented what the clinician would see, so the prototype could not yet support a credible judgment about whether the clinician experience felt human-backed or automated.
+    sourceIds: [source-review-session]
+    suggestedTargets: [select-clinician, clinician]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: false
+    uncertainty: >
+      The current preview contains a named human contact and technology-boundary language, but those cues were visually subordinate enough that the reviewer did not recognize the perspective switch at first.
+  - id: finding-human-backed-evidence-request-is-next-useful-prototype-focus
+    statement: >
+      The choice between supplying a bounded missing detail asynchronously before a human call and handling the same question with the named human during the call is concrete enough to deepen next, and appears more useful to test than adding more route explanation or override mechanics to the current dense screen.
+    sourceIds: [source-review-session]
+    suggestedTargets: [select-clinician, evidence-directed-clinician-review]
+    classification: new
+    evidenceStance: contextualizes
+    evidenceQuality: primary
+    generalizedApplicability: false
+    uncertainty: >
+      This is a product-design implication from one review session. It has not yet been tested with clinicians or operations reviewers and should remain a prototype hypothesis.
+notes:
+  - id: note-canonical-workflow-anchor
+    statement: >
+      The current canonical supply flow already places Screen Candidates before Evaluate & Select, with screening intended to protect expensive human judgment and Evaluate & Select applying deeper judgment before Selection Complete hands the clinician into onboarding.
+    sourceIds: []
+    anchors: [screen-candidates, select-clinician, selection-complete]
+questions:
+  - id: question-review-queue-entry-state
+    question: >
+      What exact prospect state and minimum evidence package should enter the evidence-directed review queue after screening?
+  - id: question-route-handoff-states
+    question: >
+      What explicit downstream state, owner, and next action should each route produce: progress, request evidence, human review, or eligibility stop?
+  - id: question-human-backed-evidence-request
+    question: >
+      How should a targeted clinician evidence request divide asynchronous collection from a named human interaction so the process saves reviewer time without replacing the relational experience?
