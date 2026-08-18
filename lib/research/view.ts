@@ -212,24 +212,52 @@ export type ReviewNote = {
   state: "awaiting" | "kept" | "discarded";
 };
 
-/** A question waiting to be researched, or a gap the model has in itself. */
+/** A question admitted to research, or a model gap parked for later triage. */
 export type QueueEntry = {
   kind: "question" | "gap";
   id: string;
   question: string;
   detail: string;
+  priority?: "high" | "normal" | "low";
+  /** Canonical records the asked question says it could change. */
+  targets?: Array<{ id: string; title: string; href: string; kind: string }>;
   /** For a gap, the record it is about. */
   subject?: { id: string; title: string; href: string; kind: string };
   /** Titles of bets that named this question as something they are waiting on. */
   blocking?: string[];
 };
 
+/** A reviewer-sized group of admitted questions tied to one product decision or operating area. */
+export type ResearchFamily = {
+  id: string;
+  title: string;
+  kind: "bet" | "stage" | "general";
+  detail: string;
+  href?: string;
+  prototypeStatus?: string;
+  questions: QueueEntry[];
+};
+
+/** Parked gaps stay visible, but grouped so they do not masquerade as an active queue. */
+export type ResearchInventoryGroup = {
+  id: string;
+  title: string;
+  href?: string;
+  gaps: QueueEntry[];
+};
+
 export type ReviewIndex = {
   runs: ReviewRun[];
   /** Accepted decisions from earlier runs, offered as supersede targets. */
   supersedable: Array<{ id: string; run: string; statement: string }>;
-  /** What a run should pick up next: asked questions first, then model gaps. */
+  /** Asked, unanswered questions only, ordered by product leverage then authored priority. */
   queue: QueueEntry[];
+  /** The same active queue grouped around the Bet or stage it is meant to improve. */
+  families: ResearchFamily[];
+  /** Model-detected gaps that have not been intentionally promoted into research. */
+  inventoryGroups: ResearchInventoryGroup[];
+  /** True when already-gathered knowledge needs review or application before another run. */
+  researchBlocked: boolean;
   sourceUrl?: string;
 };
 
