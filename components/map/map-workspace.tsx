@@ -12,7 +12,7 @@ import {
   DEFAULT_FLOW_LAYERS,
   FLOW_LAYER_IDS,
   FLOW_LAYER_TERMS,
-  edgeFlowLayers,
+  edgeProjectedFlowLayers,
   type FlowLayerId,
 } from "@/lib/model/flow-layers";
 import type { LensId, ModelGraph, ModelNode } from "@/lib/model/types";
@@ -52,10 +52,10 @@ export function MapWorkspace({ initialGraph, initialView }: { initialGraph: Mode
     const counts = Object.fromEntries(FLOW_LAYER_IDS.map((id) => [id, 0])) as Record<FlowLayerId, number>;
     for (const edge of graph.edges) {
       if (!edge.lenses.includes("flow")) continue;
-      for (const layer of edgeFlowLayers(edge)) counts[layer] += 1;
+      for (const layer of edgeProjectedFlowLayers(graph, edge)) counts[layer] += 1;
     }
     return counts;
-  }, [graph.edges]);
+  }, [graph]);
 
   /* ---- Shareable view state -------------------------------------------- */
 
