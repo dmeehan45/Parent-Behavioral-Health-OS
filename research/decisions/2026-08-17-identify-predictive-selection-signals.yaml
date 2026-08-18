@@ -7,3 +7,7 @@ decidedVia: conversation
 decisions:
   - id: decide-2026-08-17-identify-predictive-selection-signals-finding-performance-based-interpersonal-skills-predict
     disposition: accept
+  - id: decide-2026-08-17-identify-predictive-selection-signals-finding-static-resume-signals-weak
+    disposition: accept-with-edits
+    editedRecommendation: >
+      Static clinician attributes such as years of experience, training stage, qualification, theoretical orientation, and demographic or practice characteristics should be interpreted according to the specific decision they can inform, such as eligibility, capability or readiness, network fit, matching context, or a defined quality domain, rather than being collapsed into a general clinician-quality ranking. Any claim that one of these attributes predicts a later performance or quality measure should be prospectively validated for that specific use.
