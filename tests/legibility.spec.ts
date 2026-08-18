@@ -129,8 +129,39 @@ async function measure(page: import("@playwright/test").Page, route: string): Pr
         ).length;
         if (speakingChildren >= 2) continue;
 
-        const text = (element.textContent ?? "").replace(/\s+/g, " ").trim();
+        /*
+         * Only what is actually set on screen.
+         *
+         * `textContent` includes screen-reader-only labels, which are never
+         * painted — counting them inflates the character count of a card whose
+         * visible text is three short labels and reports it as unreadable
+         * prose. Measure what a reader sees.
+         */
+        const visibleText = (node: Element): string => {
+          let out = "";
+          for (const child of Array.from(node.childNodes)) {
+            if (child.nodeType === Node.TEXT_NODE) out += child.textContent ?? "";
+            else if (child instanceof Element && !child.matches(".visually-hidden, [aria-hidden='true']")) {
+              out += visibleText(child);
+            }
+          }
+          return out;
+        };
+
+        const text = visibleText(element).replace(/\s+/g, " ").trim();
         if (text.length < MIN_PROSE_LENGTH) continue;
+
+        /*
+         * A wrapper around a control is a control.
+         *
+         * A caseload slot is an `li` holding one button with a name, a need and
+         * an action stacked inside it. That is a card, and cards are laid out
+         * to a different standard than paragraphs — the measure question does
+         * not apply. An ordinary paragraph with an inline link is untouched by
+         * this, because the link is a small share of its text.
+         */
+        const control = element.querySelector("a, button");
+        if (control && visibleText(control).replace(/\s+/g, " ").trim().length >= text.length * 0.6) continue;
 
         const rect = element.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) continue;
