@@ -1,0 +1,9 @@
+id: identify-patient-matching-information
+question: "Which patient, caregiver, and family attributes materially change a matching decision enough to justify collecting them, and how should the system distinguish requirements, preferences, preference strength, unknowns, and information that can safely wait?"
+askedBy: accountable-reviewer-2026-08-15
+createdAt: 2026-08-15
+status: open
+priority: high
+targets: [family-demand, matching, propose-match, review-match]
+why: >
+  Matching should collect information because it changes a decision, not because a richer profile feels inherently better. The research should identify the smallest useful patient-side information set, distinguish hard constraints from preferences, account for patient and caregiver authority, and make missing or low-confidence information visible instead of silently treating it as neutral.
