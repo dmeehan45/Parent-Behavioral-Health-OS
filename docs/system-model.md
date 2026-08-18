@@ -23,24 +23,11 @@ The `Practice Management Platform` Entity is the accountable builder/operator ac
 
 Authority (`reference`, `proposed`, `validated`, or `policy`) keeps tentative ideas distinct from approved rules. The seed model is proposed and generalized.
 
-`content/map.yaml` owns top-level topology. `next` references in Step files own the internal process sequence. Both are directed relationships rather than assumptions about a universal funnel.
-
 ### Topology and flow layers
 
-A relationship between two Stages does not automatically mean one Stage happens after the other. The relationship vocabulary carries several jobs and the projection keeps them separate:
+The repository contract for Stage topology, relationship semantics, layer isolation, and derived connection depth lives in [`AGENTS.md`](../AGENTS.md#stage-topology-and-connection-depth). This document describes the shape that contract produces rather than restating its rules.
 
-- `flows_to`, `supplies`, and `enables` describe **forward operating progression**. These edges determine left-to-right stage rank.
-- `returns_to` describes **operating rework or return**. It loops back through the operating layer and does not participate in forward ranking.
-- `informs`, `influences`, `depends_on`, and `constrains` describe **data or contextual coupling**. They stay visible but do not push the target into a later rank.
-- `feedback_to` describes **learning feedback**. It is drawn as feedback and never participates in forward ranking.
-
-That distinction is what allows parallel parts of the system to stay parallel and keeps rematching from being mislabeled as learning. Family Demand may inform Clinician Supply while both ultimately converge on Matching; the informational link remains real without turning Demand into a prerequisite stage for Supply. Care can return to Matching without claiming that the return itself is a learning signal.
-
-The Operating flow lens can toggle **Operating flow**, **Data & state**, **Experience**, and **Learning** independently. Toggling changes which relationships are painted, never node position. A shared URL preserves the active layers so two readers can inspect the same slice of the system.
-
-Stage arrows are only headlines. When a `next` transition crosses a Stage boundary and the producing and consuming Steps agree on an Entity state, the map derives that state transfer and shows it on the Stage handoff. For example, if one Step outputs a Clinician in `match-ready` and the next Step consumes that same state across the Onboarding → Matching boundary, the map can say so without repeating the handoff in `map.yaml`.
-
-The same projection attaches canonical Problems that target both sides of a boundary and marks missing boundary detail as a gap rather than inventing it. The Experience layer is deliberately allowed to be empty. Participant experience should become visible when the model has an explicit way to say what is carried across a boundary; the projection must not infer an experience handoff merely because two Stages are adjacent.
+The resulting map can hold parallel operating paths, contextual relationships, return paths, and learning loops without turning every arrow into another step in a funnel. A Stage connection can also expose process handoffs, Entity-state transfers, Problems that span the boundary, and explicit gaps where the model cannot yet say what crosses it. Those gaps are part of the useful picture: they show where the system is thin without filling it with plausible content.
 
 ## Problem space is modelled, not implied
 
@@ -106,7 +93,7 @@ what they concern and which Bets rest on them.
 The same graph is shown four ways, so the map can hold more context than a single
 diagram could without becoming unreadable:
 
-- **Operating flow** — stages ranked by forward operating progression, with contextual, return, and learning relationships overlaid; each Stage can expand in place to reveal its Steps in `next` order.
+- **Operating flow** — the operating topology with contextual, return, and learning relationships visible alongside it; each Stage can expand in place to reveal its Steps.
 - **Problems & solutions** — the stage spine, then the problems pinned to it, then the bets proposed against those problems, then whatever has been built. It reads downward as the argument runs.
 - **Evidence** — the stage spine with claims and metrics beneath what they describe.
 - **Entities** — entities as the nouns of the system, with the steps that transform them.
