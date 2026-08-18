@@ -80,6 +80,53 @@ Two rules keep this working:
   bands — lives in `lib/model/kinds.ts`. Importing `graph.ts` from a `"use client"`
   component fails the build with a `node:fs` chunking error.
 
+### Stage topology and connection depth
+
+`content/map.yaml` owns the top-level Stage relationships. Step `next` owns the
+process sequence. The map may derive richer handoff detail from those authored
+facts, but it may not turn an attractive diagram into a new claim about the
+system.
+
+The relationship vocabulary has four different jobs:
+
+- `flows_to`, `supplies`, and `enables` are forward operating progression and
+  determine left-to-right Stage rank.
+- `returns_to` is operating rework or return. It is drawn as a loop and never
+  participates in forward ranking.
+- `informs`, `influences`, `depends_on`, and `constrains` are data or contextual
+  couplings. They stay visible without pushing the target into a later rank.
+- `feedback_to` is learning feedback. It is drawn as a loop and never
+  participates in forward ranking.
+
+Do not collapse `returns_to` and `feedback_to`. A failed start returning to
+Matching is work going backward; evidence changing future matching behavior is
+learning going backward. They may look similar on a canvas and mean different
+things to the operating system.
+
+The Operating flow lens can isolate `operating`, `data`, `experience`, and
+`learning`. **Layer toggles change ink, never topology or node position.** A gap
+belongs to a layer too: an Experience-only view may show boundaries whose
+experience payload is explicitly *unmodelled*. Hiding the boundary because the
+payload is unknown hides the research surface the layer exists to reveal.
+
+Connection depth is part of `ModelGraph`, not a canvas helper. For an authored
+Stage relationship the projection may derive:
+
+- a cross-stage operating handoff when a Step's `next` points to a Step in the
+  target Stage;
+- a data/state transfer when that producing Step's output and the consuming
+  Step's input agree on the same Entity and state;
+- canonical Problems that already target both sides of the Stage boundary;
+- an explicit gap when the relationship exists but the operating mechanism,
+  data payload, participant-experience context, or learning payload is not yet
+  described.
+
+Do not infer an experience payload from adjacency, roles, preferences, or prose
+that merely says experience matters. Do not infer a learning payload from a
+feedback arrow. Until signal, attribution, cadence, confidence, or permitted use
+is canonical, show the gap. Research that proposes what should fill it remains
+under `research/` and cannot be painted on the canonical map before review.
+
 Node positions are derived too. `lib/model/layout.ts` computes them from topology,
 so the same revision always draws the same picture and a shared URL shows the same
 view. A reader dragging a node is overriding a derived position locally; it is not
