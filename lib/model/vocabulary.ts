@@ -65,14 +65,14 @@ export function confidenceTone(confidence?: string): Tone {
 }
 
 /**
- * Relationships in `content/map.yaml` that read as a loop back through the
- * system rather than forward progress. These are drawn differently and are
- * excluded from layout ranking so the graph stays acyclic.
+ * Relationships in `content/map.yaml` that loop backwards through the system.
+ * Both learning feedback and operating rework stay out of layout ranking, but
+ * their layer semantics remain distinct in the projection.
  */
-const FEEDBACK_RELATIONSHIPS = new Set(["feedback_to"]);
+const LOOP_RELATIONSHIPS = new Set(["feedback_to", "returns_to"]);
 
 export function isFeedbackRelationship(relationship: string): boolean {
-  return FEEDBACK_RELATIONSHIPS.has(relationship);
+  return LOOP_RELATIONSHIPS.has(relationship);
 }
 
 /** Every relationship the schema allows, for the legend. */
@@ -84,7 +84,7 @@ export const RELATIONSHIP_TERMS = relationshipSchema.options.map((id) => ({
 
 export const EDGE_LEGEND: Array<{ kind: EdgeKind; label: string; description: string }> = [
   { kind: "flow", label: "Operating flow", description: "How work moves between stages." },
-  { kind: "feedback", label: "Feedback loop", description: "What the system learns and sends back." },
+  { kind: "feedback", label: "Return / feedback loop", description: "A backward relationship: operating rework or learning sent to earlier work." },
   { kind: "process", label: "Process sequence", description: "Step order inside an expanded stage." },
   { kind: "problem", label: "Problem", description: "Where a stage or step is thought to break." },
   { kind: "bet", label: "Bet", description: "A solution proposed against a problem." },
