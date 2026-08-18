@@ -1,10 +1,15 @@
 # The autonomous loop: what remains between here and self-running
 
-> **Status: written 2026-08-18, after the loop's second full walk.** Change 1
-> lands with this document. Changes 2 and 6 are a person's work with an agent
-> doing the clerical half; changes 3, 4, and 5 are software, and change 4 is
-> deliberately gated on change 2. This is a plan, not a contract: when it
-> disagrees with [`AGENTS.md`](../AGENTS.md), `AGENTS.md` wins.
+> **Status: written 2026-08-18 after the loop's second full walk; updated the
+> same day after rebasing onto the map-topology work.** Changes 1, 3, and 5
+> land with this branch — change 3's stage-level half arrived on `main`
+> independently, and what remained was the step level, marked below. Change 2's
+> tooling half also arrived on `main`: the research queue now pauses new
+> research while decisions are owed. The decisions themselves have not — the
+> decision file count is unchanged since 08-14 — so changes 2, 4, and 6 remain
+> a person's work with an agent doing the clerical half, and 4 and 6 stay
+> gated on 2. This is a plan, not a contract: when it disagrees with
+> [`AGENTS.md`](../AGENTS.md), `AGENTS.md` wins.
 
 ## The aspiration, stated precisely
 
@@ -89,23 +94,35 @@ unfinished until its decisions are recorded.** The conversation that produced
 the research is the cheapest place to decide it, and ending that conversation
 without the decision file is how 34 findings piled up.
 
+*Tooling half landed on `main`, 2026-08-18.* `research:queue` now leads with a
+single **next knowledge action** and pauses the invitation to research while
+review, application, or synthesis is owed, grouping questions by the product
+work they unblock. The queue can refuse to add to the pile; only a person can
+shrink it, and the decision file count has not moved.
+
 ### 3. Draw the routes the model already has
 
-The map's step level currently draws only `next` — the forward chain. The
-model's non-linear paths live in `exceptions.route`, and every route authored
-so far returns to `propose-match`: an expired proposal, a declined match, a
-care relationship ending in rematch. None of that is validated, classified, or
-drawn — `exceptions.route` never passes through `requireRef`, has no row in
-the conformance registry, and derives no edge, so a typo'd route validates
-green and the flow lens shows a straight ladder the model itself contradicts.
+The stage level got there first: the map-topology work on `main` added
+`returns_to` to the relationship vocabulary — operating rework, drawn as a
+loop, never ranked forward, deliberately distinct from `feedback_to` — plus
+layer toggles and derived connection depth at stage boundaries. The contract
+for it now lives in [`AGENTS.md`](../AGENTS.md#stage-topology-and-connection-depth).
 
-The change: validate the reference, classify it, and derive a distinct edge
-kind for it — drawn as the return path it is, visually separate from the
-forward chain. The session findings say the same thing from the other
-direction: the reviewer could not tell what state each route hands off to,
-and the three questions that session raised are about exactly these handoffs.
-When a person queues them and they get answered, the routes they produce
-should land as drawn structure, not prose.
+*What remained, landing with this branch, is the step level.* The model's
+step-scale non-linear paths live in `exceptions.route`, and every route
+authored so far returns to `propose-match`: an expired proposal, a declined
+match, a care relationship ending in rematch. None of that was validated,
+classified, or drawn — `exceptions.route` never passed through `requireRef`,
+had no row in the conformance registry, and derived no edge, so a typo'd
+route validated green and an expanded stage showed a straight ladder the
+model itself contradicts. This branch validates the reference, classifies it,
+and derives a `return` edge drawn apart from the forward sequence.
+
+The session findings say the same thing from the operator's side: the
+reviewer could not tell what state each route hands off to, and the three
+questions that session raised are about exactly these handoffs. When a person
+queues them and they get answered, the routes they produce now land as drawn
+structure, not prose.
 
 ### 4. Give the cross-cutting profile a home — after change 2
 
@@ -119,14 +136,14 @@ cross-stage journey with no new machinery.
 This is deliberately sequenced after change 2: composing a canonical record
 from an undecided reflection is the route-around this plan exists to end.
 
-### 5. Make sessions visible to the build queue
+### 5. Make sessions visible to the build queue — lands with this branch
 
-`prototype:queue` reads bets, so it still says "put it in front of
-participants" about a prototype whose first session is already recorded in
+`prototype:queue` read only bets, so it said "put it in front of
+participants" about a prototype whose first session was already recorded in
 staging. A small join through `lib/research/glance.ts` — which already
-swallows staging errors so a malformed handoff cannot break a surface — lets
-the queue say *a session is recorded and undecided* instead of asking for one
-that already happened.
+swallows staging errors so a malformed handoff cannot break a surface — now
+lets the queue say *a session is recorded and its findings are undecided*
+instead of asking for one that already happened.
 
 ### 6. Iterate the evidence-directed prototype — after its session is decided
 
