@@ -62,6 +62,57 @@ test("flags a font-family literal, not one that reads a token", () => {
   assert.deepEqual(rules("body { font-family: var(--font); }"), []);
 });
 
+test("a tokenized duration still needs the easing token", () => {
+  assert.deepEqual(rules(".fade { transition: opacity var(--ds-duration); }"), [
+    "motion-drift",
+  ]);
+  assert.deepEqual(
+    rules(".fade { transition: opacity var(--ds-duration) var(--ds-ease); }"),
+    [],
+  );
+});
+
+test("radius shorthands are inspected corner by corner", () => {
+  assert.deepEqual(
+    rules(".card { border-radius: var(--radius) var(--radius) 20px 20px; }"),
+    ["radius-drift"],
+  );
+  assert.deepEqual(rules(".card { border-radius: 4px 4px 20px 20px; }"), [
+    "radius-drift",
+  ]);
+  assert.deepEqual(
+    rules(".card { border-radius: var(--radius) var(--radius-lg); }"),
+    [],
+  );
+});
+
+test("comments are not scanned, in css or in tsx", () => {
+  assert.deepEqual(rules("/* example of the tell: linear-gradient(#fff, #000) */"), []);
+  assert.deepEqual(
+    rules("// never use 🚀 as a feature icon", "components/x.tsx"),
+    [],
+  );
+  assert.deepEqual(
+    rules("/* spans\nlinear-gradient(#fff, #000)\nlines */\n.ok { color: var(--ink); }"),
+    [],
+  );
+  assert.deepEqual(
+    rules('const url = "https://example.com"; const bad = <b>🚀</b>;', "components/x.tsx"),
+    ["emoji-as-ui"],
+  );
+});
+
+test("ds-allow needs a real comment and a reason", () => {
+  assert.deepEqual(
+    rules("/* ds-allow: */\n.pill { border-radius: 999px; }"),
+    ["radius-drift"],
+  );
+  assert.deepEqual(
+    rules('const s = "ds-allow: not a comment";\n<b>🚀</b>', "components/x.tsx"),
+    ["emoji-as-ui"],
+  );
+});
+
 test("a ds-allow comment on the line or the one above opts out", () => {
   assert.deepEqual(
     rules(".pulse { animation: pulse 1s ease-in-out infinite; /* ds-allow: skeleton pulse */ }"),

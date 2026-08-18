@@ -97,31 +97,41 @@ const RULES: Rule[] = [
   {
     rule: "motion-drift",
     label: "Motion bypassing the duration and easing tokens",
-    fix: "Motion is var(--ds-duration) on var(--ds-ease) — with --ds-duration-fast and --ds-duration-slow for the ends. A deliberate exception (a skeleton pulse, a sheet spring) states its reason with ds-allow.",
+    fix: "Motion is var(--ds-duration) on var(--ds-ease) — with --ds-duration-fast and --ds-duration-slow for the ends. A tokenized duration still needs the easing token, or the browser's default curve slips in. A deliberate exception (a skeleton pulse, a sheet spring) states its reason with ds-allow.",
     match: (line) => {
       if (!/\b(transition|animation|transition-duration|animation-duration)\s*:/.test(line)) {
         return false;
       }
-      const declaration = line
-        .slice(line.indexOf(":"))
-        .replace(/var\([^)]*\)/g, "");
+      const raw = line.slice(line.indexOf(":"));
+      const declaration = raw.replace(/var\([^)]*\)/g, "");
       for (const m of declaration.matchAll(DURATION)) {
         if (durationSeconds(m[1], m[2]) > 0.01) return true;
       }
       if (LITERAL_BEZIER.test(declaration)) return true;
-      return NAMED_EASING.test(declaration);
+      if (NAMED_EASING.test(declaration)) return true;
+      // A tokenized duration with no easing at all runs on the browser's
+      // default `ease`, which bypasses the system curve just as surely as
+      // writing it out would.
+      return (
+        /\b(transition|animation)\s*:/.test(line) &&
+        /var\(--ds-duration/.test(raw) &&
+        !/var\(--ds-ease\)/.test(raw)
+      );
     },
   },
   {
     rule: "radius-drift",
     label: "Radius literal off the system's scale",
-    fix: "The system has a radius scale (--radius, --radius-lg, --radius-card, --radius-pill, and the --ds-radius-* steps). Literals at 8px and above, and literal pills, drift from it; 50% circles and hairline radii under 8px are not flagged.",
+    fix: "The system has a radius scale (--radius, --radius-lg, --radius-card, --radius-pill, and the --ds-radius-* steps). Literals at 8px and above, and literal pills, drift from it — in any corner of a shorthand; 50% circles and hairline radii under 8px are not flagged.",
     match: (line) => {
       const m = line.match(/border-radius\s*:\s*([^;]+)/);
-      if (!m || m[1].includes("var(")) return false;
-      if (/9{3,}px/.test(m[1])) return true;
-      const px = m[1].match(/(\d+(\.\d+)?)px/);
-      return px !== null && Number(px[1]) >= 8;
+      if (!m) return false;
+      const value = m[1].replace(/var\([^)]*\)/g, "");
+      if (/9{3,}px/.test(value)) return true;
+      for (const px of value.matchAll(/(\d+(?:\.\d+)?)px/g)) {
+        if (Number(px[1]) >= 8) return true;
+      }
+      return false;
     },
   },
   {
@@ -135,13 +145,82 @@ const RULES: Rule[] = [
   },
 ];
 
+/**
+ * Split each line into code and comment text, tracking block comments across
+ * lines and (in TS/TSX) skipping string contents so a `//` inside a string is
+ * not read as a comment. Rules match against code only, so documenting an
+ * anti-pattern in a comment cannot fail CI — while `ds-allow:` is recognised
+ * only *inside* a comment, and only with a non-empty reason after the colon,
+ * so an unexplained or string-smuggled exemption does not suppress anything.
+ */
+function splitCodeAndComments(
+  content: string,
+  file: string,
+): { code: string[]; allows: boolean[] } {
+  const slashSlashComments = !file.endsWith(".css");
+  const code: string[] = [];
+  const allows: boolean[] = [];
+  let inBlock = false;
+  for (const raw of content.split("\n")) {
+    let lineCode = "";
+    let lineComment = "";
+    let inString: string | null = null;
+    let i = 0;
+    while (i < raw.length) {
+      if (inBlock) {
+        const end = raw.indexOf("*/", i);
+        if (end === -1) {
+          lineComment += raw.slice(i);
+          i = raw.length;
+        } else {
+          lineComment += raw.slice(i, end);
+          inBlock = false;
+          i = end + 2;
+        }
+        continue;
+      }
+      const ch = raw[i];
+      if (inString) {
+        lineCode += ch;
+        if (ch === "\\") {
+          lineCode += raw[i + 1] ?? "";
+          i += 2;
+          continue;
+        }
+        if (ch === inString) inString = null;
+        i++;
+        continue;
+      }
+      if (slashSlashComments && (ch === '"' || ch === "'" || ch === "`")) {
+        inString = ch;
+        lineCode += ch;
+        i++;
+        continue;
+      }
+      if (ch === "/" && raw[i + 1] === "*") {
+        inBlock = true;
+        i += 2;
+        continue;
+      }
+      if (slashSlashComments && ch === "/" && raw[i + 1] === "/") {
+        lineComment += raw.slice(i + 2);
+        break;
+      }
+      lineCode += ch;
+      i++;
+    }
+    code.push(lineCode);
+    allows.push(/ds-allow:\s*\S/.test(lineComment));
+  }
+  return { code, allows };
+}
+
 export function scanText(file: string, content: string): Finding[] {
   const findings: Finding[] = [];
-  const lines = content.split("\n");
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const prev = i > 0 ? lines[i - 1] : "";
-    if (line.includes("ds-allow:") || prev.includes("ds-allow:")) continue;
+  const { code, allows } = splitCodeAndComments(content, file);
+  for (let i = 0; i < code.length; i++) {
+    if (allows[i] || (i > 0 && allows[i - 1])) continue;
+    const line = code[i];
     for (const rule of RULES) {
       if (rule.match(line, file)) {
         findings.push({
