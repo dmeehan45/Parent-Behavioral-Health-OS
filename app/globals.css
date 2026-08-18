@@ -56,6 +56,17 @@
   --kind-metric: var(--ds-green-on-tint);
   --kind-entity: var(--ds-gray-aa);
 
+  /* The same five families as grounds rather than as ink, so a category can be
+     carried by a surface instead of only by a 10px pill. */
+  --kind-stage-wash: var(--ds-wash-blue);
+  --kind-step-wash: var(--ds-wash-blue);
+  --kind-problem-wash: var(--ds-wash-coral);
+  --kind-claim-wash: var(--ds-wash-coral);
+  --kind-bet-wash: var(--ds-wash-gold);
+  --kind-prototype-wash: var(--ds-wash-gold);
+  --kind-metric-wash: var(--ds-wash-green);
+  --kind-entity-wash: var(--ds-wash-neutral);
+
   /* A floor the floating nav cannot go under: a 44px touch target inside 8px
      of padding, top and bottom. Nothing subtracts it — the shell is a flex
      column, so the map takes whatever the nav leaves. */
@@ -1631,6 +1642,62 @@ p:last-child {
   gap: 4px;
 }
 
+/*
+ * A row says what kind of thing it is.
+ *
+ * Steps, problems, claims and metrics rendered as four identical stacks of grey
+ * rows — twelve of them on a stage page, distinguishable only by a badge the
+ * eye skips. Each row now takes its category's hue as an edge and its wash as a
+ * ground, which is the same vocabulary the map teaches. The badge still names
+ * the kind in words: colour is never the only signal.
+ */
+.link-list > li {
+  --row-kind: var(--kind-entity);
+  --row-wash: var(--kind-entity-wash);
+}
+
+.link-list > li[data-kind="stage"] { --row-kind: var(--kind-stage); --row-wash: var(--kind-stage-wash); }
+.link-list > li[data-kind="step"] { --row-kind: var(--kind-step); --row-wash: var(--kind-step-wash); }
+.link-list > li[data-kind="problem"] { --row-kind: var(--kind-problem); --row-wash: var(--kind-problem-wash); }
+.link-list > li[data-kind="claim"] { --row-kind: var(--kind-claim); --row-wash: var(--kind-claim-wash); }
+.link-list > li[data-kind="bet"] { --row-kind: var(--kind-bet); --row-wash: var(--kind-bet-wash); }
+.link-list > li[data-kind="prototype"] { --row-kind: var(--kind-prototype); --row-wash: var(--kind-prototype-wash); }
+.link-list > li[data-kind="metric"] { --row-kind: var(--kind-metric); --row-wash: var(--kind-metric-wash); }
+.link-list > li[data-kind="entity"] { --row-kind: var(--kind-entity); --row-wash: var(--kind-entity-wash); }
+
+/*
+ * A stage's steps run in order, and the order is a fact about the model rather
+ * than the order they happened to be listed in. Numbered from the element, so
+ * the count is never written down twice.
+ */
+.link-sequence {
+  counter-reset: link-step;
+}
+
+.link-sequence > li {
+  counter-increment: link-step;
+  position: relative;
+}
+
+.link-sequence > li::before {
+  content: counter(link-step);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 22px;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--row-kind);
+}
+
+.link-sequence > li > a,
+.link-sequence > li > button {
+  padding-left: 30px;
+}
+
 .state-list a,
 .state-list button,
 .link-list a,
@@ -1649,6 +1716,13 @@ p:last-child {
   text-decoration: none;
   font-size: 13px;
   transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.link-list a,
+.link-list button {
+  background: var(--row-wash);
+  border-left: 3px solid var(--row-kind);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 .state-list a:hover,
@@ -1963,6 +2037,33 @@ p:last-child {
  * whole record below the fold. Display type is for short strings; a heading
  * that is a sentence is set at a sentence's size.
  */
+/*
+ * A record page belongs to a category, and says so above the title.
+ *
+ * The rule under the page head takes the record's own hue, which is the
+ * vocabulary the map already teaches — blue for the machine, coral for where it
+ * breaks, gold for what we propose, green for what we can measure. It is a
+ * second signal, never the only one: the kind badge sits in the same header in
+ * words.
+ */
+.record {
+  --record-kind: var(--kind-entity);
+}
+
+.record-stage { --record-kind: var(--kind-stage); }
+.record-step { --record-kind: var(--kind-step); }
+.record-problem { --record-kind: var(--kind-problem); }
+.record-claim { --record-kind: var(--kind-claim); }
+.record-bet { --record-kind: var(--kind-bet); }
+.record-prototype { --record-kind: var(--kind-prototype); }
+.record-metric { --record-kind: var(--kind-metric); }
+.record-entity { --record-kind: var(--kind-entity); }
+
+.record .page-head {
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--record-kind);
+}
+
 .page-head h1 {
   margin-bottom: 10px;
   font-size: clamp(24px, 2.4vw, 34px);
@@ -2218,6 +2319,26 @@ p:last-child {
 .home-band h2 {
   margin: 10px 0 14px;
   font-size: 22px;
+}
+
+/*
+ * Not every section is a headline.
+ *
+ * The page ran five bands of identical weight — eyebrow, heading, muted
+ * paragraph, content — which is a metronome rather than a hierarchy: if
+ * everything is announced the same way, nothing is being announced. The loop
+ * and the first prototype are the two things worth arriving at. These three
+ * are reference, and read as reference: no eyebrow, a smaller heading, and
+ * less air above them.
+ */
+.home-band.quiet {
+  margin-top: 52px;
+}
+
+.home-band.quiet h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
 .define-list {
@@ -2563,11 +2684,35 @@ details.pipeline-guide {
  * is the division rather than either list. Collapses to one column early: two
  * columns of prose under about 230px each read worse than one.
  */
+/*
+ * Two columns, deliberately unequal.
+ *
+ * Equal halves of a machine/person split say the halves weigh the same, and
+ * the whole argument of this repository is that they do not. The person's
+ * column is the wider and darker one; the machine's is set quieter, which is
+ * also what stops the block reading as the mirrored comparison table this
+ * shape usually is.
+ */
 .home-split {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 24px;
-  margin: 24px 0;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: 32px;
+  margin: 20px 0;
+}
+
+.home-split-minor .plain-list {
+  font-size: 13.5px;
+}
+
+.home-split-major .plain-list {
+  color: var(--ink);
+}
+
+@media (max-width: 700px) {
+  .home-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
 }
 
 /* Markers opted back in — the reset strips them, and an indented column with

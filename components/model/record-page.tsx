@@ -61,7 +61,12 @@ export function RecordPage({ graph, node }: { graph: ModelGraph; node: ModelNode
   })();
 
   return (
-    <main className="shell page">
+    /* The page carries the category it belongs to. Every record page looked
+       identical regardless of whether it described a part of the machine, a
+       place it breaks, or a number that would settle an argument — the only
+       difference was a 10px badge. The hue is the map's own vocabulary, and
+       the badge below still says the word. */
+    <main className={`shell page record record-${node.kind}`}>
       <Breadcrumb
         trail={[
           { label: "System map", href: "/map" },

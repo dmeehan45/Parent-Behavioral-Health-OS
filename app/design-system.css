@@ -169,6 +169,25 @@
   --ds-status-warning: var(--ds-gold-aa);
   --ds-status-danger: var(--ds-coral-aa);
 
+  /* Category washes — new design work, declared as such.
+     The action has a wash because the action has one hue. The four-hue
+     category system had none, so anything wanting to carry a category as a
+     *surface* rather than as a 10px pill — a record's own header, a row
+     grouped by kind — had to reach past this layer into a primitive, which is
+     the one thing the alias seam exists to prevent. One role per hue family,
+     each holding its lightness through the dark scheme the way the surfaces
+     do. Hue still means category; these only let a category be a ground.
+     Mixed toward the base surface rather than taken from the ramp directly.
+     The lightest ramp step sits a little under `--ds-surface-subtle`, and the
+     muted text tier measured 4.36:1 on raw coral — under AA, on the row meta
+     of every problem in the model. Half-strength clears it on all five while
+     still reading as the category's colour. */
+  --ds-wash-blue: color-mix(in oklab, var(--ds-blue-lightest) 55%, var(--ds-surface-base));
+  --ds-wash-coral: color-mix(in oklab, var(--ds-coral-lightest) 55%, var(--ds-surface-base));
+  --ds-wash-gold: color-mix(in oklab, var(--ds-gold-lightest) 55%, var(--ds-surface-base));
+  --ds-wash-green: color-mix(in oklab, var(--ds-green-lightest) 55%, var(--ds-surface-base));
+  --ds-wash-neutral: color-mix(in oklab, var(--ds-gray-lighter) 55%, var(--ds-surface-base));
+
   /* ---- layer 3: component tokens (alias layer 2 only) --------------------- */
 
   --ds-focus-ring-inner: var(--ds-white);
@@ -238,6 +257,15 @@
     --ds-status-success: var(--ds-green-medium);
     --ds-status-warning: var(--ds-gold-medium);
     --ds-status-danger: var(--ds-coral-light);
+
+    /* The washes re-derived for the dark ground: a category tint has to stay a
+       tint, so these are the hue at the surface's own lightness rather than the
+       light-scheme value dimmed, which would read as a coloured block. */
+    --ds-wash-blue: #14262e;
+    --ds-wash-coral: #2c1a1d;
+    --ds-wash-gold: #241f13;
+    --ds-wash-green: #10241d;
+    --ds-wash-neutral: #1e2a28;
 
     --ds-focus-ring-inner: #0e1614;
     --ds-focus-ring-outer: var(--ds-blue-medium);

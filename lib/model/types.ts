@@ -67,6 +67,14 @@ export type DetailBlock =
       type: "links";
       label: string;
       items: Array<{ id: string; title: string; href: string; kind: NodeKind; meta?: string }>;
+      /**
+       * True when the order of these links is itself a fact about the model —
+       * a stage's steps run in sequence, and drawing them as a numbered chain
+       * says so. Most link blocks are sets: a bet's targets are places it
+       * lands, in no order, and numbering them would assert a sequence nobody
+       * wrote down. So this is opt-in, and the projection decides it.
+       */
+      sequence?: boolean;
     };
 
 /**
