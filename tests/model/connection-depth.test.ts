@@ -18,7 +18,7 @@ function connection(source: string, target: string) {
   return edge.connection;
 }
 
-test("onboarding to matching carries process, state, and canonical problems", () => {
+test("onboarding to matching carries process, state, actors, and canonical problems", () => {
   const depth = connection("clinician-onboarding", "matching");
 
   assert.ok(
@@ -26,25 +26,25 @@ test("onboarding to matching carries process, state, and canonical problems", ()
       (handoff) => handoff.sourceId === "step:become-match-ready" && handoff.targetId === "step:propose-match",
     ),
   );
-  assert.ok(depth.transfers.some((transfer) => transfer.label === "Clinician: match-ready"));
+  assert.ok(depth.transfers.some((transfer) => transfer.layer === "data" && transfer.label === "Clinician · match-ready"));
+  assert.ok(depth.transfers.some((transfer) => transfer.layer === "experience" && transfer.label === "Clinician"));
   assert.ok(depth.problems.some((problem) => problem.id === "problem:activation-without-productivity"));
   assert.ok(depth.problems.some((problem) => problem.id === "problem:clinician-performance-loses-context"));
-  assert.ok(depth.gaps.includes("experience"), "the model should say the experience handoff is still unmodelled");
+  assert.ok(!depth.gaps.includes("experience"), "actor continuity should be a positive signal, not a repeated generic gap");
 });
 
-test("experience-only isolation keeps boundaries whose experience payload is a known gap", () => {
-  const edge = stageEdge("clinician-onboarding", "matching");
-  assert.ok(
-    hasActiveProjectedFlowLayer(edge, new Set(["experience"])),
-    "isolating Experience should reveal the unmodelled experience boundary instead of an empty map",
-  );
+test("actor isolation keeps boundaries with real participant continuity", () => {
+  const edge = stageEdge("matching", "care-initiation");
+  assert.ok(hasActiveProjectedFlowLayer(edge, new Set(["experience"])));
+  const actors = edge.connection?.transfers.filter((transfer) => transfer.layer === "experience").map((transfer) => transfer.label);
+  assert.deepEqual(actors, ["Clinician", "Family"]);
 });
 
 test("a contextual data relationship says when its payload is still unknown", () => {
   const depth = connection("family-demand", "clinician-supply");
   assert.ok(depth.layers.includes("data"));
   assert.ok(depth.gaps.includes("data"));
-  assert.equal(depth.transfers.length, 0);
+  assert.equal(depth.transfers.filter((transfer) => transfer.layer === "data").length, 0);
 });
 
 test("an authored stage progression with no crossing Step handoff is visible as a gap", () => {
@@ -62,14 +62,14 @@ test("the direct practice to retention path already present in Steps is projecte
         handoff.sourceId === "step:reach-operating-rhythm" && handoff.targetId === "step:reach-sustainable-caseload",
     ),
   );
-  assert.ok(depth.transfers.some((transfer) => transfer.label === "Clinician: establishing"));
+  assert.ok(depth.transfers.some((transfer) => transfer.layer === "data" && transfer.label === "Clinician · establishing"));
+  assert.ok(depth.transfers.some((transfer) => transfer.layer === "experience" && transfer.label === "Clinician"));
 });
 
 test("an operating return is not misclassified as a learning loop", () => {
   const depth = connection("care-initiation", "matching");
   assert.deepEqual(depth.layers, ["operating"]);
   assert.ok(depth.gaps.includes("operating"));
-  assert.ok(depth.gaps.includes("experience"));
   assert.ok(!depth.gaps.includes("learning"));
 });
 
