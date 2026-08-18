@@ -1,6 +1,6 @@
 ---
 id: evidence-directed-clinician-review
-title: Evidence-Directed Clinician Review
+title: Evidence-Directed Clinician Qualification & Selection
 problem: scarce-review-time-without-comparable-evidence
 status: concept
 confidence: medium
@@ -12,72 +12,82 @@ prototype:
   builtAgainst: 02af58-0bba7b-952591-cf113c-10be44-11446f
 authority: proposed
 provenance: { source: author, references: [] }
-lastReviewed: 2026-08-17
+lastReviewed: 2026-08-18
 ---
 
 # Bet
 
-Build a comparable evidence profile for each in-scope clinician prospect and use evidence sufficiency, uncertainty, and explicit eligibility rules to choose the next action, reserving scarce human review for cases where structured judgment could materially change a consequential decision.
+Build one shared clinician evidence profile but separate the work around it into two functional surfaces: qualification and evidence generation before the handoff, then consequential selection and contracting judgment after it. The system should gather, verify, normalize, route, and preserve evidence so human attention is spent on interactions or decisions that add information rather than on reconstructing the candidate.
 
 # Questions
 
-- Which evidence is sufficient to advance, stop, or request more information without human review?
-- Which forms of uncertainty or contradiction justify scarce reviewer time?
-- How often will reviewers override an evidence-directed route, and what do those overrides teach us?
-- Which clinician-facing evidence requests can be automated without making the selection experience feel dehumanized or misleadingly machine-decided?
+- Which evidence can the system gather, verify, normalize, or request without qualified human judgment?
+- Which clinician interactions are worth human time because they generate meaningful behavioral evidence unavailable from static records?
+- What evidence state and uncertainty make a prospect ready to hand from qualification into selection?
+- Which ambiguities or contradictions justify senior or specialist selection judgment?
+- How should network supply and demand influence a contracting decision without becoming a clinician-quality score?
+- Which clinician-facing evidence requests can be system-supported without making the experience feel dehumanized or misleadingly machine-decided?
 
 # Learning decision
 
-Whether an operator can use a comparable evidence profile and explicit next-step routing to replace a uniform manual review path for a meaningful share of prospects while retaining accountable human judgment for consequential ambiguity.
+Whether separating qualification/evidence work from selection and contracting judgment, while carrying one explicit evidence record across the handoff, lets a network absorb greater prospect volume without wasting scarce specialist attention, losing decision context, or degrading clinician trust.
 
 # Scope
 
-**Starting state.** A clinician prospect already exists in the candidate pool. The prototype begins with several synthetic prospects whose evidence differs in completeness, confidence, and relevance.
+**Starting state.** A clinician prospect already exists in the candidate pool. The experiment begins after inbound sourcing and attraction, with synthetic prospects whose available evidence differs in completeness, confidence, and relevance.
 
-**Operator path.** The reviewer can see what is known, which items are true eligibility gates versus predictive evidence, how trustworthy each signal is, what consequential information is still missing, why the prospect was routed to the current action, and what the smallest useful next step is. The reviewer can accept the route, request additional evidence, send the case to structured human review, or override the recommendation with a reason.
+**Qualification surface.** A user responsible for candidate qualification sees what evidence the system has already assembled, which facts are genuine eligibility gates, what is missing or contradictory, and the smallest useful next action. That action may be system collection, a bounded clinician request, or a structured interaction intended to generate evidence that cannot be obtained from static records.
 
-**Clinician-facing safeguard.** When the system requests additional information from a clinician, the experience remains visibly backed by a person. Automated collection is presented as a bounded way to gather or organize a few pieces of information before or around a human interaction, not as "AI interviewing" or a machine making the contracting decision. A named human presence, clear explanation of purpose, and a route to human contact remain visible.
+**Selection surface.** A user responsible for consequential selection or contracting judgment receives the resulting evidence profile rather than the raw source trail. They can see provenance, uncertainty, what was learned through human interaction, and any unresolved issue material to the decision. They decide whether to advance, stop, seek more evidence, or make an accountable exception.
+
+These are **functional roles, not an assumed org chart**. One person may perform both in a small network. At scale they may belong to different internal teams or external partners. The prototype should test whether the handoff remains legible under either arrangement rather than prescribing staffing structure.
+
+**Clinician-facing safeguard.** When the system requests additional information, the experience remains visibly backed by a person and clear about purpose. Automation may support collection and preparation; it should not imply that a machine independently interviewed, judged, or contracted the clinician.
 
 # Out of scope
 
-Prospect generation is a separate problem space. This experiment assumes prospects already exist and does not test role posting, outbound sourcing, inbound volume generation, channel strategy, or how a clinician first enters the pool.
+Prospect generation remains a separate problem space. This experiment does not test role posting, outbound sourcing, inbound channel strategy, or how a clinician first enters the pool.
 
-The prototype also does not establish the final predictive model, automate final contracting decisions, prove which screening threshold is legally or clinically valid, or define how the evidence profile persists after selection. The last of those remains open under `define-selection-handoff`.
+The prototype also does not establish a final predictive model, validate production screening thresholds, automate final contracting authority, or define the durable downstream persistence rules for the evidence profile. That last boundary remains open under `define-selection-handoff`.
 
 # Assumptions
 
 Held for this prototype only:
 
-- Enough prospect volume already exists for scarce reviewer capacity to be a meaningful constraint.
-- The synthetic evidence shown is representative enough to make routing tradeoffs legible, but none of its scores or thresholds should be read as validated selection criteria.
-- Some facts are genuinely noncompensable eligibility requirements while other evidence should remain compensatory or reviewable.
-- Automation can prepare, normalize, summarize, or collect evidence without being granted autonomous authority to make the final contracting decision.
-- Human presence is part of the selection system, not decorative reassurance added after an automated process is designed.
+- Enough prospect volume exists for allocation of human attention to matter.
+- Qualification work and selection judgment are meaningfully different kinds of work even when the same person performs both.
+- Some facts are noncompensable eligibility requirements while other evidence is predictive, contextual, or incomplete.
+- System support can prepare, normalize, summarize, verify, or collect evidence without being granted autonomous final contracting authority.
+- Human interaction is valuable when it generates evidence or trust that the system cannot reproduce merely by processing existing data.
+- Network need can affect a contracting decision without defining clinical quality.
 
 # Signals and safeguards
 
-**Primary signal.** Whether reviewers follow, override, or abandon the evidence-directed next action, and whether the reason for an override identifies missing evidence, a bad rule, a representation error, or a case where human judgment adds information the structured profile did not contain.
+**Primary signal.** Whether qualification work produces a record the selection user can act on without reopening the original source material or repeating earlier evidence gathering, and whether disagreements reveal missing evidence, bad routing, representation error, or genuinely valuable judgment.
 
-**Efficiency signal.** Which prospects reviewers believe can be resolved without a full manual review and which actions still require meaningful reviewer time. This prototype can compare workflow choices and perceived effort, but it cannot claim a reduction in real `operating-effort-per-activation` until used in an operating process.
+**Efficiency signal.** Where human time is spent by function: evidence collection and enrichment, structured clinician interaction, ambiguity resolution, and consequential selection judgment. The prototype can expose whether work moved to a more appropriate role, but it cannot claim real operating-effort reduction until used in an operating process.
 
-**Quality safeguard.** A fast route is not a success if it hides consequential uncertainty or creates unobservable false negatives. The interface must expose confidence, provenance, and why a rule is being used. No synthetic recommendation should be presented as validated clinical truth.
+**Learning signal.** Whether evidence generated during qualification can later be connected to selection decisions and longitudinal clinician performance so the system can learn which earlier signals were actually useful rather than simply collecting more data.
 
-**Clinician-experience safeguard.** Any automated information-gathering step must disclose its bounded purpose, preserve a visible human relationship, and avoid language suggesting that an AI system is independently interviewing, judging, or contracting the clinician.
+**Quality safeguard.** A fast route is not a success if it hides uncertainty, creates unobservable false negatives, or lets network convenience become a proxy for clinical quality. Provenance and intended use of evidence should remain visible.
+
+**Clinician-experience safeguard.** Evidence gathering should preserve a legible human relationship and minimize repeated or unexplained requests. Efficiency that causes strong clinicians to abandon the process is a selection failure.
 
 # Fidelity
 
-- **Content.** Synthetic clinician prospects and synthetic evidence only. Use the evidence domains and lifecycle framing from the current research, but do not invent validated cutoffs.
-- **Interaction.** High fidelity for queue prioritization, evidence inspection, next-action choice, override, and the preview of an additional-evidence request. Those are the decisions under test.
+- **Content.** Synthetic clinicians and evidence only. Use the working evidence domains and lifecycle framing from current research without inventing validated cutoffs.
+- **Interaction.** High fidelity for the qualification-to-selection handoff, evidence inspection, targeted evidence collection, role-specific next actions, and accountable override.
 - **System.** Local and fake. No real clinician data, communication, enrichment, screening, or contracting action occurs.
-- **Visual.** Use the repository design system. Optimize for decision clarity and provenance rather than polish.
+- **Visual.** Use the repository design system. Make the distinction between qualification work and selection judgment legible before adding more workflow depth.
 
 # Review prompts
 
-Use these after working through the prototype rather than before it. Where possible, tie the answer to the specific prospect, evidence item, or route that caused the reaction.
+Use these after working through both functional surfaces rather than asking a reviewer to reason about the workflow abstractly.
 
-- **Workflow comprehension.** Can you tell what entered this queue, what decision belongs to you here, and where each action hands the prospect next? What still feels disconnected from the surrounding clinician-supply workflow?
-- **Evidence sufficiency.** Does the evidence profile give you enough information to trust the suggested next action? What is missing, over-weighted, or harder to interpret than it should be?
-- **Allocation of human judgment.** Which cases genuinely deserve structured human review, and which feel safe to resolve without it? Where is the current routing too cautious or too aggressive?
-- **Value of targeted evidence collection.** When the system asks for one more piece of evidence, does that feel meaningfully better than reviewing the prospect yourself? What would make that step useful rather than added process?
-- **Clinician experience and trust.** Does the clinician-facing evidence request still feel like a human relationship supported by technology, or does it feel like an automated interview? What specifically creates that impression?
-- **Override learning.** If you disagreed with a route, what caused the disagreement: missing evidence, a bad rule, a misleading representation, or useful human judgment the profile did not capture? What should the next iteration change because of it?
+- **Role clarity.** Is it obvious what the qualification user owns, what the selection user owns, and which work could be performed by the same person or different teams?
+- **Handoff quality.** Does the selection user receive enough evidence and provenance to act without reconstructing the candidate from source material?
+- **Human attention.** Which interactions or ambiguities genuinely deserve qualified human time, and where is the workflow still spending people on clerical evidence work?
+- **Evidence generation.** When a human interaction is used, does it produce decision-relevant evidence that the system could not have gathered another way?
+- **Network decision.** Can contracting or network-need context influence the decision without reading as a claim that one clinician is clinically better?
+- **Clinician trust.** Does system-supported evidence gathering still feel like a human relationship using technology well, or has efficiency started to dominate the experience?
+- **Learning loop.** Can you tell how an evidence item gathered here would later be connected to the decision and to real clinician performance so the system can learn whether it mattered?
