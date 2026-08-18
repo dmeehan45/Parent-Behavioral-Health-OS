@@ -38,10 +38,12 @@ function readView(
   const openParam = single("open");
   const open = openParam?.includes(":") ? openParam : undefined;
 
-  // Connections are derived and have no "removed" record page, so a stale edge
-  // deep link falls back to the map rather than opening an empty side panel.
+  // Connections are a view inside Operating flow, not a primitive shared by all
+  // lenses. A stale edge id or a URL that combines a connection with another
+  // lens falls back to that lens rather than opening detail for ink it cannot
+  // show.
   const connectionParam = single("connection");
-  const connection = connectionParam && edgeIds.has(connectionParam) ? connectionParam : undefined;
+  const connection = lens === "flow" && connectionParam && edgeIds.has(connectionParam) ? connectionParam : undefined;
 
   const expand = (single("expand") ?? "")
     .split(",")
