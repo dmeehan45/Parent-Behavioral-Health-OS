@@ -340,23 +340,24 @@ export default function Home() {
         </section>
       ) : null}
 
-      <section className="home-band">
-        <span className="eyebrow">Division of labour</span>
+      {/* Two lists of equal length, side by side, is the shape this argument
+          is usually drawn in and it says the halves weigh the same. They do
+          not. The machine's column is the smaller one on purpose. */}
+      <section className="home-band quiet">
         <h2>What the machine does, and what only you do</h2>
-        <p className="muted">The loop is arranged around this split, and the review gate is what enforces it.</p>
 
         <div className="home-split">
-          <div>
+          <div className="home-split-minor">
             <span className="field-label">An agent, quickly</span>
             <ul className="plain-list">
               <li>Read the whole repository and answer out of it.</li>
-              <li>Find public research and reduce it to findings with their sources attached.</li>
-              <li>Check a finding against what earlier runs already concluded.</li>
+              <li>Reduce public research to findings with their sources attached.</li>
+              <li>Check a finding against what earlier runs concluded.</li>
               <li>Compose the next step&rsquo;s context so nothing is lost at the join.</li>
               <li>Build the prototype, and run the validation.</li>
             </ul>
           </div>
-          <div>
+          <div className="home-split-major">
             <span className="field-label">A person, and only a person</span>
             <ul className="plain-list">
               <li>Decide whether a finding is true, and what it changes.</li>
@@ -369,14 +370,13 @@ export default function Home() {
           </div>
         </div>
 
-        <p className="muted">
-          An agent with full write access here still cannot promote its own research: a canonical record cites a
-          decision written by a named person, and validation refuses the record otherwise.
+        <p className="muted small">
+          An agent with full write access still cannot promote its own research. A canonical record cites a decision
+          written by a named person, and validation refuses the record otherwise.
         </p>
       </section>
 
-      <section className="home-band" id="use-it">
-        <span className="eyebrow">Three ways in</span>
+      <section className="home-band quiet" id="use-it">
         <h2>Read it, build against it, or take it</h2>
         <p className="muted">
           Everything is Markdown with YAML frontmatter in <code>content/</code>. No database, no admin screen.
@@ -438,16 +438,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="home-band">
-        <span className="eyebrow">Contributing</span>
+      <section className="home-band quiet">
         <h2>Tell us where this is wrong</h2>
         <p className="muted">
-          Most of this is marked proposed rather than settled. If you have run a practice like this, worked inside one,
-          or been a family on the other side of it, name where our understanding does not match what you have seen.
-        </p>
-        <p className="muted">
-          A pull request is the whole process, and naming a problem is a complete contribution — you do not have to
-          bring the answer.
+          If you have run a practice like this, worked inside one, or been a family on the other side of it, name where
+          the model does not match what you saw. Naming a problem is a complete contribution — you do not have to bring
+          the answer.
         </p>
         <div className="home-actions">
           {contributing ? (

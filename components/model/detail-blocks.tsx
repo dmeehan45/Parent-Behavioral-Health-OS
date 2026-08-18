@@ -130,13 +130,21 @@ export function DetailBlocks({
               </section>
             );
 
-          case "links":
+          case "links": {
+            /*
+             * A sequence is drawn as one. Everywhere else these are sets, and
+             * numbering a set asserts an order nobody wrote down — so the
+             * projection decides, and the list element follows it, because
+             * "these run in order" is a fact for the markup to carry rather
+             * than a look.
+             */
+            const List = block.sequence ? "ol" : "ul";
             return (
               <section className="detail-block" key={key}>
                 <Heading className="field-label">
                   {block.label} <span className="field-count">{block.items.length}</span>
                 </Heading>
-                <ul className="link-list">
+                <List className={`link-list${block.sequence ? " link-sequence" : ""}`}>
                   {block.items.map((item) => {
                     const body = (
                       <>
@@ -146,7 +154,12 @@ export function DetailBlocks({
                       </>
                     );
                     return (
-                      <li key={item.id}>
+                      /* The row carries its category, so a stage's steps, the
+                         problems that bite it and the metrics that would settle
+                         them stop being four identical stacks of grey rows. The
+                         badge still says the kind in words — hue is never the
+                         only signal. */
+                      <li key={item.id} data-kind={item.kind}>
                         {onNavigate ? (
                           <button type="button" onClick={() => onNavigate(item.id)}>
                             {body}
@@ -157,9 +170,10 @@ export function DetailBlocks({
                       </li>
                     );
                   })}
-                </ul>
+                </List>
               </section>
             );
+          }
         }
       })}
     </div>

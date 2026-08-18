@@ -106,8 +106,8 @@ function link(kind: NodeKind, contentId: string, title: string, meta?: string): 
   };
 }
 
-function linksBlock(label: string, items: LinkItem[]): DetailBlock[] {
-  return items.length > 0 ? [{ type: "links", label, items }] : [];
+function linksBlock(label: string, items: LinkItem[], sequence = false): DetailBlock[] {
+  return items.length > 0 ? [{ type: "links", label, items, sequence }] : [];
 }
 
 function listBlock(label: string, items?: string[]): DetailBlock[] {
@@ -192,9 +192,12 @@ export function projectModel(): ModelGraph {
       ...listBlock("Entry conditions", stage.entryConditions),
       ...listBlock("Exit conditions", stage.exitConditions),
       ...markdownBlocks(stage.sections),
+      // The one link block whose order is a claim: `step.order` sorted these,
+      // so the list is the sequence and is drawn as one.
       ...linksBlock(
         "Process steps",
         stageSteps.map((step) => link("step", step.id, step.title, step.purpose ? undefined : "not described")),
+        true,
       ),
       // Problems come before bets: what breaks here, then what anyone has
       // proposed about it. A problem with no bet under it is the useful signal.
