@@ -1,0 +1,9 @@
+contractVersion: 1
+runId: 2026-08-17-identify-predictive-selection-signals
+reviewedHandoffHash: fe23e82e91cb2e0e288fda04d1d39dd938881d8e59745e784344fa558ce2ff5b
+reviewer: David Meehan
+decidedAt: 2026-08-18
+decidedVia: conversation
+decisions:
+  - id: decide-2026-08-17-identify-predictive-selection-signals-finding-performance-based-interpersonal-skills-predict
+    disposition: accept
