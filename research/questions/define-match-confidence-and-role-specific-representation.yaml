@@ -1,0 +1,9 @@
+id: define-match-confidence-and-role-specific-representation
+question: "How should match confidence be estimated from the completeness and quality of patient, clinician, historical, and supply evidence; when should the system abstain or seek more information; and how should the same underlying uncertainty be represented differently to the patient, clinician, and system or operator to support their distinct decisions?"
+askedBy: accountable-reviewer-2026-08-15
+createdAt: 2026-08-15
+status: open
+priority: high
+targets: [matching, propose-match, review-match, quality-outcomes]
+why: >
+  A plausible match and confidence in that match are different constructs. Sparse or stale evidence should not be converted into false precision, and constrained supply should not be mistaken for uncertainty about fit. The research should identify when to recommend, broaden options, ask the highest-value next question, route for human review, or abstain. It should also treat confidence as one canonical evidence model with role-specific decision support: patients need understandable choice and fit information, clinicians need enough context to judge appropriateness and willingness to accept, and the system or operator needs diagnostic detail about evidence quality, missingness, constraints, and why a recommendation was made. These representations may differ in content and form without implying different underlying facts.
