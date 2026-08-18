@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getRepository } from "../../lib/content/repository";
-import { conformance, conformanceProblem, experimentFingerprint } from "../../lib/prototype/conformance";
-import { EXPERIMENT_SECTIONS } from "../../lib/content/body";
+import {
+  conformance,
+  conformanceProblem,
+  experimentFingerprint,
+  reviewPromptProblem,
+} from "../../lib/prototype/conformance";
+import { EXPERIMENT_SECTIONS, SECTION } from "../../lib/content/body";
 import type { Bet } from "../../lib/schemas";
 
 /**
@@ -116,4 +121,19 @@ test("the fingerprint is stable, and carries one digest per section", () => {
   const first = experimentFingerprint(bet(EXPERIMENT));
   assert.equal(first, experimentFingerprint(bet({ ...EXPERIMENT })));
   assert.equal(first.split("-").length, EXPERIMENT_SECTIONS.length);
+});
+
+test("a runnable prototype requires review prompts, but the prompts do not change the experiment fingerprint", () => {
+  const stamp = experimentFingerprint(bet(EXPERIMENT));
+  const withoutPrompts = bet(EXPERIMENT, built({ builtAgainst: stamp }));
+
+  assert.match(reviewPromptProblem(withoutPrompts)!, /Review prompts/);
+  assert.equal(reviewPromptProblem(bet(EXPERIMENT, built({ status: "concept" }))), undefined);
+
+  const withPrompts = bet(
+    { ...EXPERIMENT, [SECTION.reviewPrompts]: "- What did you trust, and what made you hesitate?" },
+    built({ builtAgainst: stamp }),
+  );
+  assert.equal(reviewPromptProblem(withPrompts), undefined);
+  assert.equal(experimentFingerprint(withPrompts), stamp);
 });
